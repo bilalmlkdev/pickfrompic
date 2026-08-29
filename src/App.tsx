@@ -18,10 +18,12 @@ function App() {
     format: "hex",
   });
 
-  // UPDATED: When picking a color from screen, clear the image and update custom colors
+  // FIX: If image is null, ignore the extracted colors entirely
+  const extractedColors = imageSrc ? colors : [];
+
   const handlePickedColor = (color: string) => {
     setSelectedColor(color);
-    setImageSrc(null); // <--- Clear the image so the solid color fills the left panel
+    setImageSrc(null); // Clear image
     setCustomColors((prev) => [color, ...prev.slice(0, 9)]);
   };
 
@@ -48,8 +50,10 @@ function App() {
                 selectedColor={selectedColor}
                 setSelectedColor={setSelectedColor}
               />
+
+              {/* Pass extractedColors (which is [] when no image) */}
               <ColorPalette
-                colors={colors}
+                colors={extractedColors}
                 customColors={customColors}
                 selectedColor={selectedColor}
                 setSelectedColor={setSelectedColor}
@@ -57,8 +61,10 @@ function App() {
                 setMaxColors={setMaxColors}
               />
             </div>
+
+            {/* Pass extractedColors to the right panel too */}
             <ColorDetailsPanel
-              colors={colors}
+              colors={extractedColors}
               customColors={customColors}
               selectedColor={selectedColor}
               setSelectedColor={setSelectedColor}
