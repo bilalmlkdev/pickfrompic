@@ -18,14 +18,12 @@ const ImageUploader: React.FC<Props> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const hiddenCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Lens state
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
     null,
   );
   const [lensGrid, setLensGrid] = useState<string[]>([]);
   const [isLensEnabled, setIsLensEnabled] = useState<boolean>(true);
 
-  // Draw the image to hidden canvas when it loads
   useEffect(() => {
     if (imageSrc && imgRef.current && hiddenCanvasRef.current) {
       const img = imgRef.current;
@@ -39,7 +37,6 @@ const ImageUploader: React.FC<Props> = ({
     }
   }, [imageSrc]);
 
-  // Get color at specific canvas coordinates
   const getColorAtPixel = (x: number, y: number): string => {
     if (!hiddenCanvasRef.current) return "#000000";
     const ctx = hiddenCanvasRef.current.getContext("2d", {
@@ -55,12 +52,10 @@ const ImageUploader: React.FC<Props> = ({
           .slice(1)
       );
     } catch (error) {
-      // CORS error handling
       return selectedColor;
     }
   };
 
-  // Handle mouse move to update lens
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       !imageSrc ||
@@ -74,13 +69,11 @@ const ImageUploader: React.FC<Props> = ({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Scale coordinates to natural image size
     const scaleX = imgRef.current.naturalWidth / rect.width;
     const scaleY = imgRef.current.naturalHeight / rect.height;
     const pixelX = Math.floor(x * scaleX);
     const pixelY = Math.floor(y * scaleY);
 
-    // Get 5x5 pixel grid
     const grid: string[] = [];
     for (let dy = -2; dy <= 2; dy++) {
       for (let dx = -2; dx <= 2; dx++) {
@@ -91,7 +84,6 @@ const ImageUploader: React.FC<Props> = ({
     setMousePos({ x, y });
   };
 
-  // Handle click to pick exact center pixel
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageSrc || !imgRef.current || !hiddenCanvasRef.current) return;
 
@@ -108,7 +100,7 @@ const ImageUploader: React.FC<Props> = ({
     <div>
       <h2 className="font-semibold text-gray-800 mb-3">Image</h2>
       <div
-        className="relative w-full h-80 border rounded-2xl overflow-hidden mb-4 transition-colors duration-300"
+        className="relative w-full h-80 border rounded-2xl overflow-hidden mb-4 transition-colors duration-300 cursor-crosshair"
         style={{ backgroundColor: selectedColor }}
         onClick={handleImageClick}
         onMouseMove={handleMouseMove}
@@ -124,16 +116,15 @@ const ImageUploader: React.FC<Props> = ({
             src={imageSrc}
             alt="Preview"
             crossOrigin="anonymous"
-            className="w-full h-full object-cover pointer-events-none cursor-crosshair"
+            className="w-full h-full object-cover pointer-events-none"
           />
-        ) : // Removed "No image" text so the solid color fills the space
-        null}
+        ) : null}
 
-        {/* THE MAGNIFIER LENS */}
+        {/* THE SMALLER SQUARE LENS UNDER THE MOUSE */}
         {isLensEnabled && mousePos && imageSrc && (
           <div
-            className="absolute pointer-events-none z-50 w-28 h-28 rounded-full border-2 border-white shadow-2xl overflow-hidden flex flex-col items-center justify-center"
-            style={{ left: mousePos.x - 56, top: mousePos.y - 56 }}
+            className="absolute pointer-events-none z-50 w-20 h-20 rounded-lg border-2 border-white shadow-2xl overflow-hidden flex flex-col items-center justify-center"
+            style={{ left: mousePos.x - 40, top: mousePos.y + 15 }} // Centered X, Under Y
           >
             {/* 5x5 Pixel Grid */}
             <div className="grid grid-cols-5 w-full h-full">
@@ -155,7 +146,7 @@ const ImageUploader: React.FC<Props> = ({
         {/* PLUS ICON TOGGLE (Bottom Right) */}
         <button
           onClick={(e) => {
-            e.stopPropagation(); // Prevent picking color when toggling
+            e.stopPropagation();
             setIsLensEnabled(!isLensEnabled);
           }}
           className={`absolute bottom-4 right-4 w-8 h-8 rounded-full flex items-center justify-center border shadow-md transition z-40 ${
@@ -165,7 +156,6 @@ const ImageUploader: React.FC<Props> = ({
           }`}
           title="Toggle Magnifier Lens"
         >
-          {/* Plus Icon */}
           <svg
             width="14"
             height="14"
