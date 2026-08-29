@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { HexColorPicker } from "react-colorful";
 import { useCopy } from "react-use-copy";
 
 interface Props {
+  colors: string[];
   selectedColor: string;
   setSelectedColor: (hex: string) => void;
 }
 
 const ColorDetailsPanel: React.FC<Props> = ({
+  colors,
   selectedColor,
   setSelectedColor,
 }) => {
   const { copied, copy } = useCopy();
-  const [rgb, setRgb] = useState("rgb(37, 150, 190)");
-  const [hsl, setHsl] = useState("hsl(196, 67%, 45%)");
+  const [rgb, setRgb] = useState("");
+  const [hsl, setHsl] = useState("");
 
-  // Logic to convert Hex to RGB and HSL on the fly
   useEffect(() => {
+    // Conversion logic (Hex to RGB and HSL)
     const hexToRgb = (hex: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result
         ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})`
         : "";
     };
-
-    // Full accurate HSL conversion (handles 3-digit and 6-digit hex)
     const hexToHsl = (hex: string) => {
       let r = 0,
         g = 0,
@@ -38,7 +37,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
         g = parseInt(hex.substring(3, 5), 16);
         b = parseInt(hex.substring(5, 7), 16);
       }
-
       r /= 255;
       g /= 255;
       b /= 255;
@@ -47,7 +45,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
       let h = 0,
         s = 0;
       const l = (max + min) / 2;
-
       if (max !== min) {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -64,30 +61,44 @@ const ColorDetailsPanel: React.FC<Props> = ({
         }
         h /= 6;
       }
-
-      const hDeg = Math.round(h * 360);
-      const sPct = Math.round(s * 100);
-      const lPct = Math.round(l * 100);
-      return `hsl(${hDeg}, ${sPct}%, ${lPct}%)`;
+      return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
     };
 
     setRgb(hexToRgb(selectedColor));
     setHsl(hexToHsl(selectedColor));
   }, [selectedColor]);
 
+  const topColors = colors.slice(0, 2);
+
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="font-semibold">Colors</h2>
+    <div className="flex flex-col">
+      <h2 className="font-semibold text-gray-800 mb-3">Colors</h2>
 
-      {/* Picker - Removed the broken CSS import, Tailwind handles sizing */}
-      <HexColorPicker
-        color={selectedColor}
-        onChange={setSelectedColor}
-        className="w-full h-40!"
-      />
+      {/* Top Two Most Used Colors */}
+      <div className="flex gap-4 mb-6">
+        {topColors.length > 0 ? (
+          topColors.map((color, idx) => (
+            <button
+              key={idx}
+              onClick={() => setSelectedColor(color)}
+              style={{ backgroundColor: color }}
+              className={`h-20 w-32 rounded-xl border ${
+                selectedColor === color
+                  ? "border-2 border-black"
+                  : "border-gray-200"
+              } transition`}
+            />
+          ))
+        ) : (
+          <>
+            <div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" />
+            <div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" />
+          </>
+        )}
+      </div>
 
-      {/* Values */}
-      <div className="space-y-3">
+      {/* Values Boxes */}
+      <div className="space-y-3 mb-6">
         {[
           { label: "HEX", value: selectedColor },
           { label: "RGB", value: rgb },
@@ -98,17 +109,41 @@ const ColorDetailsPanel: React.FC<Props> = ({
             className="flex items-center justify-between border border-gray-200 rounded-lg p-3"
           >
             <span className="text-gray-500 text-sm w-10">{item.label}</span>
-            <span className="font-mono text-sm text-gray-800">
+            <span className="font-mono text-sm text-gray-800 flex-1 ml-4">
               {item.value}
             </span>
             <button
               onClick={() => copy(item.value)}
-              className="text-xs bg-gray-100 hover:bg-gray-200 rounded px-2 py-1 text-gray-600"
+              className="text-gray-500 hover:text-gray-800 transition"
             >
-              {copied ? "Copied!" : "Copy"}
+              {copied ? "✓" : "⧉"}
             </button>
           </div>
         ))}
+      </div>
+
+      {/* View Color Details */}
+      <button className="text-left text-sm font-medium text-blue-600 hover:underline mb-8">
+        View color details →
+      </button>
+
+      {/* Use Your Own Image Section */}
+      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <h3 className="font-semibold text-gray-800 mb-4">Use your own image</h3>
+
+        <button className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2">
+          <span>⬆</span> Use your image
+        </button>
+
+        <button className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2">
+          <span>⌖</span> Pick from Screen
+        </button>
+
+        <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+          🛡️ We think data protection is important!{" "}
+          <span className="text-blue-500">No data is sent.</span> The magic
+          happens in your browser.
+        </p>
       </div>
     </div>
   );

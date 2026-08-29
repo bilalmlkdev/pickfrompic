@@ -11,27 +11,47 @@ const ImageUploader: React.FC<Props> = ({ imageSrc, setImageSrc, loading }) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageSrc(URL.createObjectURL(file));
-    }
+    if (file) setImageSrc(URL.createObjectURL(file));
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="font-semibold">Image</h2>
+    <div>
+      <h2 className="font-semibold text-gray-800 mb-3">Image</h2>
 
-      {/* URL Input */}
+      {/* Image Preview Area with exact height */}
+      <div className="relative w-full h-80 bg-gray-100 border rounded-2xl overflow-hidden mb-4">
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center text-gray-500">
+            Extracting colors...
+          </div>
+        ) : imageSrc ? (
+          <img
+            src={imageSrc}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            No image
+          </div>
+        )}
+      </div>
+
+      {/* Inputs */}
       <input
         type="text"
         placeholder="Paste an image URL here..."
-        className="border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500"
-        onChange={(e) => setImageSrc(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg p-3 text-sm mb-3 focus:outline-none focus:border-blue-500"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            setImageSrc(e.target.value);
+          }
+        }}
       />
 
-      {/* Upload Button */}
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="bg-black text-white rounded-lg py-3 font-medium hover:bg-gray-800 transition"
+        className="w-full bg-gray-900 text-white rounded-lg py-3 font-medium hover:bg-gray-800 transition"
       >
         Upload Image
       </button>
@@ -42,21 +62,6 @@ const ImageUploader: React.FC<Props> = ({ imageSrc, setImageSrc, loading }) => {
         className="hidden"
         onChange={handleFileChange}
       />
-
-      {/* Image Preview */}
-      <div className="mt-4 border rounded-xl overflow-hidden h-80 flex items-center justify-center bg-gray-100">
-        {loading ? (
-          <p className="text-gray-500">Extracting colors...</p>
-        ) : imageSrc ? (
-          <img
-            src={imageSrc}
-            alt="Uploaded Preview"
-            className="w-full h-full object-contain"
-          />
-        ) : (
-          <p className="text-gray-400">No image selected</p>
-        )}
-      </div>
     </div>
   );
 };
