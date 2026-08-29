@@ -2,6 +2,7 @@ import React from "react";
 
 interface Props {
   colors: string[];
+  customColors: string[];
   selectedColor: string;
   setSelectedColor: (hex: string) => void;
   maxColors: number;
@@ -10,16 +11,18 @@ interface Props {
 
 const ColorPalette: React.FC<Props> = ({
   colors,
+  customColors,
   selectedColor,
   setSelectedColor,
   maxColors,
   setMaxColors,
 }) => {
+  const allColors = [...customColors, ...colors].slice(0, maxColors);
+
   return (
     <div>
       <h2 className="font-semibold text-gray-800 mb-3">Color Palette</h2>
       <div className="flex items-center gap-3">
-        {/* Minus and Plus Buttons */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMaxColors(Math.max(2, maxColors - 1))}
@@ -35,9 +38,8 @@ const ColorPalette: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Color Swatches */}
         <div className="flex flex-1 gap-1 overflow-hidden">
-          {colors.slice(0, maxColors).map((color, idx) => (
+          {allColors.map((color, idx) => (
             <button
               key={idx}
               onClick={() => setSelectedColor(color)}
@@ -52,7 +54,6 @@ const ColorPalette: React.FC<Props> = ({
           ))}
         </div>
 
-        {/* Download and Copy Icons */}
         <div className="flex items-center gap-2 ml-auto">
           <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
             ⬇

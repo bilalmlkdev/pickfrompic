@@ -3,16 +3,20 @@ import { useCopy } from "react-use-copy";
 
 interface Props {
   colors: string[];
+  customColors: string[];
   selectedColor: string;
   setSelectedColor: (hex: string) => void;
-  setImageSrc: (src: string) => void; // Passed from App
+  setImageSrc: (src: string) => void;
+  onPickedColor: (color: string) => void;
 }
 
 const ColorDetailsPanel: React.FC<Props> = ({
   colors,
+  customColors,
   selectedColor,
   setSelectedColor,
   setImageSrc,
+  onPickedColor,
 }) => {
   const { copied, copy } = useCopy();
   const [rgb, setRgb] = useState("");
@@ -20,7 +24,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
   const [urlInput, setUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Conversion logic (Hex to RGB and HSL)
   useEffect(() => {
     const hexToRgb = (hex: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -74,37 +77,31 @@ const ColorDetailsPanel: React.FC<Props> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageSrc(URL.createObjectURL(file));
-    }
+    if (file) setImageSrc(URL.createObjectURL(file));
   };
 
-  // Real "Pick from Screen" using Native EyeDropper API
   const pickFromScreen = async () => {
     if ("EyeDropper" in window) {
       try {
-        // @ts-ignore - EyeDropper is new, TypeScript doesn't have definitions yet
+        // @ts-ignore
         const eyeDropper = new window.EyeDropper();
         const result = await eyeDropper.open();
-        setSelectedColor(result.sRGBHex);
+        onPickedColor(result.sRGBHex);
       } catch (e) {
-        // User cancelled the picker (pressed Esc or clicked away)
         console.log("EyeDropper cancelled");
       }
     } else {
       alert(
-        "Your browser does not support the EyeDropper API. Please use Chrome, Edge, or Opera, or use the file upload.",
+        "Your browser does not support the EyeDropper API. Please use Chrome or Edge.",
       );
     }
   };
 
-  const topColors = colors.slice(0, 2);
+  const topColors = [...customColors, ...colors].slice(0, 2);
 
   return (
     <div className="flex flex-col">
       <h2 className="font-semibold text-gray-800 mb-3">Colors</h2>
-
-      {/* Top Two Most Used Colors */}
       <div className="flex gap-4 mb-6">
         {topColors.length > 0 ? (
           topColors.map((color, idx) => (
@@ -112,22 +109,18 @@ const ColorDetailsPanel: React.FC<Props> = ({
               key={idx}
               onClick={() => setSelectedColor(color)}
               style={{ backgroundColor: color }}
-              className={`h-20 w-32 rounded-xl border ${
-                selectedColor === color
-                  ? "border-2 border-black"
-                  : "border-gray-200"
-              } transition`}
+              className={`h-20 w-32 rounded-xl border ${selectedColor === color ? "border-2 border-black" : "border-gray-200"} transition`}
             />
           ))
         ) : (
           <>
-            <div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" />
-            <div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" />
+            {" "}
+            <div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" />{" "}
+            <div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" />{" "}
           </>
         )}
       </div>
 
-      {/* Values Boxes */}
       <div className="space-y-3 mb-6">
         {[
           { label: "HEX", value: selectedColor },
@@ -152,16 +145,12 @@ const ColorDetailsPanel: React.FC<Props> = ({
         ))}
       </div>
 
-      {/* View Color Details */}
       <button className="text-left text-sm font-medium text-blue-600 hover:underline mb-8">
         View color details →
       </button>
 
-      {/* Use Your Own Image Section (3 entries) */}
       <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
         <h3 className="font-semibold text-gray-800 mb-4">Use your own image</h3>
-
-        {/* 1. URL Input */}
         <input
           type="text"
           placeholder="Paste image URL here..."
@@ -172,8 +161,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
           }}
           className="w-full border border-gray-300 rounded-xl p-3 text-sm mb-3 focus:outline-none focus:border-blue-500"
         />
-
-        {/* 2. Upload Button */}
         <button
           onClick={() => fileInputRef.current?.click()}
           className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2"
@@ -187,15 +174,12 @@ const ColorDetailsPanel: React.FC<Props> = ({
           className="hidden"
           onChange={handleFileChange}
         />
-
-        {/* 3. Pick from Screen Button (UPDATED) */}
         <button
           onClick={pickFromScreen}
           className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2"
         >
           <span>⌖</span> Pick from Screen
         </button>
-
         <p className="mt-4 text-xs text-gray-500 leading-relaxed">
           🛡️ We think data protection is important!{" "}
           <span className="text-blue-500">No data is sent.</span> The magic

@@ -3,45 +3,31 @@
 /* Enable class-based dark mode in Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* 1. Light Mode Variables (Default) */
+/* Light Mode Variables (Default) */
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* Neutral-900 */
   --card: #f4f4f5;
-  /* Neutral-100 */
   --card-foreground: #171717;
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
-  /* Neutral-500 */
   --border: #e4e4e7;
-  /* Neutral-200 */
   --accent: #facc15;
-  /* Yellow-400 (Support us button) */
-
-  /* Add future variables here for Light Mode */
 }
 
-/* 2. Dark Mode Variables */
+/* Dark Mode Variables */
 .dark {
   --background: #09090b;
-  /* Neutral-950 */
   --foreground: #fafafa;
-  /* Neutral-50 */
   --card: #18181b;
-  /* Neutral-900 */
   --card-foreground: #fafafa;
   --muted: #27272a;
-  /* Neutral-800 */
   --muted-foreground: #a1a1aa;
   --border: #27272a;
   --accent: #eab308;
-  /* Yellow-500 for dark mode */
-
-  /* Add future variables here for Dark Mode */
 }
 
-/* 3. Map Variables to Tailwind v4 Theme Tokens */
+/* Map Variables to Tailwind v4 Theme Tokens */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -53,12 +39,10 @@
   --color-accent: var(--accent);
 }
 
-/* 4. Apply Base Styles */
 body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
   background-color: var(--background);
   color: var(--foreground);
   transition: background-color 0.3s ease, color 0.3s ease;
-  /* Smooth transition */
-  margin: 0;
-  font-family: 'Inter', sans-serif;
 }
