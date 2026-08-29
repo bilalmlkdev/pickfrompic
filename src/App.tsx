@@ -59,6 +59,7 @@ function App() {
               colors={colors}
               selectedColor={selectedColor}
               setSelectedColor={setSelectedColor}
+              setImageSrc={setImageSrc} // Add this line
             />
           </div>
         </div>

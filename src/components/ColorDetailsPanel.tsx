@@ -1,23 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useCopy } from "react-use-copy";
 
 interface Props {
   colors: string[];
   selectedColor: string;
   setSelectedColor: (hex: string) => void;
+  setImageSrc: (src: string) => void; // Passed from App
 }
 
 const ColorDetailsPanel: React.FC<Props> = ({
   colors,
   selectedColor,
   setSelectedColor,
+  setImageSrc,
 }) => {
   const { copied, copy } = useCopy();
   const [rgb, setRgb] = useState("");
   const [hsl, setHsl] = useState("");
+  const [urlInput, setUrlInput] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Conversion logic (Hex to RGB and HSL)
   useEffect(() => {
-    // Conversion logic (Hex to RGB and HSL)
     const hexToRgb = (hex: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result
@@ -67,6 +71,13 @@ const ColorDetailsPanel: React.FC<Props> = ({
     setRgb(hexToRgb(selectedColor));
     setHsl(hexToHsl(selectedColor));
   }, [selectedColor]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageSrc(URL.createObjectURL(file));
+    }
+  };
 
   const topColors = colors.slice(0, 2);
 
@@ -127,15 +138,42 @@ const ColorDetailsPanel: React.FC<Props> = ({
         View color details →
       </button>
 
-      {/* Use Your Own Image Section */}
+      {/* Use Your Own Image Section (3 entries) */}
       <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
         <h3 className="font-semibold text-gray-800 mb-4">Use your own image</h3>
 
-        <button className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2">
+        {/* 1. URL Input */}
+        <input
+          type="text"
+          placeholder="Paste image URL here..."
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") setImageSrc(urlInput);
+          }}
+          className="w-full border border-gray-300 rounded-xl p-3 text-sm mb-3 focus:outline-none focus:border-blue-500"
+        />
+
+        {/* 2. Upload Button */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2"
+        >
           <span>⬆</span> Use your image
         </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
-        <button className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2">
+        {/* 3. Pick from Screen Button */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2"
+        >
           <span>⌖</span> Pick from Screen
         </button>
 
