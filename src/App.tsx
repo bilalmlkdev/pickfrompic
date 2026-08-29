@@ -44,6 +44,7 @@ function App() {
                 imageSrc={imageSrc}
                 setImageSrc={setImageSrc}
                 loading={loading}
+                setSelectedColor={setSelectedColor} // Add this!
               />
               <ColorPalette
                 colors={colors}

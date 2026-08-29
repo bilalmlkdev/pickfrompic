@@ -79,6 +79,25 @@ const ColorDetailsPanel: React.FC<Props> = ({
     }
   };
 
+  // Real "Pick from Screen" using Native EyeDropper API
+  const pickFromScreen = async () => {
+    if ("EyeDropper" in window) {
+      try {
+        // @ts-ignore - EyeDropper is new, TypeScript doesn't have definitions yet
+        const eyeDropper = new window.EyeDropper();
+        const result = await eyeDropper.open();
+        setSelectedColor(result.sRGBHex);
+      } catch (e) {
+        // User cancelled the picker (pressed Esc or clicked away)
+        console.log("EyeDropper cancelled");
+      }
+    } else {
+      alert(
+        "Your browser does not support the EyeDropper API. Please use Chrome, Edge, or Opera, or use the file upload.",
+      );
+    }
+  };
+
   const topColors = colors.slice(0, 2);
 
   return (
@@ -169,9 +188,9 @@ const ColorDetailsPanel: React.FC<Props> = ({
           onChange={handleFileChange}
         />
 
-        {/* 3. Pick from Screen Button */}
+        {/* 3. Pick from Screen Button (UPDATED) */}
         <button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={pickFromScreen}
           className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2"
         >
           <span>⌖</span> Pick from Screen
