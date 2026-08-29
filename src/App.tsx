@@ -18,8 +18,10 @@ function App() {
     format: "hex",
   });
 
+  // UPDATED: When picking a color from screen, clear the image and update custom colors
   const handlePickedColor = (color: string) => {
     setSelectedColor(color);
+    setImageSrc(null); // <--- Clear the image so the solid color fills the left panel
     setCustomColors((prev) => [color, ...prev.slice(0, 9)]);
   };
 
