@@ -21,6 +21,9 @@ function App() {
     format: "hex",
   });
 
+  // FIX: Define extractedColors for the right side panel
+  const extractedColors = imageSrc ? colors : [];
+
   // CRITICAL FIX 1: The palette shows extracted colors if image exists, OR just 1 solid color if image is gone
   const paletteColors = imageSrc
     ? colors
@@ -82,7 +85,7 @@ function App() {
 
             {/* Right Side: Top Boxes (STRICTLY topPicks) */}
             <ColorDetailsPanel
-              colors={colors}
+              colors={extractedColors}
               topPicks={topPicks}
               selectedColor={selectedColor}
               hoveredColor={hoveredColor}

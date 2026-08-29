@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useCopy } from "react-use-copy";
+import ImageSourceModal from "./ImageSourceModal";
 
 interface Props {
   colors: string[];
@@ -23,8 +24,7 @@ const ColorDetailsPanel: React.FC<Props> = ({
   const { copied, copy } = useCopy();
   const [rgb, setRgb] = useState("");
   const [hsl, setHsl] = useState("");
-  const [urlInput, setUrlInput] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const displayColor = hoveredColor || selectedColor;
 
@@ -79,30 +79,8 @@ const ColorDetailsPanel: React.FC<Props> = ({
     setHsl(hexToHsl(displayColor));
   }, [displayColor]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setImageSrc(URL.createObjectURL(file));
-  };
-
-  const pickFromScreen = async () => {
-    if ("EyeDropper" in window) {
-      try {
-        // @ts-ignore
-        const eyeDropper = new window.EyeDropper();
-        const result = await eyeDropper.open();
-        onPickedColor(result.sRGBHex);
-      } catch (e) {
-        console.log("EyeDropper cancelled");
-      }
-    } else {
-      alert("Your browser does not support the EyeDropper API.");
-    }
-  };
-
-  // CRITICAL FIX: Prefer topPicks, only fallback to image colors if topPicks is empty
   const topColors =
     topPicks.length > 0 ? topPicks.slice(0, 2) : colors.slice(0, 2);
-
   const displayTopColors = hoveredColor
     ? [topColors[0] || "#2596be", hoveredColor]
     : topColors;
@@ -110,6 +88,8 @@ const ColorDetailsPanel: React.FC<Props> = ({
   return (
     <div className="flex flex-col">
       <h2 className="font-semibold text-gray-800 mb-3">Colors</h2>
+
+      {/* Top Two Most Used Colors */}
       <div className="flex gap-4 mb-6">
         {displayTopColors.length > 0 ? (
           displayTopColors.map((color, idx) => (
@@ -117,18 +97,22 @@ const ColorDetailsPanel: React.FC<Props> = ({
               key={idx}
               onClick={() => setSelectedColor(color)}
               style={{ backgroundColor: color }}
-              className={`h-20 w-32 rounded-xl border ${selectedColor === color ? "border-2 border-black" : "border-gray-200"} transition`}
+              className={`h-20 w-32 rounded-xl border ${
+                selectedColor === color
+                  ? "border-2 border-black"
+                  : "border-gray-200"
+              } transition`}
             />
           ))
         ) : (
           <>
-            {" "}
-            <div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" />{" "}
-            <div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" />{" "}
+            <div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" />
+            <div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" />
           </>
         )}
       </div>
 
+      {/* Values Boxes */}
       <div className="space-y-3 mb-6">
         {[
           { label: "HEX", value: displayColor },
@@ -157,43 +141,32 @@ const ColorDetailsPanel: React.FC<Props> = ({
         View color details →
       </button>
 
+      {/* Use Your Own Image Section */}
       <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
         <h3 className="font-semibold text-gray-800 mb-4">Use your own image</h3>
-        <input
-          type="text"
-          placeholder="Paste image URL here..."
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") setImageSrc(urlInput);
-          }}
-          className="w-full border border-gray-300 rounded-xl p-3 text-sm mb-3 focus:outline-none focus:border-blue-500"
-        />
+
+        {/* Single button to open the modal */}
         <button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => setIsModalOpen(true)}
           className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2"
         >
           <span>⬆</span> Use your image
         </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-        <button
-          onClick={pickFromScreen}
-          className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2"
-        >
-          <span>⌖</span> Pick from Screen
-        </button>
+
         <p className="mt-4 text-xs text-gray-500 leading-relaxed">
           🛡️ We think data protection is important!{" "}
           <span className="text-blue-500">No data is sent.</span> The magic
           happens in your browser.
         </p>
       </div>
+
+      {/* The Image Source Modal */}
+      <ImageSourceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        setImageSrc={setImageSrc}
+        onPickedColor={onPickedColor}
+      />
     </div>
   );
 };
