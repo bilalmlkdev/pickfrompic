@@ -99,8 +99,9 @@ const ColorDetailsPanel: React.FC<Props> = ({
     }
   };
 
-  // USE topPicks instead of customColors
-  const topColors = [...topPicks, ...colors].slice(0, 2);
+  // CRITICAL FIX: Prefer topPicks, only fallback to image colors if topPicks is empty
+  const topColors =
+    topPicks.length > 0 ? topPicks.slice(0, 2) : colors.slice(0, 2);
 
   const displayTopColors = hoveredColor
     ? [topColors[0] || "#2596be", hoveredColor]
