@@ -79,6 +79,22 @@ const ColorDetailsPanel: React.FC<Props> = ({
     setHsl(hexToHsl(displayColor));
   }, [displayColor]);
 
+  // Quick Pick from Screen function
+  const pickFromScreen = async () => {
+    if ("EyeDropper" in window) {
+      try {
+        // @ts-ignore
+        const eyeDropper = new window.EyeDropper();
+        const result = await eyeDropper.open();
+        onPickedColor(result.sRGBHex);
+      } catch (e) {
+        console.log("EyeDropper cancelled");
+      }
+    } else {
+      alert("Your browser does not support the EyeDropper API.");
+    }
+  };
+
   const topColors =
     topPicks.length > 0 ? topPicks.slice(0, 2) : colors.slice(0, 2);
   const displayTopColors = hoveredColor
@@ -141,16 +157,24 @@ const ColorDetailsPanel: React.FC<Props> = ({
         View color details →
       </button>
 
-      {/* Use Your Own Image Section */}
+      {/* Use Your Own Image Section (Both Quick Actions Here) */}
       <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
         <h3 className="font-semibold text-gray-800 mb-4">Use your own image</h3>
 
-        {/* Single button to open the modal */}
+        {/* 1. Opens the full Modal */}
         <button
           onClick={() => setIsModalOpen(true)}
           className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2"
         >
           <span>⬆</span> Use your image
+        </button>
+
+        {/* 2. Quick Pick from Screen Button */}
+        <button
+          onClick={pickFromScreen}
+          className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2"
+        >
+          <span>⌖</span> Pick from Screen
         </button>
 
         <p className="mt-4 text-xs text-gray-500 leading-relaxed">
