@@ -3,8 +3,9 @@ import { useCopy } from "react-use-copy";
 
 interface Props {
   colors: string[];
-  customColors: string[];
+  topPicks: string[];
   selectedColor: string;
+  hoveredColor: string | null;
   setSelectedColor: (hex: string) => void;
   setImageSrc: (src: string) => void;
   onPickedColor: (color: string) => void;
@@ -12,8 +13,9 @@ interface Props {
 
 const ColorDetailsPanel: React.FC<Props> = ({
   colors,
-  customColors,
+  topPicks,
   selectedColor,
+  hoveredColor,
   setSelectedColor,
   setImageSrc,
   onPickedColor,
@@ -23,6 +25,8 @@ const ColorDetailsPanel: React.FC<Props> = ({
   const [hsl, setHsl] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const displayColor = hoveredColor || selectedColor;
 
   useEffect(() => {
     const hexToRgb = (hex: string) => {
@@ -71,9 +75,9 @@ const ColorDetailsPanel: React.FC<Props> = ({
       return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
     };
 
-    setRgb(hexToRgb(selectedColor));
-    setHsl(hexToHsl(selectedColor));
-  }, [selectedColor]);
+    setRgb(hexToRgb(displayColor));
+    setHsl(hexToHsl(displayColor));
+  }, [displayColor]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,20 +95,23 @@ const ColorDetailsPanel: React.FC<Props> = ({
         console.log("EyeDropper cancelled");
       }
     } else {
-      alert(
-        "Your browser does not support the EyeDropper API. Please use Chrome or Edge.",
-      );
+      alert("Your browser does not support the EyeDropper API.");
     }
   };
 
-  const topColors = [...customColors, ...colors].slice(0, 2);
+  // USE topPicks instead of customColors
+  const topColors = [...topPicks, ...colors].slice(0, 2);
+
+  const displayTopColors = hoveredColor
+    ? [topColors[0] || "#2596be", hoveredColor]
+    : topColors;
 
   return (
     <div className="flex flex-col">
       <h2 className="font-semibold text-gray-800 mb-3">Colors</h2>
       <div className="flex gap-4 mb-6">
-        {topColors.length > 0 ? (
-          topColors.map((color, idx) => (
+        {displayTopColors.length > 0 ? (
+          displayTopColors.map((color, idx) => (
             <button
               key={idx}
               onClick={() => setSelectedColor(color)}
@@ -123,7 +130,7 @@ const ColorDetailsPanel: React.FC<Props> = ({
 
       <div className="space-y-3 mb-6">
         {[
-          { label: "HEX", value: selectedColor },
+          { label: "HEX", value: displayColor },
           { label: "RGB", value: rgb },
           { label: "HSL", value: hsl },
         ].map((item) => (
