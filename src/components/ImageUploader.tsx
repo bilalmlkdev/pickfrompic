@@ -1,19 +1,26 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from "react";
 
 interface Props {
   imageSrc: string | null;
   loading: boolean;
   selectedColor: string;
-  setImageSrc: (src: string) => void;
   setHoveredColor: (color: string | null) => void;
   onImagePick: (color: string) => void;
 }
 
-const ImageUploader: React.FC<Props> = ({ imageSrc, loading, selectedColor, setImageSrc, setHoveredColor, onImagePick }) => {
+const ImageUploader: React.FC<Props> = ({
+  imageSrc,
+  loading,
+  selectedColor,
+  setHoveredColor,
+  onImagePick,
+}) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const hiddenCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [lensGrid, setLensGrid] = useState<string[]>([]);
   const [isLensEnabled, setIsLensEnabled] = useState<boolean>(true);
 
@@ -21,7 +28,7 @@ const ImageUploader: React.FC<Props> = ({ imageSrc, loading, selectedColor, setI
   const handleImageLoad = () => {
     const img = imgRef.current;
     const canvas = hiddenCanvasRef.current;
-    const ctx = canvas?.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas?.getContext("2d", { willReadFrequently: true });
 
     if (img && canvas && ctx) {
       canvas.width = img.naturalWidth;
@@ -31,19 +38,32 @@ const ImageUploader: React.FC<Props> = ({ imageSrc, loading, selectedColor, setI
   };
 
   const getColorAtPixel = (x: number, y: number): string => {
-    if (!hiddenCanvasRef.current) return '#000000';
-    const ctx = hiddenCanvasRef.current.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return '#000000';
+    if (!hiddenCanvasRef.current) return "#000000";
+    const ctx = hiddenCanvasRef.current.getContext("2d", {
+      willReadFrequently: true,
+    });
+    if (!ctx) return "#000000";
     try {
       const pixelData = ctx.getImageData(x, y, 1, 1).data;
-      return '#' + ((1 << 24) + (pixelData[0] << 16) + (pixelData[1] << 8) + pixelData[2]).toString(16).slice(1);
+      return (
+        "#" +
+        ((1 << 24) + (pixelData[0] << 16) + (pixelData[1] << 8) + pixelData[2])
+          .toString(16)
+          .slice(1)
+      );
     } catch (error) {
-      return '#000000';
+      return "#000000";
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageSrc || !imgRef.current || !hiddenCanvasRef.current || !isLensEnabled) return;
+    if (
+      !imageSrc ||
+      !imgRef.current ||
+      !hiddenCanvasRef.current ||
+      !isLensEnabled
+    )
+      return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -87,13 +107,18 @@ const ImageUploader: React.FC<Props> = ({ imageSrc, loading, selectedColor, setI
       <h2 className="font-semibold text-gray-800 mb-3">Image</h2>
       <div
         className="relative w-full h-80 border rounded-2xl overflow-hidden mb-4 transition-colors duration-300 cursor-crosshair"
-        style={{ backgroundColor: imageSrc ? 'transparent' : selectedColor }}
+        style={{ backgroundColor: imageSrc ? "transparent" : selectedColor }}
         onClick={handleImageClick}
         onMouseMove={handleMouseMove}
-        onMouseLeave={() => { setMousePos(null); setHoveredColor(null); }}
+        onMouseLeave={() => {
+          setMousePos(null);
+          setHoveredColor(null);
+        }}
       >
         {loading ? (
-          <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-100">Extracting colors...</div>
+          <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-100">
+            Extracting colors...
+          </div>
         ) : imageSrc ? (
           <img
             ref={imgRef}
@@ -131,18 +156,32 @@ const ImageUploader: React.FC<Props> = ({ imageSrc, loading, selectedColor, setI
             setIsLensEnabled(!isLensEnabled);
           }}
           className={`absolute bottom-4 right-4 w-8 h-8 rounded-full flex items-center justify-center border shadow-md transition z-40 ${
-            isLensEnabled ? 'bg-black text-white border-black' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+            isLensEnabled
+              ? "bg-black text-white border-black"
+              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
           }`}
           title="Toggle Magnifier Lens"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14"/><path d="M12 5v14"/>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
           </svg>
         </button>
       </div>
 
       <canvas ref={hiddenCanvasRef} className="hidden" />
-      <p className="text-xs text-gray-400 text-center mt-2">Tip: Hover to magnify, click to pick!</p>
+      <p className="text-xs text-gray-400 text-center mt-2">
+        Tip: Hover to magnify, click to pick!
+      </p>
     </div>
   );
 };

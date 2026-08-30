@@ -13,7 +13,8 @@ const ImageSourceModal: React.FC<Props> = ({
   setImageSrc,
   onPickedColor,
 }) => {
-  const [activeTab, setActiveTab] = useState("upload");
+  // FIX: Initial state set to "upload-image"
+  const [activeTab, setActiveTab] = useState("upload-image");
   const [urlInput, setUrlInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);

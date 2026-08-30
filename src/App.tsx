@@ -67,7 +67,6 @@ function App() {
             <div className="flex flex-col gap-6">
               <ImageUploader
                 imageSrc={imageSrc}
-                setImageSrc={setImageSrc}
                 loading={loading}
                 selectedColor={selectedColor}
                 setHoveredColor={setHoveredColor}

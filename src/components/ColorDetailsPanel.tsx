@@ -83,7 +83,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
   const pickFromScreen = async () => {
     if ("EyeDropper" in window) {
       try {
-        // @ts-ignore
         const eyeDropper = new window.EyeDropper();
         const result = await eyeDropper.open();
         onPickedColor(result.sRGBHex);
