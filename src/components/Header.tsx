@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../hooks/useTheme";
 
@@ -6,11 +6,29 @@ const Header: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
+  // Dropdown State
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsToolsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3 transition-colors relative z-50">
       {/* UPDATED: Logo now redirects to Main Picker (Home) */}
       <Link to="/" className="flex items-center gap-3 cursor-pointer">
-        {/* Floral Logo Icon (uses currentColor) */}
+        {/* Floral Logo Icon */}
         <svg
           width="32"
           height="32"
@@ -35,32 +53,249 @@ const Header: React.FC = () => {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
-        {/* Center Navigation */}
-        <nav className="hidden lg:flex items-center gap-2">
-          {/* UPDATED: Color picker button navigates to Home */}
+        {/* UPDATED: Tools Dropdown Button */}
+        <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 border border-border bg-card/50 backdrop-blur-md rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition shadow-xs"
+            onClick={() => setIsToolsOpen(!isToolsOpen)}
+            className={`flex items-center gap-1 border rounded-full px-4 py-2 text-sm font-medium transition shadow-xs ${
+              isToolsOpen
+                ? "bg-white border-gray-300 text-gray-900"
+                : "border-border bg-card/50 backdrop-blur-md text-foreground hover:bg-card"
+            }`}
           >
+            Tools
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="12"
+              height="12"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="lucide lucide-pipette h-4 w-4"
+              className={`transition-transform ${isToolsOpen ? "rotate-180" : ""}`}
             >
-              <path d="m2 22 1-1h3l9-9"></path>
-              <path d="M3 21v-3l9-9"></path>
-              <path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"></path>
+              <path d="m6 9 6 6 6-6" />
             </svg>
-            Color picker
           </button>
-        </nav>
+
+          {isToolsOpen && (
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[700px] bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 text-left z-50">
+              {/* Top Highlighted Item */}
+              <Link
+                to="/"
+                onClick={() => setIsToolsOpen(false)}
+                className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-cyan-50 hover:from-pink-100 hover:to-cyan-100 transition mb-4"
+              >
+                <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">
+                  🖼️
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    Pick color from image
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Upload, paste or link an image: get HEX, RGB, HSL
+                  </p>
+                </div>
+              </Link>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* EXTRACT Column */}
+                <div>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                    Extract
+                  </h4>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link
+                        to="/color/2596be"
+                        onClick={() => setIsToolsOpen(false)}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">✏️</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Color picker
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            Explore any color: variations, harmony,
+                            accessibility
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        onClick={(e) => e.preventDefault()}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">🔍</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Contrast checker
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            Check WCAG AA/AAA ratios for any color pair
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        onClick={(e) => e.preventDefault()}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">👁️</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Blindness simulator
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            Preview how your colors look to color-blind users
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        onClick={(e) => e.preventDefault()}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">🎨</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Browse colors
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            A catalog of named colors with codes
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* CREATE Column */}
+                <div>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                    Create
+                  </h4>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link
+                        to="/dashboard/palette/create"
+                        onClick={() => setIsToolsOpen(false)}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">✨</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Palette generator
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            Auto-generate balanced palettes
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/dashboard/gradient/create"
+                        onClick={() => setIsToolsOpen(false)}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">🌀</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Gradient maker
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            Build CSS gradients with live preview
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/dashboard/palette/create"
+                        onClick={() => setIsToolsOpen(false)}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <span className="text-lg text-gray-600">📁</span>
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800">
+                            Palette creator
+                          </span>
+                          <span className="block text-xs text-gray-500">
+                            Build a palette from scratch
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* YOUR LIBRARY Footer */}
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                  Your Library
+                </h4>
+                <div className="flex gap-6">
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setIsToolsOpen(false)}
+                    className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900"
+                  >
+                    <span>📊</span> Dashboard
+                  </Link>
+                  <Link
+                    to="/dashboard/palette"
+                    onClick={() => setIsToolsOpen(false)}
+                    className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900"
+                  >
+                    <span>📂</span> Saved palettes
+                  </Link>
+                  <Link
+                    to="/dashboard/gradient"
+                    onClick={() => setIsToolsOpen(false)}
+                    className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900"
+                  >
+                    <span>📁</span> Saved gradients
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Color Picker (Redirects home) */}
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 border border-border bg-card/50 backdrop-blur-md rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition shadow-xs"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-pipette h-4 w-4"
+          >
+            <path d="m2 22 1-1h3l9-9"></path>
+            <path d="M3 21v-3l9-9"></path>
+            <path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"></path>
+          </svg>
+          Color picker
+        </button>
 
         {/* Support Us Button */}
         <button className="bg-accent hover:bg-yellow-300 text-black text-sm font-semibold px-4 py-2 rounded-full transition">
@@ -69,7 +304,6 @@ const Header: React.FC = () => {
 
         {/* Theme Toggle */}
         <div className="flex items-center justify-center border border-border bg-card/50 backdrop-blur-md rounded-full py-0.5 w-[78px] gap-1">
-          {/* Sun (Light) */}
           <button
             onClick={() => isDark && toggleTheme()}
             className={`p-2 rounded-full transition ${!isDark ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
@@ -95,7 +329,6 @@ const Header: React.FC = () => {
               <path d="m19.07 4.93-1.41 1.41" />
             </svg>
           </button>
-          {/* Moon (Dark) */}
           <button
             onClick={() => !isDark && toggleTheme()}
             className={`p-2 rounded-full transition ${isDark ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
