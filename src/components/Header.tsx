@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../hooks/useTheme";
 
 const Header: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Dropdown State
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Detect if we are on the Color Picker page
+  const isColorPage = location.pathname.startsWith("/color/");
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -23,6 +27,15 @@ const Header: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Dynamic Navigation for the Header Button
+  const handlePickerToggle = () => {
+    if (isColorPage) {
+      navigate("/"); // Go back to Image Picker
+    } else {
+      navigate("/color/2596be"); // Go to Color Picker
+    }
+  };
 
   return (
     <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3 transition-colors relative z-50">
@@ -273,9 +286,9 @@ const Header: React.FC = () => {
           )}
         </div>
 
-        {/* Color Picker (Redirects home) */}
+        {/* UPDATED: Dynamic Color/Image Picker Button */}
         <button
-          onClick={() => navigate("/")}
+          onClick={handlePickerToggle}
           className="flex items-center gap-2 border border-border bg-card/50 backdrop-blur-md rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition shadow-xs"
         >
           <svg
@@ -294,7 +307,7 @@ const Header: React.FC = () => {
             <path d="M3 21v-3l9-9"></path>
             <path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"></path>
           </svg>
-          Color picker
+          {isColorPage ? "Image picker" : "Color picker"}
         </button>
 
         {/* Support Us Button */}
