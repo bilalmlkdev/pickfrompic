@@ -30,16 +30,14 @@ interface DashboardContextType {
   updatePalette: (id: string, collection: string) => void;
   deletePalette: (id: string) => void;
   addColor: (name: string, hex: string) => void;
+  deleteColor: (id: string) => void;
   addGradient: (name: string, colors: string[]) => void;
+  deleteGradient: (id: string) => void;
 }
 
-const DashboardContext = createContext<DashboardContextType | undefined>(
-  undefined,
-);
+const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
-export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [palettes, setPalettes] = useState<Palette[]>(() => {
     const saved = localStorage.getItem("dash_palettes");
     return saved ? JSON.parse(saved) : [];
@@ -79,9 +77,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const updatePalette = (id: string, collection: string) => {
-    setPalettes((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, collection } : p)),
-    );
+    setPalettes((prev) => prev.map((p) => (p.id === id ? { ...p, collection } : p)));
   };
 
   const deletePalette = (id: string) => {
@@ -98,6 +94,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
     setColors((prev) => [newColor, ...prev]);
   };
 
+  const deleteColor = (id: string) => {
+    setColors((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const addGradient = (name: string, colors: string[]) => {
     const newGradient: Gradient = {
       id: crypto.randomUUID(),
@@ -106,6 +106,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
       createdAt: new Date().toISOString(),
     };
     setGradients((prev) => [newGradient, ...prev]);
+  };
+
+  const deleteGradient = (id: string) => {
+    setGradients((prev) => prev.filter((g) => g.id !== id));
   };
 
   return (
@@ -118,7 +122,9 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
         updatePalette,
         deletePalette,
         addColor,
+        deleteColor,
         addGradient,
+        deleteGradient,
       }}
     >
       {children}
@@ -128,7 +134,6 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useDashboard = () => {
   const context = useContext(DashboardContext);
-  if (!context)
-    throw new Error("useDashboard must be used within DashboardProvider");
+  if (!context) throw new Error("useDashboard must be used within DashboardProvider");
   return context;
 };
