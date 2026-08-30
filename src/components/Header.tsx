@@ -1,13 +1,15 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../hooks/useTheme";
 
 const Header: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   return (
-    <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3  transition-colors">
-      {/* Logo */}
-      <div className="flex items-center gap-3 cursor-pointer">
+    <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3 transition-colors relative z-50">
+      {/* UPDATED: Logo now redirects to Main Picker (Home) */}
+      <Link to="/" className="flex items-center gap-3 cursor-pointer">
         {/* Floral Logo Icon (uses currentColor) */}
         <svg
           width="32"
@@ -29,13 +31,17 @@ const Header: React.FC = () => {
         <span className="font-medium text-[18px] text-foreground tracking-normal">
           ImageColorPicker.com
         </span>
-      </div>
+      </Link>
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
         {/* Center Navigation */}
         <nav className="hidden lg:flex items-center gap-2">
-          <button className="flex items-center gap-2 border border-border bg-card/50 backdrop-blur-md rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition shadow-xs">
+          {/* UPDATED: Color picker button navigates to Home */}
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 border border-border bg-card/50 backdrop-blur-md rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition shadow-xs"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -43,9 +49,9 @@ const Header: React.FC = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="lucide lucide-pipette h-4 w-4"
             >
               <path d="m2 22 1-1h3l9-9"></path>
@@ -110,12 +116,18 @@ const Header: React.FC = () => {
         </div>
 
         {/* Login Button */}
-        <button className="border border-border bg-card/50 backdrop-blur-md hover:bg-card text-foreground text-sm font-semibold px-5 py-2 rounded-full transition">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="border border-border bg-card/50 backdrop-blur-md hover:bg-card text-foreground text-sm font-semibold px-5 py-2 rounded-full transition"
+        >
           Login
         </button>
 
         {/* Sign Up Button */}
-        <button className="bg-foreground hover:opacity-80 text-background text-sm font-semibold px-5 py-2 rounded-full transition">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="bg-foreground hover:opacity-80 text-background text-sm font-semibold px-5 py-2 rounded-full transition"
+        >
           Sign up
         </button>
       </div>
