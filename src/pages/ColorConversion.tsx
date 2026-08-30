@@ -42,6 +42,27 @@ const ColorConversion = () => {
     { label: "HWB", value: `${hwb.h}, ${hwb.w}, ${hwb.b}` },
   ];
 
+  // REAL EyeDropper API Implementation
+  const pickFromScreen = async () => {
+    // Check if the browser supports the EyeDropper API (Chrome, Edge, Opera)
+    if ("EyeDropper" in window) {
+      try {
+        // @ts-ignore - EyeDropper is a newer browser API
+        const eyeDropper = new window.EyeDropper();
+        const result = await eyeDropper.open();
+        if (result && result.sRGBHex) {
+          setCurrentHex(result.sRGBHex);
+        }
+      } catch (e) {
+        console.log("EyeDropper cancelled or failed");
+      }
+    } else {
+      alert(
+        "Your browser does not support the EyeDropper API. Please use Chrome, Edge, or Opera.",
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-200 via-pink-100 to-cyan-200 p-8">
       <div className="max-w-5xl mx-auto">
@@ -89,6 +110,14 @@ const ColorConversion = () => {
               className="w-full bg-gray-900 text-white py-3 rounded-xl mt-4 hover:bg-gray-800"
             >
               💾 Save Color
+            </button>
+
+            {/* REAL Pick from Screen Button */}
+            <button
+              onClick={pickFromScreen}
+              className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl mt-3 hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            >
+              <span>⌖</span> Pick from Screen
             </button>
           </div>
 

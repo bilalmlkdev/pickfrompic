@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
-// import CreatePalette from "./pages/CreatePalette";
-// import GradientMaker from "./pages/GradientMaker";
 import ColorConversion from "./pages/ColorConversion";
 import { DashboardProvider } from "./context/DashboardContext";
 import MainPicker from "./pages/MainPicker";
