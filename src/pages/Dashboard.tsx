@@ -1,19 +1,31 @@
 import React, { useState } from "react";
 import { useDashboard } from "../context/DashboardContext";
-import SavePaletteModal from "../components/modals/SavePaletteModal";
+import CreatePalette from "./CreatePalette";
+import GradientMaker from "./GradientMaker";
+import ColorConversion from "./ColorConversion";
 import { downloadFile, convertToCss } from "../utils/exportUtils";
 
 const Dashboard: React.FC = () => {
   const { palettes, deletePalette, updatePalette } = useDashboard();
   const [activeTab, setActiveTab] = useState("Palettes");
+  const [activeView, setActiveView] = useState<
+    "list" | "palette" | "gradient" | "color"
+  >("list");
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [editingCollectionId, setEditingCollectionId] = useState<string | null>(
     null,
   );
   const [newCollectionName, setNewCollectionName] = useState("");
+
+  // Conditionally render creation pages based on the + button
+  if (activeView === "palette")
+    return <CreatePalette onBack={() => setActiveView("list")} />;
+  if (activeView === "gradient")
+    return <GradientMaker onBack={() => setActiveView("list")} />;
+  if (activeView === "color")
+    return <ColorConversion onBack={() => setActiveView("list")} />;
 
   const filteredPalettes = palettes.filter((palette) =>
     palette.name.toLowerCase().includes(search.toLowerCase()),
@@ -41,10 +53,15 @@ const Dashboard: React.FC = () => {
   };
 
   const handleSaveCollection = (id: string) => {
-    if (newCollectionName) {
-      updatePalette(id, newCollectionName);
-    }
+    if (newCollectionName) updatePalette(id, newCollectionName);
     setEditingCollectionId(null);
+  };
+
+  // Routes + button to the correct page based on active tab
+  const handlePlusClick = () => {
+    if (activeTab === "Palettes") setActiveView("palette");
+    else if (activeTab === "Gradients") setActiveView("gradient");
+    else if (activeTab === "Colors") setActiveView("color");
   };
 
   return (
@@ -59,7 +76,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex gap-8">
-          {/* Sidebar (No Projects) */}
+          {/* Sidebar */}
           <div className="w-64 shrink-0 bg-white rounded-2xl shadow-lg p-4 h-fit">
             {tabs.map((tab) => (
               <button
@@ -87,7 +104,7 @@ const Dashboard: React.FC = () => {
                 <div className="absolute left-3 top-3 text-gray-400">🔍</div>
                 <input
                   type="text"
-                  placeholder="Search palettes..."
+                  placeholder={`Search ${activeTab.toLowerCase()}...`}
                   className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -109,7 +126,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Cards */}
+            {/* Palettes Grid */}
             {activeTab === "Palettes" && (
               <div
                 className={
@@ -124,13 +141,12 @@ const Dashboard: React.FC = () => {
                       key={palette.id}
                       className="bg-white rounded-2xl shadow-lg overflow-hidden p-5"
                     >
-                      {/* Title & Menu */}
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-xl text-gray-900">
                           {palette.name}
                         </h3>
 
-                        {/* 3 Dots Dropdown */}
+                        {/* Dropdown Menu */}
                         <div className="relative">
                           <button
                             onClick={() =>
@@ -164,15 +180,6 @@ const Dashboard: React.FC = () => {
                                   <span>➡️</span> Move to collection
                                 </button>
                                 <button
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    setIsSaveModalOpen(true);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-3"
-                                >
-                                  <span>✏️</span> Edit
-                                </button>
-                                <button
                                   onClick={() => handleDownload(palette)}
                                   className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-3"
                                 >
@@ -190,7 +197,7 @@ const Dashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Collection Info or Editing Input */}
+                      {/* Collection Edit Input */}
                       {editingCollectionId === palette.id ? (
                         <div className="flex gap-2 mb-4">
                           <input
@@ -249,21 +256,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating + Button */}
+        {/* Floating + Button (Routes to Creation Pages) */}
         <button
-          onClick={() => setIsSaveModalOpen(true)}
+          onClick={handlePlusClick}
           className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-gray-900 text-white text-3xl shadow-xl hover:bg-gray-800 transition"
         >
           +
         </button>
       </div>
-
-      {/* Save Modal */}
-      <SavePaletteModal
-        isOpen={isSaveModalOpen}
-        onClose={() => setIsSaveModalOpen(false)}
-        colors={["#1e81b0", "#eeeeee", "#e28743", "#76b5c5", "#21130d"]}
-      />
     </div>
   );
 };
