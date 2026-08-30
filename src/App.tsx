@@ -1,7 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
+// import CreatePalette from "./pages/CreatePalette";
+// import GradientMaker from "./pages/GradientMaker";
 import ColorConversion from "./pages/ColorConversion";
+import ContrastChecker from "./pages/ContrastChecker"; // Added import
 import { DashboardProvider } from "./context/DashboardContext";
 import MainPicker from "./pages/MainPicker";
 
@@ -13,8 +16,10 @@ function App() {
           <Header />
           <Routes>
             <Route path="/" element={<MainPicker />} />
-            {/* Uses the unified ColorConversion page for view details */}
             <Route path="/color/:hex" element={<ColorConversion />} />
+
+            {/* New Route */}
+            <Route path="/contrast-checker" element={<ContrastChecker />} />
 
             {/* Dashboard Routes */}
             <Route path="/dashboard" element={<Dashboard />} />

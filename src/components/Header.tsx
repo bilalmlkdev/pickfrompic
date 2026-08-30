@@ -140,8 +140,9 @@ const Header: React.FC = () => {
                     </li>
                     <li>
                       <a
-                        href="#"
-                        onClick={(e) => e.preventDefault()}
+                        href="/contrast-checker"
+                        
+                        onClick={() => setIsToolsOpen(false)}
                         className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
                       >
                         <span className="text-lg text-gray-600">🔍</span>

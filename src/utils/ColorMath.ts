@@ -119,3 +119,35 @@ export const rgbToHwb = (r: number, g: number, b: number) => {
   const bl = 100 - (Math.max(r, g, b) / 255) * 100;
   return { h, w: Math.round(w), b: Math.round(bl) };
 };
+
+
+
+// Add to src/utils/ColorMath.ts
+
+export const getContrastRatio = (hex1: string, hex2: string) => {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+
+  // Linearize sRGB
+  const linearize = (c: number) => {
+    c /= 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+
+  // Calculate Relative Luminance
+  const luminance = (r: number, g: number, b: number) => {
+    const R = linearize(r);
+    const G = linearize(g);
+    const B = linearize(b);
+    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  };
+
+  const L1 = luminance(rgb1.r, rgb1.g, rgb1.b);
+  const L2 = luminance(rgb2.r, rgb2.g, rgb2.b);
+
+  // Ensure L1 is the lighter color
+  const lighter = Math.max(L1, L2);
+  const darker = Math.min(L1, L2);
+
+  return (lighter + 0.05) / (darker + 0.05);
+};
