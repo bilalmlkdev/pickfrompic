@@ -40,14 +40,15 @@ const ColorPalette: React.FC<Props> = ({
           </button>
         </div>
 
-        <div className="flex flex-1 gap-1 overflow-hidden h-10">
+        {/* CHANGED: Fixed w-10 width and overflow-x-auto so they don't stretch! */}
+        <div className="flex flex-1 gap-1 overflow-x-auto h-10">
           {allColors.length > 0 ? (
             allColors.map((color, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedColor(color)}
                 style={{ backgroundColor: color }}
-                className={`h-full flex-1 transition-all duration-200 ${idx === 0 ? "rounded-l-lg" : ""} ${idx === allColors.length - 1 ? "rounded-r-lg" : ""} ${selectedColor === color ? "ring-2 ring-black ring-offset-2 z-10 scale-105" : "border border-gray-200"}`}
+                className={`h-10 w-10 shrink-0 transition-all duration-200 ${idx === 0 ? "rounded-l-lg" : ""} ${idx === allColors.length - 1 ? "rounded-r-lg" : ""} ${selectedColor === color ? "ring-2 ring-black ring-offset-2 z-10 scale-105" : "border border-gray-200"}`}
                 title={color}
               />
             ))

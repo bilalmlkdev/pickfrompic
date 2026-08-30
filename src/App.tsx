@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
-import ColorDetailPage from "./pages/ColorDetailsPage";
+// import CreatePalette from "./pages/CreatePalette";
+// import GradientMaker from "./pages/GradientMaker";
+import ColorConversion from "./pages/ColorConversion";
 import { DashboardProvider } from "./context/DashboardContext";
 import MainPicker from "./pages/MainPicker";
 
@@ -13,7 +15,8 @@ function App() {
           <Header />
           <Routes>
             <Route path="/" element={<MainPicker />} />
-            <Route path="/color/:hex" element={<ColorDetailPage />} />
+            {/* Uses the unified ColorConversion page for view details */}
+            <Route path="/color/:hex" element={<ColorConversion />} />
 
             {/* Dashboard Routes */}
             <Route path="/dashboard" element={<Dashboard />} />
