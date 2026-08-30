@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ExportPaletteModal from "./ExportPaletteModal";
-import SavePaletteModal from "./modals/SavePaletteModal";
+import SaveItemModal from "./modals/SaveItemModal";
 
 interface Props {
   colors: string[];
@@ -19,8 +19,6 @@ const ColorPalette: React.FC<Props> = ({
 }) => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSaveOpen, setIsSaveOpen] = useState(false);
-
-  // FIX: Use (colors || []) to prevent crashing if colors is undefined
   const allColors = (colors || []).slice(0, maxColors);
 
   return (
@@ -49,13 +47,7 @@ const ColorPalette: React.FC<Props> = ({
                 key={idx}
                 onClick={() => setSelectedColor(color)}
                 style={{ backgroundColor: color }}
-                className={`h-full flex-1 transition-all duration-200 ${
-                  idx === 0 ? "rounded-l-lg" : ""
-                } ${idx === allColors.length - 1 ? "rounded-r-lg" : ""} ${
-                  selectedColor === color
-                    ? "ring-2 ring-black ring-offset-2 z-10 scale-105"
-                    : "border border-gray-200"
-                }`}
+                className={`h-full flex-1 transition-all duration-200 ${idx === 0 ? "rounded-l-lg" : ""} ${idx === allColors.length - 1 ? "rounded-r-lg" : ""} ${selectedColor === color ? "ring-2 ring-black ring-offset-2 z-10 scale-105" : "border border-gray-200"}`}
                 title={color}
               />
             ))
@@ -87,10 +79,11 @@ const ColorPalette: React.FC<Props> = ({
         onClose={() => setIsExportOpen(false)}
         colors={allColors}
       />
-      <SavePaletteModal
+      <SaveItemModal
         isOpen={isSaveOpen}
         onClose={() => setIsSaveOpen(false)}
-        colors={allColors}
+        type="palette"
+        data={allColors}
       />
     </div>
   );

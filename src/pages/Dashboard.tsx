@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { useDashboard } from "../context/DashboardContext";
 import CreatePalette from "./CreatePalette";
 import GradientMaker from "./GradientMaker";
@@ -6,11 +7,11 @@ import ColorConversion from "./ColorConversion";
 import { downloadFile, convertToCss } from "../utils/exportUtils";
 
 const Dashboard: React.FC = () => {
+  const { tab = "palette" } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { palettes, deletePalette, updatePalette } = useDashboard();
-  const [activeTab, setActiveTab] = useState("Palettes");
-  const [activeView, setActiveView] = useState<
-    "list" | "palette" | "gradient" | "color"
-  >("list");
+
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -19,18 +20,21 @@ const Dashboard: React.FC = () => {
   );
   const [newCollectionName, setNewCollectionName] = useState("");
 
-  // Conditionally render creation pages based on the + button
-  if (activeView === "palette")
-    return <CreatePalette onBack={() => setActiveView("list")} />;
-  if (activeView === "gradient")
-    return <GradientMaker onBack={() => setActiveView("list")} />;
-  if (activeView === "color")
-    return <ColorConversion onBack={() => setActiveView("list")} />;
+  // FIX: Correctly check if the URL ends with /create
+  const isCreatePage = location.pathname.endsWith("/create");
+
+  const activeTab = tab.charAt(0).toUpperCase() + tab.slice(1);
+
+  // FIX: Render creation pages based on the isCreatePage check
+  if (isCreatePage) {
+    if (tab === "palette") return <CreatePalette />;
+    if (tab === "gradient") return <GradientMaker />;
+    if (tab === "color") return <ColorConversion />;
+  }
 
   const filteredPalettes = palettes.filter((palette) =>
     palette.name.toLowerCase().includes(search.toLowerCase()),
   );
-
   const tabs = ["Palettes", "Colors", "Gradients"];
 
   const handleDownload = (palette: { name: string; colors: string[] }) => {
@@ -57,18 +61,23 @@ const Dashboard: React.FC = () => {
     setEditingCollectionId(null);
   };
 
-  // Routes + button to the correct page based on active tab
   const handlePlusClick = () => {
-    if (activeTab === "Palettes") setActiveView("palette");
-    else if (activeTab === "Gradients") setActiveView("gradient");
-    else if (activeTab === "Colors") setActiveView("color");
+    navigate(`/dashboard/${tab}/create`);
   };
+
+  const displayTab =
+    tab === "color" ? "Colors" : tab === "gradient" ? "Gradients" : "Palettes";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-200 via-pink-100 to-cyan-200">
       <div className="max-w-6xl mx-auto p-8">
-        {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 relative">
+          <Link
+            to="/"
+            className="absolute left-0 top-2 text-blue-600 underline hover:text-blue-800"
+          >
+            ← Back to Home
+          </Link>
           <h1 className="text-5xl font-bold text-gray-900 mb-2">Dashboard</h1>
           <p className="text-lg text-gray-600">
             Manage your saved palettes and gradients
@@ -76,35 +85,35 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex gap-8">
-          {/* Sidebar */}
           <div className="w-64 shrink-0 bg-white rounded-2xl shadow-lg p-4 h-fit">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium ${
-                  activeTab === tab
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-500 hover:bg-gray-50"
-                }`}
-              >
-                <span>
-                  {tab === "Palettes" ? "🎨" : tab === "Colors" ? "🌈" : "🌀"}
-                </span>{" "}
-                {tab}
-              </button>
-            ))}
+            {tabs.map((t) => {
+              const tabPath = t.toLowerCase().replace(/s$/, "");
+              return (
+                <button
+                  key={t}
+                  onClick={() => navigate(`/dashboard/${tabPath}`)}
+                  className={`w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium ${
+                    displayTab === t
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
+                  <span>
+                    {t === "Palettes" ? "🎨" : t === "Colors" ? "🌈" : "🌀"}
+                  </span>{" "}
+                  {t}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Main Content */}
           <div className="flex-1">
-            {/* Search Bar */}
             <div className="bg-white rounded-2xl shadow-lg p-4 mb-6 flex items-center gap-4">
               <div className="relative flex-1">
                 <div className="absolute left-3 top-3 text-gray-400">🔍</div>
                 <input
                   type="text"
-                  placeholder={`Search ${activeTab.toLowerCase()}...`}
+                  placeholder={`Search ${displayTab.toLowerCase()}...`}
                   className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -126,8 +135,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Palettes Grid */}
-            {activeTab === "Palettes" && (
+            {displayTab === "Palettes" && (
               <div
                 className={
                   view === "grid"
@@ -145,8 +153,6 @@ const Dashboard: React.FC = () => {
                         <h3 className="font-semibold text-xl text-gray-900">
                           {palette.name}
                         </h3>
-
-                        {/* Dropdown Menu */}
                         <div className="relative">
                           <button
                             onClick={() =>
@@ -158,7 +164,6 @@ const Dashboard: React.FC = () => {
                           >
                             ...
                           </button>
-
                           {openMenuId === palette.id && (
                             <div className="absolute right-0 top-8 w-56 bg-white border border-gray-100 rounded-xl shadow-xl z-20 overflow-hidden">
                               <div className="px-4 py-3 border-b border-gray-100 font-semibold text-gray-800">
@@ -196,38 +201,6 @@ const Dashboard: React.FC = () => {
                           )}
                         </div>
                       </div>
-
-                      {/* Collection Edit Input */}
-                      {editingCollectionId === palette.id ? (
-                        <div className="flex gap-2 mb-4">
-                          <input
-                            type="text"
-                            value={newCollectionName}
-                            onChange={(e) =>
-                              setNewCollectionName(e.target.value)
-                            }
-                            placeholder="New Collection Name"
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-1 text-sm"
-                          />
-                          <button
-                            onClick={() => handleSaveCollection(palette.id)}
-                            className="bg-gray-900 text-white text-xs px-3 rounded-lg"
-                          >
-                            Save
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3 text-sm text-gray-500 mb-4">
-                          <span className="flex items-center gap-1">
-                            📁 {palette.collection}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            🌐 Untitled Collection
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Rounded Color Strip */}
                       <div className="flex h-8 rounded-full overflow-hidden border border-gray-200">
                         {palette.colors.map((color, idx) => (
                           <div
@@ -247,16 +220,14 @@ const Dashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Placeholder for Colors / Gradients */}
-            {activeTab !== "Palettes" && (
+            {displayTab !== "Palettes" && (
               <div className="bg-white rounded-2xl p-12 text-center text-gray-500">
-                No saved {activeTab.toLowerCase()} yet.
+                No saved {displayTab.toLowerCase()} yet.
               </div>
             )}
           </div>
         </div>
 
-        {/* Floating + Button (Routes to Creation Pages) */}
         <button
           onClick={handlePlusClick}
           className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-gray-900 text-white text-3xl shadow-xl hover:bg-gray-800 transition"

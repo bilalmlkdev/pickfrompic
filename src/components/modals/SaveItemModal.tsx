@@ -1,25 +1,31 @@
 import React, { useState } from "react";
 import { useDashboard } from "../../context/DashboardContext";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  colors: string[];
+  type: "palette" | "color" | "gradient";
+  data: any;
 }
 
-const SavePaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
-  const { addPalette } = useDashboard();
-  const [name, setName] = useState("My new Palette");
+const SaveItemModal: React.FC<Props> = ({ isOpen, onClose, type, data }) => {
+  const { addPalette, addColor, addGradient } = useDashboard();
+  const navigate = useNavigate();
+  const [name, setName] = useState("My New Item");
   const [collection, setCollection] = useState("Untitled Collection");
 
   if (!isOpen) return null;
 
   const handleSave = () => {
     if (!name) return;
-    addPalette(name, collection, colors);
+
+    if (type === "palette") addPalette(name, collection, data);
+    else if (type === "color") addColor(name, data);
+    else if (type === "gradient") addGradient(name, data);
+
     onClose();
-    setName("My new Palette");
-    setCollection("Untitled Collection");
+    navigate(`/dashboard/${type}`);
   };
 
   return (
@@ -32,10 +38,9 @@ const SavePaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-          Save Palette
+          Save {type.charAt(0).toUpperCase() + type.slice(1)}
         </h2>
 
-        {/* Name */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Name
@@ -48,23 +53,23 @@ const SavePaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
           />
         </div>
 
-        {/* Collection */}
-        <div className="mb-8">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Collection
-          </label>
-          <select
-            value={collection}
-            onChange={(e) => setCollection(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
-          >
-            <option>Untitled Collection</option>
-            <option>Branding</option>
-            <option>Web Design</option>
-          </select>
-        </div>
+        {type === "palette" && (
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Collection
+            </label>
+            <select
+              value={collection}
+              onChange={(e) => setCollection(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+            >
+              <option>Untitled Collection</option>
+              <option>Branding</option>
+              <option>Web Design</option>
+            </select>
+          </div>
+        )}
 
-        {/* Footer */}
         <div className="flex gap-4">
           <button
             onClick={onClose}
@@ -84,4 +89,4 @@ const SavePaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
   );
 };
 
-export default SavePaletteModal;
+export default SaveItemModal;
