@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import ExportPaletteModal from "./ExportPaletteModal";
 
 interface Props {
   colors: string[];
@@ -15,6 +16,7 @@ const ColorPalette: React.FC<Props> = ({
   maxColors,
   setMaxColors,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const allColors = colors.slice(0, maxColors);
 
   return (
@@ -59,7 +61,12 @@ const ColorPalette: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
+          {/* UPDATED: Download Button Opens Modal */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
+            title="Download Palette"
+          >
             ⬇
           </button>
           <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
@@ -67,6 +74,13 @@ const ColorPalette: React.FC<Props> = ({
           </button>
         </div>
       </div>
+
+      {/* The Export Modal */}
+      <ExportPaletteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        colors={allColors}
+      />
     </div>
   );
 };
