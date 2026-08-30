@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ExportPaletteModal from "./ExportPaletteModal";
+import SavePaletteModal from "./modals/SavePaletteModal";
 
 interface Props {
   colors: string[];
@@ -16,8 +17,11 @@ const ColorPalette: React.FC<Props> = ({
   maxColors,
   setMaxColors,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const allColors = colors.slice(0, maxColors);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
+
+  // FIX: Use (colors || []) to prevent crashing if colors is undefined
+  const allColors = (colors || []).slice(0, maxColors);
 
   return (
     <div>
@@ -61,24 +65,31 @@ const ColorPalette: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          {/* UPDATED: Download Button Opens Modal */}
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsExportOpen(true)}
             className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
             title="Download Palette"
           >
             ⬇
           </button>
-          <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100">
+          <button
+            onClick={() => setIsSaveOpen(true)}
+            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
+            title="Save Palette"
+          >
             ⧉
           </button>
         </div>
       </div>
 
-      {/* The Export Modal */}
       <ExportPaletteModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        colors={allColors}
+      />
+      <SavePaletteModal
+        isOpen={isSaveOpen}
+        onClose={() => setIsSaveOpen(false)}
         colors={allColors}
       />
     </div>

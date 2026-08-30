@@ -22,23 +22,25 @@ const ColorDetailsPanel: React.FC<Props> = ({
   onPickedColor,
 }) => {
   const { copied, copy } = useCopy();
-  const [rgb, setRgb] = useState("");
-  const [hsl, setHsl] = useState("");
+  const [rgb, setRgb] = useState("rgb(37, 150, 190)");
+  const [hsl, setHsl] = useState("hsl(196, 67%, 45%)");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const displayColor = hoveredColor || selectedColor;
 
   useEffect(() => {
+    // Hex to RGB and HSL
     const hexToRgb = (hex: string) => {
+      if (!hex) return "rgb(0, 0, 0)";
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result
         ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})`
-        : "";
+        : hex; // Fallback to raw hex if invalid
     };
+
     const hexToHsl = (hex: string) => {
-      let r = 0,
-        g = 0,
-        b = 0;
+      if (!hex) return "hsl(0, 0%, 0%)";
+      let r = 0, g = 0, b = 0;
       if (hex.length === 4) {
         r = parseInt(hex[1] + hex[1], 16);
         g = parseInt(hex[2] + hex[2], 16);
@@ -48,27 +50,16 @@ const ColorDetailsPanel: React.FC<Props> = ({
         g = parseInt(hex.substring(3, 5), 16);
         b = parseInt(hex.substring(5, 7), 16);
       }
-      r /= 255;
-      g /= 255;
-      b /= 255;
-      const max = Math.max(r, g, b),
-        min = Math.min(r, g, b);
-      let h = 0,
-        s = 0;
-      const l = (max + min) / 2;
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0; const l = (max + min) / 2;
       if (max !== min) {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
-          case r:
-            h = (g - b) / d + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = (b - r) / d + 2;
-            break;
-          case b:
-            h = (r - g) / d + 4;
-            break;
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
         }
         h /= 6;
       }
@@ -79,7 +70,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
     setHsl(hexToHsl(displayColor));
   }, [displayColor]);
 
-  // Quick Pick from Screen function
   const pickFromScreen = async () => {
     if ("EyeDropper" in window) {
       try {
@@ -94,8 +84,7 @@ const ColorDetailsPanel: React.FC<Props> = ({
     }
   };
 
-  const topColors =
-    topPicks.length > 0 ? topPicks.slice(0, 2) : colors.slice(0, 2);
+  const topColors = topPicks.length > 0 ? topPicks.slice(0, 2) : (colors || []).slice(0, 2);
   const displayTopColors = hoveredColor
     ? [topColors[0] || "#2596be", hoveredColor]
     : topColors;
@@ -103,8 +92,6 @@ const ColorDetailsPanel: React.FC<Props> = ({
   return (
     <div className="flex flex-col">
       <h2 className="font-semibold text-gray-800 mb-3">Colors</h2>
-
-      {/* Top Two Most Used Colors */}
       <div className="flex gap-4 mb-6">
         {displayTopColors.length > 0 ? (
           displayTopColors.map((color, idx) => (
@@ -113,83 +100,47 @@ const ColorDetailsPanel: React.FC<Props> = ({
               onClick={() => setSelectedColor(color)}
               style={{ backgroundColor: color }}
               className={`h-20 w-32 rounded-xl border ${
-                selectedColor === color
-                  ? "border-2 border-black"
-                  : "border-gray-200"
+                selectedColor === color ? "border-2 border-black" : "border-gray-200"
               } transition`}
             />
           ))
         ) : (
-          <>
-            <div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" />
-            <div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" />
-          </>
+          <><div className="h-20 w-32 rounded-xl bg-blue-500 border border-gray-200" /><div className="h-20 w-32 rounded-xl bg-blue-800 border border-gray-200" /></>
         )}
       </div>
 
-      {/* Values Boxes */}
       <div className="space-y-3 mb-6">
         {[
           { label: "HEX", value: displayColor },
           { label: "RGB", value: rgb },
           { label: "HSL", value: hsl },
         ].map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between border border-gray-200 rounded-lg p-3"
-          >
+          <div key={item.label} className="flex items-center justify-between border border-gray-200 rounded-lg p-3">
             <span className="text-gray-500 text-sm w-10">{item.label}</span>
-            <span className="font-mono text-sm text-gray-800 flex-1 ml-4">
-              {item.value}
-            </span>
-            <button
-              onClick={() => copy(item.value)}
-              className="text-gray-500 hover:text-gray-800 transition"
-            >
+            <span className="font-mono text-sm text-gray-800 flex-1 ml-4">{item.value}</span>
+            <button onClick={() => copy(item.value)} className="text-gray-500 hover:text-gray-800 transition">
               {copied ? "✓" : "⧉"}
             </button>
           </div>
         ))}
       </div>
 
-      <button className="text-left text-sm font-medium text-blue-600 hover:underline mb-8">
-        View color details →
-      </button>
+      <button className="text-left text-sm font-medium text-blue-600 hover:underline mb-8">View color details →</button>
 
-      {/* Use Your Own Image Section (Both Quick Actions Here) */}
       <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
         <h3 className="font-semibold text-gray-800 mb-4">Use your own image</h3>
-
-        {/* 1. Opens the full Modal */}
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2"
-        >
+        <button onClick={() => setIsModalOpen(true)} className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl mb-3 hover:bg-gray-800 transition flex items-center justify-center gap-2">
           <span>⬆</span> Use your image
         </button>
-
-        {/* 2. Quick Pick from Screen Button */}
-        <button
-          onClick={pickFromScreen}
-          className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2"
-        >
+        <button onClick={pickFromScreen} className="w-full bg-white border border-gray-300 text-gray-800 font-medium py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2">
           <span>⌖</span> Pick from Screen
         </button>
-
         <p className="mt-4 text-xs text-gray-500 leading-relaxed">
-          🛡️ We think data protection is important!{" "}
-          <span className="text-blue-500">No data is sent.</span> The magic
-          happens in your browser.
+          🛡️ We think data protection is important! <span className="text-blue-500">No data is sent.</span> The magic happens in your browser.
         </p>
       </div>
 
-      {/* The Image Source Modal */}
-      <ImageSourceModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        setImageSrc={setImageSrc}
-        onPickedColor={onPickedColor}
-      />
+      <ImageSourceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} setImageSrc={setImageSrc} onPickedColor={onPickedColor} />
     </div>
   );
 };
