@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   Pipette,
-  Star,
   Image as ImageIcon,
   Pencil,
   Search as SearchIcon,
