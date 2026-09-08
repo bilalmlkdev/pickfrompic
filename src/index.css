@@ -3,31 +3,59 @@
 /* Enable class-based dark mode in Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Light Mode Variables (Default) */
+/* ---------------------------------- */
+/* Light Mode Variables (Default)     */
+/* ---------------------------------- */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-  --card: #f4f4f5;
-  --card-foreground: #171717;
+  --foreground: #18181b;
+
+  --card: #ffffff;
+  --card-foreground: #18181b;
+
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
+
   --border: #e4e4e7;
+
   --accent: #facc15;
+  --accent-foreground: #18181b;
+
+  --success: #16a34a;
+  --danger: #dc2626;
+  --link: #2563eb;
+
+  --tile-dot: rgba(0, 0, 0, 0.05);
 }
 
-/* Dark Mode Variables */
+/* ---------------------------------- */
+/* Dark Mode Variables                */
+/* ---------------------------------- */
 .dark {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --muted: #27272a;
+  --background: #090a0b;
+  --foreground: #f4f4f5;
+
+  --card: #161618;
+  --card-foreground: #f4f4f5;
+
+  --muted: #232326;
   --muted-foreground: #a1a1aa;
-  --border: #27272a;
+
+  --border: #2a2a2e;
+
   --accent: #eab308;
+  --accent-foreground: #0a0a0b;
+
+  --success: #4ade80;
+  --danger: #f87171;
+  --link: #60a5fa;
+
+  --tile-dot: rgba(255, 255, 255, 0.06);
 }
 
-/* Map Variables to Tailwind v4 Theme Tokens */
+/* ---------------------------------- */
+/* Map Variables to Tailwind v4 Theme */
+/* ---------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -37,12 +65,587 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-link: var(--link);
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   background-color: var(--background);
   color: var(--foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+
+/* Slim custom scrollbar for horizontal palette strips etc. */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 999px;
+}
+
+
+
+/* for background */
+/* Keyframes used by .bg-blur-circle */
+@keyframes safari-layer-keepalive {
+  0% {
+    transform: translateZ(0) scale(1);
+  }
+
+  to {
+    transform: translateZ(0) scale(1.000001);
+  }
+}
+
+/* Tailwind utilities used in the HTML */
+/* .relative {
+  position: relative;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.hidden {
+  display: none;
+} */
+
+@media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+}
+
+/* ===== bg-gradient-main ===== */
+.bg-gradient-main {
+  background: linear-gradient(180deg, #fff, #fff 70%, hsla(60, 9%, 98%, 0));
+}
+
+.dark .bg-gradient-main {
+  background: linear-gradient(180deg, #0a0d12, #0a0d12 70%, rgba(10, 13, 18, 0));
+}
+
+/* ===== bg-fade-bottom: blends hero bg into the flat page bg below it ===== */
+.bg-fade-bottom {
+  position: absolute;
+  width: 100%;
+  height: 314px;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent, var(--background));
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ===== bg-blur-circle ===== */
+.bg-blur-circle {
+  position: absolute;
+  width: 605px;
+  height: 460px;
+  filter: blur(205px);
+  border-radius: 5000px;
+  opacity: 0.7;
+  z-index: 0;
+  transform: translateZ(0) scale(1);
+  will-change: background-color, transform;
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform: translateZ(0) scale(1);
+  -webkit-backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  -webkit-perspective: 1000px;
+  contain: layout style paint;
+  isolation: isolate;
+  animation: safari-layer-keepalive 1ms linear infinite;
+  animation-fill-mode: both;
+}
+
+.dark .bg-blur-circle {
+  opacity: 0.57;
+}
+
+/* Colored blur circles */
+.bg-blur-left-orange {
+  left: -209px;
+  top: 12px;
+  background-color: var(--dynamic-left-1, #ff6b00);
+}
+
+.dark .bg-blur-left-orange {
+  background-color: var(--dynamic-left-1, #f38744);
+}
+
+.bg-blur-left-pink {
+  left: -77px;
+  top: 376px;
+  background-color: var(--dynamic-left-2, #ff1493);
+}
+
+.dark .bg-blur-left-pink {
+  background-color: var(--dynamic-left-2, #ee46bc);
+}
+
+.bg-blur-right-cyan {
+  left: calc(100vw - 468px);
+  top: 12px;
+  background-color: var(--dynamic-right-1, #00d4ff);
+}
+
+.dark .bg-blur-right-cyan {
+  background-color: var(--dynamic-right-1, #2ce);
+}
+
+.bg-blur-right-green {
+  left: calc(100vw - 645px);
+  top: 376px;
+  background-color: var(--dynamic-right-2, #0f8);
+}
+
+.dark .bg-blur-right-green {
+  background-color: var(--dynamic-right-2, #47cd89);
+}
+
+/* ===== Left fade bars ===== */
+.bg-fade-left-bar {
+  position: absolute;
+  width: 80px;
+  height: 1036px;
+  top: 0;
+  background: linear-gradient(90deg, hsla(0, 0%, 100%, 0.2), hsla(0, 0%, 100%, 0));
+  border: 1px solid hsla(0, 0%, 100%, 0.25);
+  z-index: 0;
+  mask: linear-gradient(180deg, #000, #000 70%, transparent);
+  -webkit-mask: linear-gradient(180deg, #000, #000 70%, transparent);
+}
+
+.dark .bg-fade-left-bar {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.bg-fade-left-bar-1 {
+  left: 0;
+  opacity: 1;
+}
+
+.bg-fade-left-bar-2 {
+  left: 80px;
+  opacity: 0.9;
+}
+
+.bg-fade-left-bar-3 {
+  left: 160px;
+  opacity: 0.8;
+}
+
+.bg-fade-left-bar-4 {
+  left: 240px;
+  opacity: 0.7;
+}
+
+.bg-fade-left-bar-5 {
+  left: 320px;
+  opacity: 0.6;
+}
+
+.bg-fade-left-bar-6 {
+  left: 400px;
+  opacity: 0.5;
+}
+
+.bg-fade-left-bar-7 {
+  left: 480px;
+  opacity: 0.4;
+}
+
+.bg-fade-left-bar-8 {
+  left: 560px;
+  opacity: 0.3;
+}
+
+.dark .bg-fade-left-bar-1,
+.dark .bg-fade-left-bar-2,
+.dark .bg-fade-left-bar-3,
+.dark .bg-fade-left-bar-4,
+.dark .bg-fade-left-bar-5,
+.dark .bg-fade-left-bar-6,
+.dark .bg-fade-left-bar-7,
+.dark .bg-fade-left-bar-8 {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), transparent);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+/* ===== Right fade bars ===== */
+.bg-fade-right-bar {
+  position: absolute;
+  width: 80px;
+  height: 1036px;
+  top: 0;
+  background: linear-gradient(90deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.2));
+  border: 1px solid hsla(0, 0%, 100%, 0.25);
+  z-index: 1;
+  mask: linear-gradient(180deg, #000, #000 70%, transparent);
+  -webkit-mask: linear-gradient(180deg, #000, #000 70%, transparent);
+}
+
+.dark .bg-fade-right-bar {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.2));
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.bg-fade-right-bar-1 {
+  right: 560px;
+  opacity: 0.3;
+}
+
+.bg-fade-right-bar-2 {
+  right: 480px;
+  opacity: 0.4;
+}
+
+.bg-fade-right-bar-3 {
+  right: 400px;
+  opacity: 0.5;
+}
+
+.bg-fade-right-bar-4 {
+  right: 320px;
+  opacity: 0.6;
+}
+
+.bg-fade-right-bar-5 {
+  right: 240px;
+  opacity: 0.7;
+}
+
+.bg-fade-right-bar-6 {
+  right: 160px;
+  opacity: 0.8;
+}
+
+.bg-fade-right-bar-7 {
+  right: 80px;
+  opacity: 0.9;
+}
+
+.bg-fade-right-bar-8 {
+  right: 0;
+  opacity: 1;
+}
+
+.dark .bg-fade-right-bar-1,
+.dark .bg-fade-right-bar-2,
+.dark .bg-fade-right-bar-3,
+.dark .bg-fade-right-bar-4,
+.dark .bg-fade-right-bar-5,
+.dark .bg-fade-right-bar-6,
+.dark .bg-fade-right-bar-7,
+.dark .bg-fade-right-bar-8 {
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+/* ===== Mobile (max-width: 768px) ===== */
+@media (max-width: 768px) {
+
+  /* Left bars become horizontal strips at bottom? Actually they become fixed bottom bars */
+  .bg-fade-left-bar-1,
+  .bg-fade-left-bar-2,
+  .bg-fade-left-bar-3,
+  .bg-fade-left-bar-4,
+  .bg-fade-left-bar-5,
+  .bg-fade-left-bar-6,
+  .bg-fade-left-bar-7,
+  .bg-fade-left-bar-8 {
+    width: 100vw;
+    height: 50px;
+    background: linear-gradient(180deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.2));
+    border: 1px solid hsla(0, 0%, 100%, 0.25);
+    position: fixed;
+    left: 0;
+    z-index: 0;
+  }
+
+  .dark .bg-fade-left-bar-1,
+  .dark .bg-fade-left-bar-2,
+  .dark .bg-fade-left-bar-3,
+  .dark .bg-fade-left-bar-4,
+  .dark .bg-fade-left-bar-5,
+  .dark .bg-fade-left-bar-6,
+  .dark .bg-fade-left-bar-7,
+  .dark .bg-fade-left-bar-8 {
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
+    border: 1px solid rgba(0, 0, 0, 0.25);
+  }
+
+  .bg-fade-left-bar-1 {
+    top: 0;
+    opacity: 1;
+  }
+
+  .bg-fade-left-bar-2 {
+    top: 50px;
+    opacity: 0.9;
+  }
+
+  .bg-fade-left-bar-3 {
+    top: 100px;
+    opacity: 0.8;
+  }
+
+  .bg-fade-left-bar-4 {
+    top: 150px;
+    opacity: 0.7;
+  }
+
+  .bg-fade-left-bar-5 {
+    top: 200px;
+    opacity: 0.6;
+  }
+
+  .bg-fade-left-bar-6 {
+    top: 250px;
+    opacity: 0.5;
+  }
+
+  .bg-fade-left-bar-7 {
+    top: 300px;
+    opacity: 0.4;
+  }
+
+  .bg-fade-left-bar-8 {
+    top: 350px;
+    opacity: 0.3;
+  }
+
+  /* Right bars similar but with bottom positioning */
+  .bg-fade-right-bar-1,
+  .bg-fade-right-bar-2,
+  .bg-fade-right-bar-3,
+  .bg-fade-right-bar-4,
+  .bg-fade-right-bar-5,
+  .bg-fade-right-bar-6,
+  .bg-fade-right-bar-7,
+  .bg-fade-right-bar-8 {
+    width: 100vw;
+    height: 50px;
+    background: linear-gradient(180deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.2));
+    border: 1px solid hsla(0, 0%, 100%, 0.25);
+    position: fixed;
+    left: 0;
+    z-index: 0;
+  }
+
+  .dark .bg-fade-right-bar-1,
+  .dark .bg-fade-right-bar-2,
+  .dark .bg-fade-right-bar-3,
+  .dark .bg-fade-right-bar-4,
+  .dark .bg-fade-right-bar-5,
+  .dark .bg-fade-right-bar-6,
+  .dark .bg-fade-right-bar-7,
+  .dark .bg-fade-right-bar-8 {
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
+    border: 1px solid rgba(0, 0, 0, 0.25);
+  }
+
+  .bg-fade-right-bar-1 {
+    bottom: 350px;
+    opacity: 0.3;
+  }
+
+  .bg-fade-right-bar-2 {
+    bottom: 300px;
+    opacity: 0.4;
+  }
+
+  .bg-fade-right-bar-3 {
+    bottom: 250px;
+    opacity: 0.5;
+  }
+
+  .bg-fade-right-bar-4 {
+    bottom: 200px;
+    opacity: 0.6;
+  }
+
+  .bg-fade-right-bar-5 {
+    bottom: 150px;
+    opacity: 0.7;
+  }
+
+  .bg-fade-right-bar-6 {
+    bottom: 100px;
+    opacity: 0.8;
+  }
+
+  .bg-fade-right-bar-7 {
+    bottom: 50px;
+    opacity: 0.9;
+  }
+
+  .bg-fade-right-bar-8 {
+    bottom: 0;
+    opacity: 1;
+  }
+}
+
+/* ===== Tablet (768px – 1023px) ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+  /* Left bars 1–6 become vertical again but with different left offsets */
+  .bg-fade-left-bar-1,
+  .bg-fade-left-bar-2,
+  .bg-fade-left-bar-3,
+  .bg-fade-left-bar-4,
+  .bg-fade-left-bar-5,
+  .bg-fade-left-bar-6 {
+    width: 80px;
+    height: 1036px;
+    position: absolute;
+    background: linear-gradient(90deg, hsla(0, 0%, 100%, 0.2), hsla(0, 0%, 100%, 0));
+    border: none;
+    z-index: 0;
+  }
+
+  .dark .bg-fade-left-bar-1,
+  .dark .bg-fade-left-bar-2,
+  .dark .bg-fade-left-bar-3,
+  .dark .bg-fade-left-bar-4,
+  .dark .bg-fade-left-bar-5,
+  .dark .bg-fade-left-bar-6 {
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent);
+    border: none;
+  }
+
+  .bg-fade-left-bar-1 {
+    left: 0;
+    opacity: 1;
+  }
+
+  .bg-fade-left-bar-2 {
+    left: 50px;
+    opacity: 0.9;
+  }
+
+  .bg-fade-left-bar-3 {
+    left: 100px;
+    opacity: 0.8;
+  }
+
+  .bg-fade-left-bar-4 {
+    left: 150px;
+    opacity: 0.7;
+  }
+
+  .bg-fade-left-bar-5 {
+    left: 200px;
+    opacity: 0.6;
+  }
+
+  .bg-fade-left-bar-6 {
+    left: 250px;
+    opacity: 0.5;
+  }
+
+  /* Right bars 1–6 with right offsets */
+  .bg-fade-right-bar-1,
+  .bg-fade-right-bar-2,
+  .bg-fade-right-bar-3,
+  .bg-fade-right-bar-4,
+  .bg-fade-right-bar-5,
+  .bg-fade-right-bar-6 {
+    width: 80px;
+    height: 1036px;
+    position: absolute;
+    background: linear-gradient(90deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.2));
+    border: none;
+    z-index: 1;
+  }
+
+  .dark .bg-fade-right-bar-1,
+  .dark .bg-fade-right-bar-2,
+  .dark .bg-fade-right-bar-3,
+  .dark .bg-fade-right-bar-4,
+  .dark .bg-fade-right-bar-5,
+  .dark .bg-fade-right-bar-6 {
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.2));
+    border: none;
+  }
+
+  .bg-fade-right-bar-1 {
+    right: 250px;
+    opacity: 0.5;
+  }
+
+  .bg-fade-right-bar-2 {
+    right: 200px;
+    opacity: 0.6;
+  }
+
+  .bg-fade-right-bar-3 {
+    right: 150px;
+    opacity: 0.7;
+  }
+
+  .bg-fade-right-bar-4 {
+    right: 100px;
+    opacity: 0.8;
+  }
+
+  .bg-fade-right-bar-5 {
+    right: 50px;
+    opacity: 0.9;
+  }
+
+  .bg-fade-right-bar-6 {
+    right: 0;
+    opacity: 1;
+  }
+
+  /* Ensure no border for these in tablet */
+  .bg-fade-left-bar-1,
+  .bg-fade-left-bar-2,
+  .bg-fade-left-bar-3,
+  .bg-fade-left-bar-4,
+  .bg-fade-left-bar-5,
+  .bg-fade-left-bar-6,
+  .bg-fade-right-bar-1,
+  .bg-fade-right-bar-2,
+  .bg-fade-right-bar-3,
+  .bg-fade-right-bar-4,
+  .bg-fade-right-bar-5,
+  .bg-fade-right-bar-6 {
+    border: none !important;
+  }
+}
+
+/* ===== Desktop small (1024px – 1279px) ===== */
+@media (min-width: 1024px) and (max-width: 1279px) {
+
+  .bg-fade-left-bar-8,
+  .bg-fade-right-bar-1 {
+    display: none;
+  }
 }

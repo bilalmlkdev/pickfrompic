@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useExtractColors } from "react-extract-colors";
-import { Link } from "react-router-dom";
-import ImageUploader from "../components/ImageUploader";
-import ColorDetailsPanel from "../components/ColorDetailsPanel";
-import ColorPalette from "../components/ColorPalette";
+import { Maximize2 } from "lucide-react";
+import ImageUploader from "../components/organisms/ImageUploader";
+import ColorDetailsPanel from "../components/organisms/ColorDetailsPanel";
+import ColorPalette from "../components/organisms/ColorPalette";
+import ToolCard from "../components/templates/ToolCard";
+
 
 const MainPicker = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(
@@ -14,7 +16,7 @@ const MainPicker = () => {
   const [maxColors, setMaxColors] = useState<number>(10);
   const [topPicks, setTopPicks] = useState<string[]>([]);
 
-  const { colors, loading } = useExtractColors(imageSrc || undefined, {
+  const { colors, loading } = useExtractColors(imageSrc ?? "", {
     maxColors: maxColors,
     format: "hex",
   });
@@ -41,27 +43,32 @@ const MainPicker = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center">
-      <div className="text-center mt-10 mb-8 px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
-          Free Color Picker: Extract colors from any image instantly.
+    <div className="flex-1 flex flex-col">
+      <div className="text-center mt-20 mb-8 px-4">
+        <h1 className="text-[28px] md:text-[50px] font-medium text-foreground tracking-tight leading-tight">
+          Free Color Picker:
+          <br />
+          Extract colors from any image instantly.
         </h1>
-        <p className="mt-4 text-muted-foreground text-lg">
+        <p className="mt-3 text-muted-foreground text-xl">
           Upload, paste, or enter a URL to get HEX, RGB, HSL and more, no signup
           needed.
         </p>
-        <Link
-          to="/dashboard"
-          className="mt-4 inline-block text-blue-600 underline hover:text-blue-800 transition"
-        >
-          Go to Dashboard
-        </Link>
       </div>
 
-      <div className="flex-1 flex justify-center pb-12 px-4 w-full">
-        <div className="bg-background dark:bg-neutral-900 border border-border/50 dark:border-neutral-800 rounded-3xl shadow-2xl p-6 md:p-8 max-w-6xl w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div className="flex flex-col gap-6">
+      <div className="relative">
+        <ToolCard>
+          <button
+            className="absolute -top-3.5 -right-3.5 w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity"
+            title="Expand"
+          >
+            <Maximize2 size={20} />
+          </button>
+
+          {/* Left side: ImageUploader + ColorPalette */}
+          <div className="grid grid-cols-1 lg:grid-cols-[67%_30%] gap-10 pr-6">
+            {/* Left Column - 75% */}
+            <div className="flex flex-col gap-5">
               <ImageUploader
                 imageSrc={imageSrc}
                 loading={loading}
@@ -77,17 +84,21 @@ const MainPicker = () => {
                 setMaxColors={setMaxColors}
               />
             </div>
-            <ColorDetailsPanel
-              colors={extractedColors}
-              topPicks={topPicks}
-              selectedColor={selectedColor}
-              hoveredColor={hoveredColor}
-              setSelectedColor={setSelectedColor}
-              setImageSrc={setImageSrc}
-              onPickedColor={handlePickedColor}
-            />
+
+            {/* Right Column - 25% */}
+            <div>
+              <ColorDetailsPanel
+                colors={extractedColors}
+                topPicks={topPicks}
+                selectedColor={selectedColor}
+                hoveredColor={hoveredColor}
+                setSelectedColor={setSelectedColor}
+                setImageSrc={setImageSrc}
+                onPickedColor={handlePickedColor}
+              />
+            </div>
           </div>
-        </div>
+        </ToolCard>
       </div>
     </div>
   );

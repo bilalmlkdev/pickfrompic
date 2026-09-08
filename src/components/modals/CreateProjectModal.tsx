@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useDashboard } from "../../context/DashboardContext";
+import ModalShell from "../molecules/ModalShell";
+import Input from "../atoms/Input";
+import Button from "../atoms/Button";
 
 interface Props {
   isOpen: boolean;
@@ -7,11 +10,7 @@ interface Props {
   onCreated: (id: string) => void;
 }
 
-const CreateProjectModal: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  onCreated,
-}) => {
+const CreateProjectModal: React.FC<Props> = ({ isOpen, onClose, onCreated }) => {
   const { addProject } = useDashboard();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -28,33 +27,21 @@ const CreateProjectModal: React.FC<Props> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-          Create New Project
-        </h2>
+    <ModalShell onClose={onClose} maxWidth="max-w-md" zIndex="z-110">
+      <div className="p-7">
+        <h2 className="text-xl font-bold text-center text-foreground mb-6">Create New Project</h2>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Project Name
-          </label>
-          <input
-            type="text"
+        <div className="mb-4">
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Project Name</label>
+          <Input
             placeholder="e.g., Website Redesign"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
           />
         </div>
 
-        <div className="mb-8">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="mb-6">
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">
             Description (optional)
           </label>
           <textarea
@@ -62,30 +49,20 @@ const CreateProjectModal: React.FC<Props> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none"
+            className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10 resize-none"
           />
         </div>
 
-        <div className="flex gap-4">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-xl bg-white border border-gray-300 text-gray-800 font-semibold hover:bg-gray-50"
-          >
+        <div className="flex gap-3">
+          <Button variant="secondary" fullWidth size="lg" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            onClick={handleCreate}
-            className={`flex-1 py-3 rounded-xl font-semibold transition ${
-              name
-                ? "bg-gray-900 text-white hover:bg-gray-800"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
+          </Button>
+          <Button variant="primary" fullWidth size="lg" onClick={handleCreate} disabled={!name}>
             Create
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 };
 

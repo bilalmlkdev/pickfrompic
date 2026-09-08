@@ -114,7 +114,7 @@ export const rgbToLuv = (r: number, g: number, b: number) => {
 };
 
 export const rgbToHwb = (r: number, g: number, b: number) => {
-  const { h, s, l } = rgbToHsl(r, g, b);
+  const { h } = rgbToHsl(r, g, b);
   const w = (Math.min(r, g, b) / 255) * 100;
   const bl = 100 - (Math.max(r, g, b) / 255) * 100;
   return { h, w: Math.round(w), b: Math.round(bl) };
@@ -160,10 +160,10 @@ export const getContrastRatio = (hex1: string, hex2: string) => {
 export const rgbToHsb = (r: number, g: number, b: number) => {
   r /= 255; g /= 255; b /= 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0;
+  let h = 0;
   const v = max;
   const d = max - min;
-  s = max === 0 ? 0 : d / max;
+  const s = max === 0 ? 0 : d / max;
   if (max !== min) {
     switch (max) {
       case r: h = (g - b) / d + (g < b ? 6 : 0); break;

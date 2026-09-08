@@ -1,16 +1,14 @@
-import React, { useState } from "react";
-import { HexColorPicker } from "react-colorful";
-import { getContrastRatio, hexToRgb, rgbToHsl } from "../utils/ColorMath";
-import { useCopy } from "react-use-copy";
+import { useState } from "react";
+import { Check, Palette as PaletteIcon, Ruler, Lightbulb, X } from "lucide-react";
+import { getContrastRatio, hexToRgb } from "../utils/ColorMath";
+import ToolCard from "../components/templates/ToolCard";
 
 const ContrastChecker = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#2596be");
-  const { copied, copy } = useCopy();
 
   const ratio = getContrastRatio(textColor, bgColor);
 
-  // Ratings
   const normalAARatio = 4.5;
   const normalAAARatio = 7;
   const largeAARatio = 3;
@@ -21,246 +19,190 @@ const ContrastChecker = () => {
   const isLargeAA = ratio >= largeAARatio;
   const isLargeAAA = ratio >= largeAAARatio;
 
-  // Overall rating
   let rating = "Poor";
-  let ratingColor = "text-red-500";
-  let ratingBg = "bg-red-50 border-red-200";
-  let stars = "★☆☆☆☆";
+  let ratingColor = "text-danger";
+  let ratingBg = "bg-danger/10 border-danger/30";
 
   if (ratio >= 7) {
     rating = "Excellent";
-    ratingColor = "text-green-600";
-    ratingBg = "bg-green-50 border-green-200";
-    stars = "★★★★★";
+    ratingColor = "text-success";
+    ratingBg = "bg-success/10 border-success/30";
   } else if (ratio >= 4.5) {
     rating = "Good";
-    ratingColor = "text-yellow-600";
-    ratingBg = "bg-yellow-50 border-yellow-200";
-    stars = "★★★★☆";
+    ratingColor = "text-accent";
+    ratingBg = "bg-accent/10 border-accent/30";
   } else if (ratio >= 3) {
     rating = "Moderate";
     ratingColor = "text-orange-500";
-    ratingBg = "bg-orange-50 border-orange-200";
-    stars = "★★★☆☆";
+    ratingBg = "bg-orange-500/10 border-orange-500/30";
   }
 
-  // Convert to RGB and HSL for display
-  const textRgb = hexToRgb(textColor);
-  const bgRgb = hexToRgb(bgColor);
+  void hexToRgb;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-200 via-pink-100 to-cyan-200 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Hero */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Color Contrast Checker
-          </h1>
-          <p className="text-lg text-gray-600">
-            Test the contrast ratio between foreground and background colors to
-            ensure accessibility.
+    <div className="flex-1 w-full py-10 px-4">
+      <div className="max-w-[780px] mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-1.5">Color Contrast Checker</h1>
+          <p className="text-muted-foreground text-[15px]">
+            Test the contrast ratio between foreground and background colors to ensure accessibility.
           </p>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Top Ratio Section */}
-          <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 bg-gray-50/50">
+        <ToolCard noPadding className="overflow-hidden">
+          <div className="p-6 md:p-7 border-b border-border flex flex-col md:flex-row items-center justify-between gap-5 bg-muted/40">
             <div className="text-center md:text-left">
-              <div className="text-6xl font-bold text-gray-900">
+              <div className="text-5xl font-bold text-foreground">
                 {ratio.toFixed(2)}
-                <span className="text-2xl text-gray-500">:1</span>
+                <span className="text-xl text-muted-foreground">:1</span>
               </div>
-              <p className="text-gray-500 mt-2">Contrast</p>
+              <p className="text-muted-foreground mt-1.5 text-sm">Contrast</p>
             </div>
 
-            <div
-              className={`flex items-center gap-4 px-6 py-4 rounded-2xl border ${ratingBg}`}
-            >
-              <div className="w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center font-bold text-lg">
+            <div className={`flex items-center gap-3.5 px-5 py-3 rounded-2xl border ${ratingBg}`}>
+              <div className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center font-bold text-sm text-foreground">
                 AA
               </div>
               <div>
-                <div className={`text-xl font-bold ${ratingColor}`}>
-                  {rating}
-                </div>
-                <div className="text-yellow-400 text-xl tracking-widest">
-                  {stars}
-                </div>
+                <div className={`text-lg font-bold ${ratingColor}`}>{rating}</div>
               </div>
             </div>
           </div>
 
-          {/* Normal & Large Text Ratings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 border-b border-gray-100">
-            <div className="p-6 border-b md:border-b-0 md:border-r border-gray-100">
-              <h3 className="font-semibold mb-3 text-center">Normal Text</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 border-b border-border">
+            <div className="p-5 border-b md:border-b-0 md:border-r border-border">
+              <h3 className="font-semibold text-sm mb-3 text-center text-foreground">Normal Text</h3>
               <div className="flex justify-center gap-6">
                 <div className="text-center">
-                  <div className="font-bold text-xl">AA (4.5:1)</div>
-                  <div
-                    className={`text-2xl mt-1 ${isNormalAA ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {isNormalAA ? "✓" : "✗"}
+                  <div className="font-bold text-sm text-foreground">AA (4.5:1)</div>
+                  <div className={`mt-1 flex justify-center ${isNormalAA ? "text-success" : "text-danger"}`}>
+                    {isNormalAA ? <Check size={20} /> : <X size={20} />}
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-xl">AAA (7:1)</div>
-                  <div
-                    className={`text-2xl mt-1 ${isNormalAAA ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {isNormalAAA ? "✓" : "✗"}
+                  <div className="font-bold text-sm text-foreground">AAA (7:1)</div>
+                  <div className={`mt-1 flex justify-center ${isNormalAAA ? "text-success" : "text-danger"}`}>
+                    {isNormalAAA ? <Check size={20} /> : <X size={20} />}
                   </div>
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <h3 className="font-semibold mb-3 text-center">Large Text</h3>
+            <div className="p-5">
+              <h3 className="font-semibold text-sm mb-3 text-center text-foreground">Large Text</h3>
               <div className="flex justify-center gap-6">
                 <div className="text-center">
-                  <div className="font-bold text-xl">AA (3:1)</div>
-                  <div
-                    className={`text-2xl mt-1 ${isLargeAA ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {isLargeAA ? "✓" : "✗"}
+                  <div className="font-bold text-sm text-foreground">AA (3:1)</div>
+                  <div className={`mt-1 flex justify-center ${isLargeAA ? "text-success" : "text-danger"}`}>
+                    {isLargeAA ? <Check size={20} /> : <X size={20} />}
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-xl">AAA (4.5:1)</div>
-                  <div
-                    className={`text-2xl mt-1 ${isLargeAAA ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {isLargeAAA ? "✓" : "✗"}
+                  <div className="font-bold text-sm text-foreground">AAA (4.5:1)</div>
+                  <div className={`mt-1 flex justify-center ${isLargeAAA ? "text-success" : "text-danger"}`}>
+                    {isLargeAAA ? <Check size={20} /> : <X size={20} />}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Main Layout: Inputs & Preview */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8 p-8">
-            {/* Left: Colors */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
-              <div className="flex gap-2 border-b border-gray-100 pb-4">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-sm font-medium">
-                  🎨 Colors
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 p-6 md:p-7">
+            <div className="bg-card border border-border rounded-2xl p-5 space-y-5">
+              <div className="flex gap-2 border-b border-border pb-3.5">
+                <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-muted text-xs font-medium text-foreground">
+                  <PaletteIcon size={13} /> Colors
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 rounded-full text-gray-500 text-sm">
-                  📏 Adjust
+                <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-muted-foreground text-xs">
+                  <Ruler size={13} /> Adjust
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 rounded-full text-gray-500 text-sm">
-                  💡 Suggestions
+                <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-muted-foreground text-xs">
+                  <Lightbulb size={13} /> Suggestions
                 </button>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Text Color
-                </label>
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden mb-2">
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Text Color</label>
+                <div className="flex items-center border border-border rounded-lg overflow-hidden mb-2 bg-card">
                   <input
                     type="text"
                     value={textColor}
                     onChange={(e) => setTextColor(e.target.value)}
-                    className="flex-1 p-3 focus:outline-none font-mono text-sm"
+                    className="flex-1 p-2.5 bg-transparent text-foreground focus:outline-none font-mono text-sm"
                   />
-                  <div
-                    className="w-10 h-10 border-l border-gray-200"
-                    style={{ backgroundColor: textColor }}
-                  ></div>
+                  <div className="w-9 h-9 border-l border-border" style={{ backgroundColor: textColor }}></div>
                 </div>
                 <input
                   type="color"
                   value={textColor}
                   onChange={(e) => setTextColor(e.target.value)}
-                  className="w-full h-10 cursor-pointer"
+                  className="w-full h-9 cursor-pointer rounded-lg"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  #{textColor.replace("#", "")}
-                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Background Color
-                </label>
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden mb-2">
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Background Color</label>
+                <div className="flex items-center border border-border rounded-lg overflow-hidden mb-2 bg-card">
                   <input
                     type="text"
                     value={bgColor}
                     onChange={(e) => setBgColor(e.target.value)}
-                    className="flex-1 p-3 focus:outline-none font-mono text-sm"
+                    className="flex-1 p-2.5 bg-transparent text-foreground focus:outline-none font-mono text-sm"
                   />
-                  <div
-                    className="w-10 h-10 border-l border-gray-200"
-                    style={{ backgroundColor: bgColor }}
-                  ></div>
+                  <div className="w-9 h-9 border-l border-border" style={{ backgroundColor: bgColor }}></div>
                 </div>
                 <input
                   type="color"
                   value={bgColor}
                   onChange={(e) => setBgColor(e.target.value)}
-                  className="w-full h-10 cursor-pointer"
+                  className="w-full h-9 cursor-pointer rounded-lg"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  #{bgColor.replace("#", "")}
-                </p>
               </div>
             </div>
 
-            {/* Right: Preview */}
             <div
-              className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col items-center justify-center min-h-[400px]"
+              className="rounded-2xl border border-border p-6 flex flex-col items-center justify-center min-h-[360px]"
               style={{ backgroundColor: bgColor }}
             >
               <div className="text-center" style={{ color: textColor }}>
-                <div className="text-8xl font-bold mb-4">Aa</div>
-                <h2 className="text-3xl font-bold mb-2">Preview Title</h2>
-                <p className="text-xl mb-4">
-                  The quick brown fox jumps over the lazy dog
-                </p>
-                <p className="text-xs mb-8">Small text example (12px)</p>
+                <div className="text-7xl font-bold mb-3">Aa</div>
+                <h2 className="text-2xl font-bold mb-1.5">Preview Title</h2>
+                <p className="text-lg mb-3">The quick brown fox jumps over the lazy dog</p>
+                <p className="text-xs mb-6">Small text example (12px)</p>
 
-                <div className="flex justify-center gap-8 pt-4 border-t border-current/20 text-sm">
+                <div className="flex justify-center gap-7 pt-3.5 border-t border-current/20 text-sm">
                   <div>
                     <p className="font-semibold">Text</p>
-                    <p className="flex items-center gap-1 text-xs opacity-80">
-                      ■ {textColor}
-                    </p>
+                    <p className="text-xs opacity-80">{textColor}</p>
                   </div>
                   <div>
                     <p className="font-semibold">Background</p>
-                    <p className="flex items-center gap-1 text-xs opacity-80">
-                      ■ {bgColor}
-                    </p>
+                    <p className="text-xs opacity-80">{bgColor}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* WCAG Standards */}
-          <div className="bg-gray-50 p-8 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-muted/40 p-6 md:p-7 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Level AA</h4>
-              <p className="text-sm text-gray-600">
-                Minimum contrast ratio of 4.5:1 for normal text and 3:1 for
-                large text. Required for most websites.
+              <h4 className="font-semibold text-foreground text-sm mb-1.5">Level AA</h4>
+              <p className="text-sm text-muted-foreground">
+                Minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text. Required for most
+                websites.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Level AAA</h4>
-              <p className="text-sm text-gray-600">
-                Enhanced contrast ratio of 7:1 for normal text and 4.5:1 for
-                large text. Recommended for optimal accessibility.
+              <h4 className="font-semibold text-foreground text-sm mb-1.5">Level AAA</h4>
+              <p className="text-sm text-muted-foreground">
+                Enhanced contrast ratio of 7:1 for normal text and 4.5:1 for large text. Recommended for
+                optimal accessibility.
               </p>
             </div>
-            <p className="text-sm text-gray-500 col-span-full mt-4">
-              Good contrast (AA) for normal text, excellent contrast (AAA) for
-              large text.
+            <p className="text-xs text-muted-foreground col-span-full mt-2">
+              Good contrast (AA) for normal text, excellent contrast (AAA) for large text.
             </p>
           </div>
-        </div>
+        </ToolCard>
       </div>
     </div>
   );

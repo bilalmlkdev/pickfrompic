@@ -22,10 +22,18 @@ export interface Gradient {
   createdAt: string;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}
+
 interface DashboardContextType {
   palettes: Palette[];
   colors: Color[];
   gradients: Gradient[];
+  projects: Project[];
   addPalette: (name: string, collection: string, colors: string[]) => void;
   updatePalette: (id: string, collection: string) => void;
   deletePalette: (id: string) => void;
@@ -33,6 +41,8 @@ interface DashboardContextType {
   deleteColor: (id: string) => void;
   addGradient: (name: string, colors: string[]) => void;
   deleteGradient: (id: string) => void;
+  addProject: (name: string, description: string) => Project;
+  deleteProject: (id: string) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -53,6 +63,11 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const saved = localStorage.getItem("dash_projects");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => {
     localStorage.setItem("dash_palettes", JSON.stringify(palettes));
   }, [palettes]);
@@ -64,6 +79,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     localStorage.setItem("dash_gradients", JSON.stringify(gradients));
   }, [gradients]);
+
+  useEffect(() => {
+    localStorage.setItem("dash_projects", JSON.stringify(projects));
+  }, [projects]);
 
   const addPalette = (name: string, collection: string, colors: string[]) => {
     const newPalette: Palette = {
@@ -112,12 +131,28 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setGradients((prev) => prev.filter((g) => g.id !== id));
   };
 
+  const addProject = (name: string, description: string): Project => {
+    const newProject: Project = {
+      id: crypto.randomUUID(),
+      name,
+      description,
+      createdAt: new Date().toISOString(),
+    };
+    setProjects((prev) => [newProject, ...prev]);
+    return newProject;
+  };
+
+  const deleteProject = (id: string) => {
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+  };
+
   return (
     <DashboardContext.Provider
       value={{
         palettes,
         colors,
         gradients,
+        projects,
         addPalette,
         updatePalette,
         deletePalette,
@@ -125,6 +160,8 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         deleteColor,
         addGradient,
         deleteGradient,
+        addProject,
+        deleteProject,
       }}
     >
       {children}

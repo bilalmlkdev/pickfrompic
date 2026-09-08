@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { useDashboard } from "../../context/DashboardContext";
 import { useNavigate } from "react-router-dom";
+import { useDashboard } from "../../context/DashboardContext";
+import ModalShell from "../molecules/ModalShell";
+import Input from "../atoms/Input";
+import Button from "../atoms/Button";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   type: "palette" | "color" | "gradient";
-  data: any;
+  data: string | string[];
 }
 
 const SaveItemModal: React.FC<Props> = ({ isOpen, onClose, type, data }) => {
@@ -20,48 +23,33 @@ const SaveItemModal: React.FC<Props> = ({ isOpen, onClose, type, data }) => {
   const handleSave = () => {
     if (!name) return;
 
-    if (type === "palette") addPalette(name, collection, data);
-    else if (type === "color") addColor(name, data);
-    else if (type === "gradient") addGradient(name, data);
+    if (type === "palette") addPalette(name, collection, data as string[]);
+    else if (type === "color") addColor(name, data as string);
+    else if (type === "gradient") addGradient(name, data as string[]);
 
     onClose();
     navigate(`/dashboard/${type}`);
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+    <ModalShell onClose={onClose} maxWidth="max-w-md">
+      <div className="p-7">
+        <h2 className="text-xl font-bold text-center text-foreground mb-6">
           Save {type.charAt(0).toUpperCase() + type.slice(1)}
         </h2>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Name
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
-          />
+        <div className="mb-4">
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Name</label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
         {type === "palette" && (
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Collection
-            </label>
+          <div className="mb-6">
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Collection</label>
             <select
               value={collection}
               onChange={(e) => setCollection(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+              className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
             >
               <option>Untitled Collection</option>
               <option>Branding</option>
@@ -70,22 +58,16 @@ const SaveItemModal: React.FC<Props> = ({ isOpen, onClose, type, data }) => {
           </div>
         )}
 
-        <div className="flex gap-4">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-xl bg-white border border-gray-300 text-gray-800 font-semibold hover:bg-gray-50"
-          >
+        <div className="flex gap-3">
+          <Button variant="secondary" fullWidth size="lg" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 py-3 rounded-xl bg-gray-900 text-white font-semibold hover:bg-gray-800"
-          >
+          </Button>
+          <Button variant="primary" fullWidth size="lg" onClick={handleSave}>
             Save
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 };
 
