@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://pickfrompic.com/sitemap.xml
+Sitemap: https://pickfrompic.vercel.app/sitemap.xml

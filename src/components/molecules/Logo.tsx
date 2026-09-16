@@ -21,7 +21,7 @@ const Logo: React.FC = () => (
       />
     </svg>
     <span className="font-semibold relative top-[1px] text-xl text-foreground tracking-tight whitespace-nowrap">
-      PickfromPic.com
+      PickfromPic
     </span>
   </Link>
 );
