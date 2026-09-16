@@ -1,131 +1,123 @@
-# pickfrompic
+<div align="center">
 
-A free, open-source color tool for designers and developers. Pick colors from images, create palettes, generate gradients, and convert color formats - all running entirely in your browser.
+  <a href="https://pickfrompic.vercel.app/">
+    <img src="https://raw.githubusercontent.com/bilalmlkdev/pickfrompic/main/public/favicon.svg" alt="pickfrompic Logo" width="100%" height="120">
+  </a>
 
-**Live Demo:** [pickfrompic.vercel.app](https://pickfrompic.vercel.app)
+# Pickfrompic
 
-## Features
+A free, open-source color tool for designers and developers. Pick colors from images, create palettes, <br> generate gradients, and convert color formats - all running entirely in your browser.
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Site-black?style=for-the-badge)](https://pickfrompic.vercel.app)
+[![GitHub Stars](https://img.shields.io/github/stars/bilalmlkdev/pickfrompic?style=for-the-badge&logo=github&color=yellow)](https://github.com/bilalmlkdev/pickfrompic)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
+
+</div>
+
+<p align="center">
+  <i>Created by <a href="https://bilalmlkdev.vercel.app" target="_blank">Bilal Malik</a></i><br>
+  <i>Follow on Github <a href="https://github.com/bilalmlkdev" target="_blank">bilalmlkdev</a></i>
+</p>
+
+
+[![PickfromPic Dashboard](https://raw.githubusercontent.com/bilalmlkdev/pickfrompic/main/public/preview.png)](https://pickfrompic.vercel.app/)
+
+## What is pickfrompic
+
+Most color tools ask you to install a browser extension, create an account, or upload your work to some server before you can pick a single pixel. pickfrompic doesn't. Open the site, drag in an image, and you're picking colors within a second. No sign-up, no upload to a remote server, nothing leaving your machine. Every color you pick, every palette you save, and every gradient you build stays right in your browser.
+
+Built for two kinds of people: someone who just needs to grab a color from a screenshot quickly, and someone who wants to build entire design systems from reference images without opening Figma.
+
+## How it works
 
 ### Image Color Picker
-- Upload any image (PNG, JPG, GIF, WEBP) and extract dominant colors instantly
-- Interactive magnifier lens for precise pixel-level color picking
-- Color dot highlighting - click a palette color to see where it appears on the image
-- Pick from screen using the EyeDropper API
-- Load images from URLs, website screenshots, or clipboard paste
 
-### Color Picker & Conversion
-- Full-featured color picker with HEX input
-- Convert between 8 formats: HEX, RGB, HSL, HSB, CMYK, LAB, LUV, HWB
-- Switch between picker view and format-specific sliders (HSB, HSL, RGB)
-- Pick any color from your screen with EyeDropper
-- One-click copy for any format
+Drop in any PNG, JPG, GIF, or WEBP - or paste a URL, or use the built-in screenshot tool to grab an entire website. The app extracts dominant colors automatically and displays them as a palette. Click any swatch and the image lights up with dots showing every pixel that matches that color. The magnifier lens follows your cursor down to the individual pixel, and the EyeDropper API lets you pick colors from anywhere on your screen.
+
+### Color Picker and Conversion
+
+A full-featured picker with HEX input, plus format-specific sliders for HSB, HSL, and RGB when you need fine control. The right panel always shows all eight format cards - HEX, RGB, HSL, HSB, CMYK, LAB, LUV, and HWB - so you can grab whatever format your project needs without switching views.
 
 ### Palette Generator
-- Create custom color palettes with up to 20 colors
-- Add, remove, and reorder color stops
-- Fine-tune each color with the built-in picker
-- Randomize entire palette with one click
-- Pick colors directly from your screen
-- Export as CSS variables, JSON, SVG, or PNG
-- Save palettes to your dashboard
+
+Build color palettes from scratch or from picked colors. Add up to 20 colors, remove any you don't want, randomize the entire set with one click, or pick directly from your screen. Each color shows its format values in cards on the right side. Export as CSS variables, JSON, SVG, or PNG.
 
 ### Gradient Maker
-- Build linear and radial CSS gradients
-- Add, remove, and adjust multiple color stops
-- Visual angle slider (0-360 degrees)
-- Position slider for each stop
-- Pick from screen for any color stop
-- Randomize gradient with one click
-- Live preview with gradient bar
-- Copy CSS code instantly
-- Download as SVG or PNG
+
+Build linear and radial CSS gradients. Add and remove color stops, adjust positions with sliders, set the angle visually, and toggle between linear and radial. The live preview updates as you tweak, and you get the CSS code ready to copy or download as SVG or PNG.
 
 ### Dashboard
-- Save and manage palettes, colors, and gradients
-- Grid and list view options
-- Search through saved items
-- Multi-select with bulk delete
-- Export and download saved items
 
-### PWA Support
-- Install as a native app on your device
-- Works offline after first visit
-- Fast, app-like experience
+Everything you save lands in the Dashboard - a dedicated space for palettes, colors, and gradients you want to keep. Three tabs keep things organized, grid and list view options, search, multi-select with bulk delete, and every saved item can be exported or downloaded individually. Powered by `localStorage` - instant, private, and works offline.
 
-## Tech Stack
+## Design philosophy
 
-| Technology | Purpose |
-|---|---|
-| React 19 | UI framework |
-| TypeScript | Type safety |
-| Vite | Build tool & dev server |
-| TailwindCSS v4 | Styling |
-| React Colorful | Color picker component |
-| React Router v7 | Client-side routing |
-| Lucide React | Icons |
-| react-extract-colors | Image color extraction |
+Nothing should get between you and the color you're looking for. No forced account creation, no server round-trip for saving a palette, and no single "correct" way to use the tools. Tools are always one click away. Copy actions happen instantly with per-item feedback. The maximize button lets you focus on one tool without distraction. Every piece of the UI is there because it answers a question you'd otherwise have to ask yourself mid-work: *what format do I need, and how do I get it fast?*
 
-## Getting Started
+## Frequently asked questions
 
-### Prerequisites
-- Node.js 18+ and npm
+**Does pickfrompic require an account or internet connection?**
+No. Everything is stored locally in your browser. You can use it offline after the first load.
 
-### Installation
+**Where do my saved colors go?**
+Nowhere but your own browser's `localStorage`. No backend, no database, nothing leaves your device.
 
-```bash
-# Clone the repository
-git clone https://github.com/bilalmlkdev/pickfrompic.git
+**Will my saved items carry over if I switch browsers?**
+No, since storage is local. Export your items first using one of the supported formats.
 
-# Navigate to project
-cd pickfrompic
+**Is pickfrompic free to use?**
+Yes, entirely. Open-source under the MIT license. You're free to self-host or modify it.
 
-# Install dependencies
-npm install
+**Does pickfrompic work on mobile?**
+Built and tuned for desktop. It will load on mobile, but you'll get the best experience on a desktop or laptop.
 
-# Start development server
-npm run dev
-```
+**Does the EyeDropper work everywhere?**
+The EyeDropper API requires Chrome, Edge, or Opera. Every other feature works in all modern browsers.
 
-The app will be available at `http://localhost:5173`.
+## Built with
 
-### Available Scripts
+<details open>
+<summary><strong>Technologies</strong></summary>
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Run TypeScript type checking |
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **TailwindCSS v4** - Styling
+- **React Colorful** - Color picker component
+- **React Router v7** - Client-side routing
+- **Lucide React** - Icons
+- **react-extract-colors** - Image color extraction
 
-## Project Structure
+</details>
+
+<p align="left">
+  <img src="https://skillicons.dev/icons?i=react,ts,vite,tailwind,js,git" />
+</p>
+
+## Project structure
 
 ```
 pickfrompic/
-├── public/
-│   ├── favicon.svg          # App icon (logo)
-│   ├── manifest.json         # PWA manifest
-│   ├── sw.js                 # Service worker
-│   ├── robots.txt            # Search engine rules
-│   └── sitemap.xml           # Sitemap for SEO
+├── public/                 Static assets (favicon, manifest, service worker)
 ├── src/
 │   ├── components/
-│   │   ├── atoms/            # Basic UI elements (Button, Input, Swatch, etc.)
-│   │   ├── molecules/        # Composed elements (Logo, ModalShell, PillTabs, etc.)
-│   │   ├── organisms/        # Complex components (Header, ImageUploader, etc.)
-│   │   ├── modals/           # Modal dialogs (ExportPalette, SaveItem, ImageSource, etc.)
-│   │   └── templates/        # Layout components (ToolCard, PageShell)
-│   ├── context/              # React context (DashboardContext)
-│   ├── hooks/                # Custom hooks (useDocumentTitle)
-│   ├── pages/                # Route pages (MainPicker, ColorConversion, Dashboard, etc.)
-│   └── utils/                # Utilities (ColorMath, exportUtils)
+│   │   ├── atoms/          Button, Input, Swatch, Dropdown, TopLoader
+│   │   ├── molecules/      Logo, ModalShell, PillTabs, RangeSlider
+│   │   ├── organisms/      Header, ImageUploader, ColorPalette, ColorDetailsPanel
+│   │   ├── modals/         ExportPaletteModal, SaveItemModal, ImageSourceModal
+│   │   └── templates/      ToolCard, PageShell
+│   ├── context/            DashboardContext
+│   ├── hooks/              useDocumentTitle
+│   ├── pages/              MainPicker, ColorConversion, CreatePalette, GradientMaker, Dashboard
+│   └── utils/              ColorMath, exportUtils
 ├── index.html
 ├── vite.config.ts
-├── tsconfig.json
 └── package.json
 ```
 
-## Color Formats Supported
+The color logic lives in `ColorMath.ts` (conversion functions) and `exportUtils.ts` (format-specific export generation). Those two files are the place to start if you're reading the source.
+
+## Color formats supported
 
 | Format | Example | Description |
 |---|---|---|
@@ -137,35 +129,56 @@ pickfrompic/
 | LAB | `59, -16, -27` | CIELAB color space |
 | LUV | `58, -12, -27` | CIELUV color space |
 | HWB | `198, 18%, 25%` | Hue, Whiteness, Blackness |
-| XYZ | `28, 47, 62` | CIE 1931 color space |
 
-## Browser Support
+## Browser support
 
-- Chrome 76+ (EyeDropper API supported)
-- Firefox 62+
-- Safari 12.1+
-- Edge 79+
+Chrome 76+, Firefox 62+, Safari 12.1+, Edge 79+. The EyeDropper API (pick from screen) requires Chrome, Edge, or Opera.
 
-> **Note:** The EyeDropper (pick from screen) feature requires Chrome, Edge, or Opera.
+## Running locally
 
-## Privacy
+```bash
+git clone https://github.com/bilalmlkdev/pickfrompic.git
+cd pickfrompic
+npm install
+npm run dev
+```
 
-All color processing happens entirely in your browser. No image data or color information is sent to any server. The app works offline after the first visit.
+No environment variables, no backend - `npm run dev` is the whole setup.
+
+## What's next
+
+- Color harmony suggestions (complementary, analogous, triadic)
+- Accessibility contrast checker
+- Custom image cropping before extraction
+- Additional export formats
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome. Fork, branch, test against `npm run dev`, and open a pull request. Small fixes are just as welcome as larger features.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
-## Author
+```text
+MIT License
 
-**bilalmlkdev** - [GitHub](https://github.com/bilalmlkdev) · [Ko-fi](https://ko-fi.com/bilalmlkdev)
+Copyright (c) 2026 Bilal Malik
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software.
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

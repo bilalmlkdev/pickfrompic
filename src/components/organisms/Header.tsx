@@ -14,6 +14,7 @@ import {
   Star,
 } from "lucide-react";
 import Logo from "../molecules/Logo";
+import { LuGithub } from "react-icons/lu";
 
 const tools = [
   { to: "/", icon: ImageIcon, label: "Image picker", desc: "Extract from image" },
@@ -56,7 +57,7 @@ const Header: React.FC = () => {
             onClick={() => setIsToolsOpen(!isToolsOpen)}
             aria-label="Open tools menu"
             aria-expanded={isToolsOpen}
-            className={`flex items-center gap-1 rounded-full px-3 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-colors ${
+            className={`flex items-center gap-1 rounded-full px-3 h-8 text-xs sm:text-sm font-medium transition-colors ${
               isToolsOpen
                 ? "bg-white text-foreground shadow-sm"
                 : "bg-white/80 backdrop-blur-md text-foreground hover:bg-gray-100"
@@ -129,7 +130,7 @@ const Header: React.FC = () => {
         <button
           onClick={handlePickerToggle}
           aria-label={isMainPage ? "Switch to color picker" : "Switch to image picker"}
-          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8  text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Pipette size={13} />
           <span className="hidden sm:inline">{isMainPage ? "Color picker" : "Image picker"}</span>
@@ -140,9 +141,9 @@ const Header: React.FC = () => {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Support on Ko-fi"
-          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full px-2.5 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full px-2.5 h-8  text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
-          <Coffee size={13} />
+          <Coffee size={14.5} />
           <span className="hidden sm:inline">Support</span>
         </a>
 
@@ -151,10 +152,10 @@ const Header: React.FC = () => {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="View source on GitHub"
-          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
+          className="flex items-center gap-1 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8  text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
-          <Star size={13} />
-          <span className="hidden sm:inline">bilalmlkdev</span>
+          <LuGithub size={14.5} />
+          <span className="hidden sm:inline">Star on Github</span>
         </a>
       </div>
     </header>
