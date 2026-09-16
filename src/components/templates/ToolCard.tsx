@@ -69,7 +69,7 @@ const ToolCard: React.FC<Props> = ({
       {!noMaximize && (
         <button
           onClick={() => setIsMaximized(true)}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-muted/60 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10"
+          className="absolute top-5 -right-4 w-8 h-8 rounded-l-lg rounded-r-full bg-card border border-border border-r-0 shadow-md hover:shadow-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-all z-10"
           title="Maximize"
         >
           <Maximize2 size={14} />

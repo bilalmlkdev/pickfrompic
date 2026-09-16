@@ -10,10 +10,10 @@ import {
   FolderOpen,
   LayoutGrid,
   FolderClosed,
-  GitBranchPlus,
+  Coffee,
+  User,
 } from "lucide-react";
 import Logo from "../molecules/Logo";
-import Button from "../atoms/Button";
 
 const extractLinks = [
   {
@@ -198,16 +198,28 @@ const Header: React.FC = () => {
           {isMainPage ? "Color picker" : "Image picker"}
         </button>
 
-        {/* Support us */}
+        {/* Support on Ko-fi */}
         <a
-          href="https://github.com"
+          href="https://ko-fi.com/bilalmlkdev"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden lg:inline-flex"
+          className="hidden sm:inline-flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full px-3.5 h-9 text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
         >
-          <Button variant="accent" size="sm" icon={<GitBranchPlus size={13} fill="currentColor" />}>
-            Star on Github
-          </Button>
+          <Coffee size={14} />
+          <span className="hidden lg:inline">Support</span>
+        </a>
+
+        {/* Profile */}
+        <a
+          href="https://github.com/bilalmlkdev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden sm:inline-flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-3 pr-3.5 h-9 text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
+        >
+          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+            <User size={12} className="text-muted-foreground" />
+          </div>
+          <span className="hidden lg:inline">bilalmlkdev</span>
         </a>
       </div>
     </header>
