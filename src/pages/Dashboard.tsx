@@ -112,6 +112,12 @@ const Dashboard: React.FC = () => {
   const filteredColors = colors.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
   const filteredGradients = gradients.filter((g) => g.name.toLowerCase().includes(search.toLowerCase()));
 
+  const currentItems =
+    displayTab === "Palettes" ? filteredPalettes :
+    displayTab === "Colors" ? filteredColors :
+    filteredGradients;
+  const hasItems = currentItems.length > 0;
+
   const DropdownMenu = ({ id, item }: { id: string; item: Palette | Color | Gradient }) => (
     <div className="relative">
       <button
@@ -210,13 +216,13 @@ const Dashboard: React.FC = () => {
               <div className="flex gap-1">
                 {!selectMode ? (
                   <>
-                    <IconButton active={view === "grid"} onClick={() => setView("grid")}>
+                    <IconButton active={view === "grid"} onClick={() => setView("grid")} disabled={!hasItems}>
                       <LayoutGrid size={14} />
                     </IconButton>
-                    <IconButton active={view === "list"} onClick={() => setView("list")}>
+                    <IconButton active={view === "list"} onClick={() => setView("list")} disabled={!hasItems}>
                       <List size={14} />
                     </IconButton>
-                    <IconButton onClick={toggleSelectMode} title="Select items">
+                    <IconButton onClick={toggleSelectMode} title="Select items" disabled={!hasItems}>
                       <Check size={14} />
                     </IconButton>
                   </>
@@ -231,7 +237,8 @@ const Dashboard: React.FC = () => {
                             : filteredGradients.map((g) => g.id);
                         selectAll(allIds);
                       }}
-                      className="px-3 h-8 rounded-lg text-xs font-medium bg-muted text-foreground hover:bg-muted/80 transition-colors"
+                      disabled={!hasItems}
+                      className="px-3 h-8 rounded-lg text-xs font-medium bg-muted text-foreground hover:bg-muted/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {selectedIds.size === (
                         displayTab === "Palettes"

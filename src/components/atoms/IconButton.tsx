@@ -31,7 +31,7 @@ const IconButton: React.FC<Props> = ({
 
   return (
     <button
-      className={`shrink-0 rounded-full flex items-center justify-center transition-colors duration-150 ${sizeClasses[size]} ${active ? "bg-foreground text-background" : base} ${className}`}
+      className={`shrink-0 rounded-full flex items-center justify-center transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed ${sizeClasses[size]} ${active ? "bg-foreground text-background" : base} ${className}`}
       {...rest}
     >
       {children}

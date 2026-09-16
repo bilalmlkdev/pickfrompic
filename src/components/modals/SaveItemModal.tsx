@@ -19,10 +19,13 @@ const SaveItemModal: React.FC<Props> = ({ isOpen, onClose, type, data, initialNa
   const navigate = useNavigate();
   const [name, setName] = useState(initialName || "");
 
-  if (!isOpen) return null;
+  if (!isOpen || !data) return null;
 
   const handleSave = () => {
     if (!name.trim()) return;
+    if (type === "palette" && (!Array.isArray(data) || data.length === 0)) return;
+    if (type === "gradient" && (!Array.isArray(data) || data.length === 0)) return;
+    if (type === "color" && typeof data !== "string") return;
 
     if (type === "palette") addPalette(name, "", data as string[]);
     else if (type === "color") addColor(name, data as string);

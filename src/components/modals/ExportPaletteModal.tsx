@@ -33,7 +33,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
     setTimeout(() => setCopiedId(null), 1500);
   }, []);
 
-  if (!isOpen) return null;
+  if (!isOpen || !colors || colors.length === 0) return null;
 
   const content =
     activeTab === "css"

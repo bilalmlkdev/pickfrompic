@@ -22,6 +22,7 @@ const ColorPalette: React.FC<Props> = ({
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const allColors = (colors || []).slice(0, maxColors);
+  const hasColors = allColors.length > 0;
 
   return (
     <div>
@@ -62,6 +63,7 @@ const ColorPalette: React.FC<Props> = ({
             size="md"
             onClick={() => setIsExportOpen(true)}
             title="Download Palette"
+            disabled={!hasColors}
           >
             <Download size={16} />
           </IconButton>
@@ -69,6 +71,7 @@ const ColorPalette: React.FC<Props> = ({
             size="md"
             onClick={() => setIsSaveOpen(true)}
             title="Save Palette"
+            disabled={!hasColors}
           >
             <Save size={16} />
           </IconButton>
