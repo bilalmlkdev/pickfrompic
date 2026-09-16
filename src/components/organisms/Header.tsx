@@ -11,7 +11,7 @@ import {
   FolderOpen,
   FolderClosed,
   Coffee,
-  User,
+  Star,
 } from "lucide-react";
 import Logo from "../molecules/Logo";
 
@@ -57,8 +57,8 @@ const Header: React.FC = () => {
             onClick={() => setIsToolsOpen(!isToolsOpen)}
             className={`flex items-center gap-1 rounded-full px-3 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-colors ${
               isToolsOpen
-                ? "bg-card text-foreground shadow-sm"
-                : "bg-card/50 backdrop-blur-md text-foreground hover:bg-card"
+                ? "bg-white text-foreground shadow-sm"
+                : "bg-white/80 backdrop-blur-md text-foreground hover:bg-gray-100"
             }`}
           >
             Tools
@@ -128,7 +128,7 @@ const Header: React.FC = () => {
         {/* Color / Image Picker toggle */}
         <button
           onClick={handlePickerToggle}
-          className="flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Pipette size={13} />
           <span className="hidden sm:inline">{isMainPage ? "Color picker" : "Image picker"}</span>
@@ -139,22 +139,20 @@ const Header: React.FC = () => {
           href="https://ko-fi.com/bilalmlkdev"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full px-2.5 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full px-2.5 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Coffee size={13} />
           <span className="hidden sm:inline">Support</span>
         </a>
 
-        {/* Profile */}
+        {/* GitHub Repo */}
         <a
-          href="https://github.com/bilalmlkdev"
+          href="https://github.com/bilalmlkdev/pickfrompic"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
-          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center shrink-0">
-            <User size={11} className="text-muted-foreground" />
-          </div>
+          <Star size={13} />
           <span className="hidden sm:inline">bilalmlkdev</span>
         </a>
       </div>
