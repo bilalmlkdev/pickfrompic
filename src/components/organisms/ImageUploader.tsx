@@ -172,7 +172,7 @@ const ImageUploader: React.FC<Props> = ({
             <img
               ref={imgRef}
               src={imageSrc}
-              alt="Preview"
+              alt="Uploaded image for color extraction"
               crossOrigin="anonymous"
               onLoad={handleImageLoad}
               className="w-full h-full object-cover pointer-events-none"

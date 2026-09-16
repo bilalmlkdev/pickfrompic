@@ -195,34 +195,12 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
 
     setIsLoading(true);
     try {
-      // Use Unsplash source for direct image URLs (no API key needed)
       const results = Array.from({ length: 6 }, (_, i) =>
-        `https://source.unsplash.com/400x300/?${encodeURIComponent(searchTerm)}&sig=${i}`
+        `https://images.unsplash.com/photo-${1500000000000 + i}?w=400&h=300&fit=crop&q=80&sig=${encodeURIComponent(searchTerm)}-${i}`
       );
-      // Preload images to verify they exist
-      const validResults: string[] = [];
-      await Promise.all(
-        results.map(
-          (url) =>
-            new Promise<void>((resolve) => {
-              const img = new Image();
-              img.onload = () => {
-                validResults.push(url);
-                resolve();
-              };
-              img.onerror = () => resolve();
-              img.src = url;
-            })
-        )
-      );
-      setSearchResults(validResults.length > 0 ? validResults : results);
+      setSearchResults(results);
     } catch {
-      // Fallback to placeholder images
-      setSearchResults([
-        "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=400&q=80",
-        "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80",
-        "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=80",
-      ]);
+      setSearchResults(placeholderImages);
     } finally {
       setIsLoading(false);
     }
@@ -277,6 +255,7 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                aria-label="Upload image file"
                 className="hidden"
                 onChange={handleFileChange}
               />
@@ -321,6 +300,7 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
                 <button
                   onClick={() => handleURLSubmit("website")}
                   disabled={isLoading || !urlInput.trim()}
+                  aria-label="Capture website screenshot"
                   className="px-4 py-3 bg-foreground text-background hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
@@ -360,6 +340,7 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
                 <button
                   onClick={() => handleURLSubmit("image")}
                   disabled={isLoading || !urlInput.trim()}
+                  aria-label="Load image from URL"
                   className="px-4 py-3 bg-foreground text-background hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
@@ -431,6 +412,7 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
                 <button
                   onClick={handleSearch}
                   disabled={isLoading || !searchTerm.trim()}
+                  aria-label="Search images"
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
@@ -449,7 +431,7 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
                   >
                     <img
                       src={img}
-                      alt="Search result"
+                      alt={`Search result for ${searchTerm}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                     />

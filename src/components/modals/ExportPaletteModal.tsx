@@ -66,6 +66,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         </div>
         <button
           onClick={onClose}
+          aria-label="Close export modal"
           className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-border transition-colors"
         >
           <X size={15} />
@@ -131,8 +132,8 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
               </pre>
               <button
                 onClick={() => handleCopy("content", content)}
+                aria-label="Copy code to clipboard"
                 className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                title="Copy code"
               >
                 {copiedId === "content" ? <Check size={12} /> : <Copy size={12} />}
               </button>
@@ -145,6 +146,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
       <div className="px-5 pb-5 flex gap-2.5">
         <button
           onClick={handleDownload}
+          aria-label="Download palette"
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Download size={14} />
@@ -152,6 +154,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         </button>
         <button
           onClick={() => handleCopy("all", content)}
+          aria-label="Copy all code to clipboard"
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium hover:bg-border transition-colors"
         >
           {copiedId === "all" ? <Check size={14} /> : <Copy size={14} />}

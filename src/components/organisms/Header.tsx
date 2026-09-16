@@ -55,6 +55,8 @@ const Header: React.FC = () => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsToolsOpen(!isToolsOpen)}
+            aria-label="Open tools menu"
+            aria-expanded={isToolsOpen}
             className={`flex items-center gap-1 rounded-full px-3 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-colors ${
               isToolsOpen
                 ? "bg-white text-foreground shadow-sm"
@@ -128,6 +130,7 @@ const Header: React.FC = () => {
         {/* Color / Image Picker toggle */}
         <button
           onClick={handlePickerToggle}
+          aria-label={isMainPage ? "Switch to color picker" : "Switch to image picker"}
           className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Pipette size={13} />
@@ -139,6 +142,7 @@ const Header: React.FC = () => {
           href="https://ko-fi.com/bilalmlkdev"
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Support on Ko-fi"
           className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full px-2.5 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Coffee size={13} />
@@ -150,6 +154,7 @@ const Header: React.FC = () => {
           href="https://github.com/bilalmlkdev/pickfrompic"
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="View source on GitHub"
           className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Star size={13} />

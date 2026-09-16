@@ -9,11 +9,13 @@ interface Props<T extends string> {
 
 function PillTabs<T extends string>({ tabs, active, onChange, className = "" }: Props<T>) {
   return (
-    <div className={`flex flex-wrap gap-1.5 ${className}`}>
+    <div className={`flex flex-wrap gap-1.5 ${className}`} role="tablist">
       {tabs.map((tab) => (
         <button
           key={tab.value}
           onClick={() => onChange(tab.value)}
+          role="tab"
+          aria-selected={active === tab.value}
           className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-[19.5px] sm:py-2 rounded-full text-xs font-medium transition-colors ${
             active === tab.value
               ? "bg-foreground text-background shadow-sm"

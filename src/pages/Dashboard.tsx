@@ -122,6 +122,7 @@ const Dashboard: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setOpenMenuId(openMenuId === id ? null : id)}
+        aria-label="More options"
         className="text-muted-foreground hover:text-foreground transition-colors p-1 -m-1"
       >
         <MoreHorizontal size={18} />
