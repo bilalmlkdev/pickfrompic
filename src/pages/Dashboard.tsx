@@ -310,15 +310,12 @@ const Dashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={handlePlusClick}
-                  className="w-full mt-5 h-20 rounded-2xl border-2 border-dashed border-border hover:border-foreground/30 transition-all flex flex-col items-center justify-center gap-1.5 group cursor-pointer"
-                  style={{
-                    background: "linear-gradient(135deg, #f97316 0%, #ec4899 25%, #8b5cf6 50%, #3b82f6 75%, #10b981 100%)",
-                  }}
+                  className="w-full mt-5 h-20  flex flex-col items-center justify-center gap-1.5 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Plus size={18} className="text-foreground" />
+                  <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                    <Plus size={18} className="text-card" />
                   </div>
-                  <span className="text-xs font-medium text-background/90">New Palette</span>
+                  <span className="text-xs font-medium text-muted-foreground">New Palette</span>
                 </button>
               </>
             )}
@@ -363,15 +360,12 @@ const Dashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={handlePlusClick}
-                  className="w-full mt-5 h-20 rounded-2xl border-2 border-dashed border-border hover:border-foreground/30 transition-all flex flex-col items-center justify-center gap-1.5 group cursor-pointer"
-                  style={{
-                    background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #db2777 100%)",
-                  }}
+                  className="w-full mt-5 h-20  flex flex-col items-center justify-center gap-1.5 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Plus size={18} className="text-foreground" />
+                  <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                    <Plus size={18} className="text-card" />
                   </div>
-                  <span className="text-xs font-medium text-background/90">New Color</span>
+                  <span className="text-xs font-medium text-muted-foreground">New Color</span>
                 </button>
               </>
             )}
@@ -415,15 +409,12 @@ const Dashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={handlePlusClick}
-                  className="w-full mt-5 h-20 rounded-2xl border-2 border-dashed border-border hover:border-foreground/30 transition-all flex flex-col items-center justify-center gap-1.5 group cursor-pointer"
-                  style={{
-                    background: "linear-gradient(135deg, #f43f5e 0%, #f97316 25%, #eab308 50%, #22c55e 75%, #3b82f6 100%)",
-                  }}
+                  className="w-full mt-5 h-20 flex flex-col items-center justify-center gap-1.5 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-full bg-background/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Plus size={18} className="text-foreground" />
+                  <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                    <Plus size={18} className="text-card" />
                   </div>
-                  <span className="text-xs font-medium text-background/90">New Gradient</span>
+                  <span className="text-xs font-medium text-muted-foreground">New Gradient</span>
                 </button>
               </>
             )}
