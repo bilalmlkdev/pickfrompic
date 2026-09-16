@@ -1,0 +1,22 @@
+{
+  "name": "Pickfrompic - Image Color Picker & Palette Tool",
+  "short_name": "pickfrompic",
+  "description": "Pick colors from images, create palettes, generate gradients, and convert color formats.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["design", "developer", "utilities"],
+  "prefer_related_applications": false
+}
