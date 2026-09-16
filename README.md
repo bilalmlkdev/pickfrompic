@@ -1,7 +1,7 @@
 <div align="center">
 
   <a href="https://pickfrompic.vercel.app/">
-    <img src="https://raw.githubusercontent.com/bilalmlkdev/pickfrompic/main/public/favicon.svg" alt="pickfrompic Logo" width="100%" height="120">
+    <img src="https://raw.githubusercontent.com/bilalmlkdev/pickfrompic/main/public/favicon.png" alt="pickfrompic Logo" width="100%" height="120">
   </a>
 
 # Pickfrompic

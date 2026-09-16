@@ -2,7 +2,7 @@ const CACHE_NAME = 'pickfrompic-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/favicon.svg',
+  '/favicon.png',
   '/manifest.json',
 ];
 
