@@ -7,36 +7,19 @@ import {
   Pencil,
   Sparkles,
   Spline,
-  FolderOpen,
   LayoutGrid,
+  FolderOpen,
   FolderClosed,
   Coffee,
   User,
 } from "lucide-react";
 import Logo from "../molecules/Logo";
 
-const extractLinks = [
-  {
-    to: "/color/2596be",
-    icon: Pencil,
-    title: "Color picker",
-    desc: "Explore any color: variations, harmony, accessibility",
-  },
-];
-
-const createLinks = [
-  {
-    to: "/dashboard/palette/create",
-    icon: Sparkles,
-    title: "Palette generator",
-    desc: "Auto-generate balanced palettes",
-  },
-  {
-    to: "/dashboard/gradient/create",
-    icon: Spline,
-    title: "Gradient maker",
-    desc: "Build CSS gradients with live preview",
-  },
+const tools = [
+  { to: "/", icon: ImageIcon, label: "Image picker", desc: "Extract from image" },
+  { to: "/color/2596be", icon: Pencil, label: "Color picker", desc: "Explore any color" },
+  { to: "/dashboard/palette/create", icon: Sparkles, label: "Palette generator", desc: "Auto-generate palettes" },
+  { to: "/dashboard/gradient/create", icon: Spline, label: "Gradient maker", desc: "Build CSS gradients" },
 ];
 
 const Header: React.FC = () => {
@@ -67,123 +50,76 @@ const Header: React.FC = () => {
     <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3 px-4 lg:px-0 relative z-50">
       <Logo />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Tools Dropdown */}
-        <div className="relative hidden md:block" ref={dropdownRef}>
+        <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsToolsOpen(!isToolsOpen)}
-            className={`flex items-center gap-1 rounded-full px-3.5 h-9 text-sm font-medium shadow-xs ${
+            className={`flex items-center gap-1 rounded-full px-3 h-8 sm:h-9 text-xs sm:text-sm font-medium transition-colors ${
               isToolsOpen
-                ? "bg-card text-foreground"
-                : " bg-card/50 backdrop-blur-md text-foreground hover:bg-card"
+                ? "bg-card text-foreground shadow-sm"
+                : "bg-card/50 backdrop-blur-md text-foreground hover:bg-card"
             }`}
           >
             Tools
             <ChevronDown
-              size={14}
-              className={`transition-transform ${isToolsOpen ? "rotate-180" : ""}`}
+              size={13}
+              className={`transition-transform duration-200 ${isToolsOpen ? "rotate-180" : ""}`}
             />
           </button>
 
           {isToolsOpen && (
-            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[640px] bg-card border border-border rounded-2xl shadow-2xl p-5 text-left z-50">
-              <Link
-                to="/"
-                onClick={() => setIsToolsOpen(false)}
-                className="flex items-center gap-3.5 p-3.5 rounded-xl bg-muted/60 hover:bg-muted transition mb-4"
-              >
-                <div className="w-10 h-10 bg-card rounded-lg shadow-sm flex items-center justify-center shrink-0">
-                  <ImageIcon size={18} className="text-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-[13px] text-foreground">
-                    Pick color from image
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Upload, paste or link an image: get HEX, RGB, HSL
-                  </p>
-                </div>
-              </Link>
+            <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl p-2 text-left z-50">
+              {tools.map((tool) => (
+                <Link
+                  key={tool.to}
+                  to={tool.to}
+                  onClick={() => setIsToolsOpen(false)}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted transition-colors group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-muted group-hover:bg-card flex items-center justify-center shrink-0 transition-colors">
+                    <tool.icon size={15} className="text-muted-foreground group-hover:text-foreground" />
+                  </div>
+                  <div>
+                    <span className="block text-[13px] font-medium text-foreground leading-tight">
+                      {tool.label}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground leading-tight">
+                      {tool.desc}
+                    </span>
+                  </div>
+                </Link>
+              ))}
 
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                    Extract
-                  </h4>
-                  <ul className="space-y-0.5">
-                    {extractLinks.map((item) => (
-                      <li key={item.title}>
-                        <Link
-                          to={item.to}
-                          onClick={() => setIsToolsOpen(false)}
-                          className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted"
-                        >
-                          <item.icon size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                          <span>
-                            <span className="block text-[13px] font-medium text-foreground">
-                              {item.title}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">{item.desc}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="my-1.5 border-t border-border" />
 
-                <div>
-                  <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                    Create
-                  </h4>
-                  <ul className="space-y-0.5">
-                    {createLinks.map((item) => (
-                      <li key={item.title}>
-                        <Link
-                          to={item.to}
-                          onClick={() => setIsToolsOpen(false)}
-                          className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted"
-                        >
-                          <item.icon size={16} className="text-muted-foreground mt-0.5 shrink-0" />
-                          <span>
-                            <span className="block text-[13px] font-medium text-foreground">
-                              {item.title}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">{item.desc}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="px-2.5 pb-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Library
+                </span>
               </div>
-
-              <div className="mt-4 pt-3.5 border-t border-border">
-                <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
-                  Your Library
-                </h4>
-                <div className="flex gap-5">
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsToolsOpen(false)}
-                    className="flex items-center gap-1.5 text-[13px] text-foreground/80 hover:text-foreground"
-                  >
-                    <LayoutGrid size={14} /> Dashboard
-                  </Link>
-                  <Link
-                    to="/dashboard/palette"
-                    onClick={() => setIsToolsOpen(false)}
-                    className="flex items-center gap-1.5 text-[13px] text-foreground/80 hover:text-foreground"
-                  >
-                    <FolderOpen size={14} /> Saved palettes
-                  </Link>
-                  <Link
-                    to="/dashboard/gradient"
-                    onClick={() => setIsToolsOpen(false)}
-                    className="flex items-center gap-1.5 text-[13px] text-foreground/80 hover:text-foreground"
-                  >
-                    <FolderClosed size={14} /> Saved gradients
-                  </Link>
-                </div>
+              <div className="flex flex-col">
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsToolsOpen(false)}
+                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors text-[13px] text-foreground/80 hover:text-foreground"
+                >
+                  <LayoutGrid size={13} /> Dashboard
+                </Link>
+                <Link
+                  to="/dashboard/palette"
+                  onClick={() => setIsToolsOpen(false)}
+                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors text-[13px] text-foreground/80 hover:text-foreground"
+                >
+                  <FolderOpen size={13} /> Palettes
+                </Link>
+                <Link
+                  to="/dashboard/gradient"
+                  onClick={() => setIsToolsOpen(false)}
+                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors text-[13px] text-foreground/80 hover:text-foreground"
+                >
+                  <FolderClosed size={13} /> Gradients
+                </Link>
               </div>
             </div>
           )}
@@ -192,10 +128,10 @@ const Header: React.FC = () => {
         {/* Color / Image Picker toggle */}
         <button
           onClick={handlePickerToggle}
-          className="hidden sm:flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-3 pr-3.5 h-9 text-sm font-medium text-foreground hover:bg-card shadow-sm"
+          className="flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
         >
-          <Pipette size={14} />
-          {isMainPage ? "Color picker" : "Image picker"}
+          <Pipette size={13} />
+          <span className="hidden sm:inline">{isMainPage ? "Color picker" : "Image picker"}</span>
         </button>
 
         {/* Support on Ko-fi */}
@@ -203,10 +139,10 @@ const Header: React.FC = () => {
           href="https://ko-fi.com/bilalmlkdev"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden sm:inline-flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full px-3.5 h-9 text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full px-2.5 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
         >
-          <Coffee size={14} />
-          <span className="hidden lg:inline">Support</span>
+          <Coffee size={13} />
+          <span className="hidden sm:inline">Support</span>
         </a>
 
         {/* Profile */}
@@ -214,12 +150,12 @@ const Header: React.FC = () => {
           href="https://github.com/bilalmlkdev"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden sm:inline-flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-3 pr-3.5 h-9 text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
+          className="flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 sm:h-9 text-xs sm:text-sm font-medium text-foreground hover:bg-card shadow-sm transition-colors"
         >
-          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-            <User size={12} className="text-muted-foreground" />
+          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center shrink-0">
+            <User size={11} className="text-muted-foreground" />
           </div>
-          <span className="hidden lg:inline">bilalmlkdev</span>
+          <span className="hidden sm:inline">bilalmlkdev</span>
         </a>
       </div>
     </header>
