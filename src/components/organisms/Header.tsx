@@ -5,9 +5,6 @@ import {
   Pipette,
   Image as ImageIcon,
   Pencil,
-  Search as SearchIcon,
-  Eye,
-  Palette as PaletteIcon,
   Sparkles,
   Spline,
   FolderOpen,
@@ -15,9 +12,7 @@ import {
   FolderClosed,
   GitBranchPlus,
 } from "lucide-react";
-import { useTheme } from "../../hooks/useTheme";
 import Logo from "../molecules/Logo";
-import ThemeToggle from "../molecules/ThemeToggle";
 import Button from "../atoms/Button";
 
 const extractLinks = [
@@ -26,24 +21,6 @@ const extractLinks = [
     icon: Pencil,
     title: "Color picker",
     desc: "Explore any color: variations, harmony, accessibility",
-  },
-  {
-    to: "/contrast-checker",
-    icon: Eye,
-    title: "Contrast checker",
-    desc: "Check WCAG AA/AAA ratios for any color pair",
-  },
-  {
-    to: "#",
-    icon: SearchIcon,
-    title: "Blindness simulator",
-    desc: "Preview how your colors look to color-blind users",
-  },
-  {
-    to: "#",
-    icon: PaletteIcon,
-    title: "Browse colors",
-    desc: "A catalog of named colors with codes",
   },
 ];
 
@@ -60,23 +37,16 @@ const createLinks = [
     title: "Gradient maker",
     desc: "Build CSS gradients with live preview",
   },
-  {
-    to: "/dashboard/palette/create",
-    icon: FolderClosed,
-    title: "Palette creator",
-    desc: "Build a palette from scratch",
-  },
 ];
 
 const Header: React.FC = () => {
-  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isColorPage = location.pathname.startsWith("/color/");
+  const isMainPage = location.pathname === "/";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,8 +59,8 @@ const Header: React.FC = () => {
   }, []);
 
   const handlePickerToggle = () => {
-    if (isColorPage) navigate("/");
-    else navigate("/color/2596be");
+    if (isMainPage) navigate("/color/2596be");
+    else navigate("/");
   };
 
   return (
@@ -145,10 +115,7 @@ const Header: React.FC = () => {
                       <li key={item.title}>
                         <Link
                           to={item.to}
-                          onClick={(e) => {
-                            if (item.to === "#") e.preventDefault();
-                            setIsToolsOpen(false);
-                          }}
+                          onClick={() => setIsToolsOpen(false)}
                           className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted"
                         >
                           <item.icon size={16} className="text-muted-foreground mt-0.5 shrink-0" />
@@ -228,15 +195,20 @@ const Header: React.FC = () => {
           className="hidden sm:flex items-center gap-1.5 bg-card/50 backdrop-blur-md rounded-full pl-3 pr-3.5 h-9 text-sm font-medium text-foreground hover:bg-card shadow-sm"
         >
           <Pipette size={14} />
-          {isColorPage ? "Image picker" : "Color picker"}
+          {isMainPage ? "Color picker" : "Image picker"}
         </button>
 
         {/* Support us */}
-        <Button variant="accent" size="sm" icon={<GitBranchPlus size={13} fill="currentColor" />} className="hidden lg:inline-flex">
-          Star on Github
-        </Button>
-
-        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+        <a
+          href="https://github.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden lg:inline-flex"
+        >
+          <Button variant="accent" size="sm" icon={<GitBranchPlus size={13} fill="currentColor" />}>
+            Star on Github
+          </Button>
+        </a>
       </div>
     </header>
   );

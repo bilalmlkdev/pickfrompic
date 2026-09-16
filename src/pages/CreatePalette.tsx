@@ -1,8 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Check, Copy, Plus } from "lucide-react";
-import { useCopy } from "react-use-copy";
+import { Check, Copy, Plus } from "lucide-react";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
 import Input from "../components/atoms/Input";
@@ -18,7 +16,13 @@ const CreatePalette = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [paletteName, setPaletteName] = useState("New Color Palette");
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const { copied, copy } = useCopy();
+  const [copiedColor, setCopiedColor] = useState<string | null>(null);
+
+  const handleCopy = useCallback((value: string) => {
+    navigator.clipboard.writeText(value);
+    setCopiedColor(value);
+    setTimeout(() => setCopiedColor(null), 1500);
+  }, []);
 
   const updateColor = (newColor: string) => {
     const newColors = [...colors];
@@ -33,17 +37,11 @@ const CreatePalette = () => {
   };
 
   return (
-    <div className="flex-1 w-full py-8 px-4 mt-35">
+    <div className="flex-1 w-full py-6 px-4 mt-14">
       <div className="max-w-[780px] mx-auto mb-4">
         <h1 className="text-3xl font-bold text-center text-foreground mb-6">
           Create Your Palette
         </h1>
-        <Link
-          to="/dashboard/palette"
-          className="text-link text-sm font-medium hover:underline mb-5 flex items-center gap-1.5 w-fit"
-        >
-          <ArrowLeft size={14} /> Back to Dashboard
-        </Link>
       </div>
 
       <ToolCard>
@@ -61,18 +59,25 @@ const CreatePalette = () => {
             />
 
             <div className="space-y-2.5">
-              {colors.map((color, idx) => (
+              {colors.map((color, idx) => {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                const luminance = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+                const textColor = luminance > 0.5 ? "#000000" : "#ffffff";
+                const overlayColor = luminance > 0.5 ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.2)";
+                return (
                 <div key={idx}>
                   <button
                     onClick={() => setSelectedIndex(idx)}
-                    className={`w-full h-14 rounded-xl flex items-center px-4 text-white shadow-sm transition-colors border-2 ${
+                    className={`w-full h-14 rounded-xl flex items-center px-4 shadow-sm transition-colors border-2 ${
                       selectedIndex === idx
                         ? "border-foreground"
                         : "border-transparent"
                     }`}
-                    style={{ backgroundColor: color }}
+                    style={{ backgroundColor: color, color: textColor }}
                   >
-                    <span className="bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-mono">
+                    <span className="backdrop-blur-sm px-2 py-1 rounded-full text-xs font-mono" style={{ backgroundColor: overlayColor }}>
                       {color}
                     </span>
                   </button>
@@ -85,7 +90,8 @@ const CreatePalette = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <Button
@@ -116,10 +122,10 @@ const CreatePalette = () => {
                 monospace
               />
               <button
-                onClick={() => copy(colors[selectedIndex])}
+                onClick={() => handleCopy(colors[selectedIndex])}
                 className="bg-muted hover:bg-border px-3 rounded-lg text-foreground transition-colors shrink-0"
               >
-                {copied ? <Check size={15} /> : <Copy size={15} />}
+                {copiedColor === colors[selectedIndex] ? <Check size={15} /> : <Copy size={15} />}
               </button>
             </div>
           </div>
@@ -131,6 +137,7 @@ const CreatePalette = () => {
         onClose={() => setIsSaveModalOpen(false)}
         type="palette"
         data={colors}
+        initialName={paletteName}
       />
     </div>
   );

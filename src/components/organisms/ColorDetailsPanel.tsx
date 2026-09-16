@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
-import { useCopy } from "react-use-copy";
+import React, { useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Upload, Pipette } from "lucide-react";
+import { hexToRgb, rgbToHsl } from "../../utils/ColorMath";
 import ImageSourceModal from "../modals/ImageSourceModal";
 import ColorField from "../molecules/ColorField";
 import SectionLabel from "../atoms/SectionLabel";
@@ -9,51 +9,15 @@ import Button from "../atoms/Button";
 
 const hexToRgbString = (hex: string) => {
   if (!hex) return "rgb(0, 0, 0)";
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})`
-    : hex;
+  const { r, g, b } = hexToRgb(hex);
+  return `rgb(${r}, ${g}, ${b})`;
 };
 
 const hexToHslString = (hex: string) => {
   if (!hex) return "hsl(0, 0%, 0%)";
-  let r = 0,
-    g = 0,
-    b = 0;
-  if (hex.length === 4) {
-    r = parseInt(hex[1] + hex[1], 16);
-    g = parseInt(hex[2] + hex[2], 16);
-    b = parseInt(hex[3] + hex[3], 16);
-  } else if (hex.length === 7) {
-    r = parseInt(hex.substring(1, 3), 16);
-    g = parseInt(hex.substring(3, 5), 16);
-    b = parseInt(hex.substring(5, 7), 16);
-  }
-  r /= 255;
-  g /= 255;
-  b /= 255;
-  const max = Math.max(r, g, b),
-    min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-    h /= 6;
-  }
-  return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+  const { r, g, b } = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(r, g, b);
+  return `hsl(${h}, ${s}%, ${l}%)`;
 };
 
 interface Props {
@@ -75,9 +39,15 @@ const ColorDetailsPanel: React.FC<Props> = ({
   setImageSrc,
   onPickedColor,
 }) => {
-  const { copied, copy } = useCopy();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = useCallback((id: string, value: string) => {
+    navigator.clipboard.writeText(value);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  }, []);
 
   const displayColor = hoveredColor || selectedColor;
 
@@ -117,8 +87,8 @@ const ColorDetailsPanel: React.FC<Props> = ({
               key={idx}
               onClick={() => setSelectedColor(color)}
               style={{ backgroundColor: color }}
-              className={`h-25 flex-1 rounded-lg border transition-colors ${
-                selectedColor === color ? "border-none" : "border-none"
+              className={`h-25 flex-1 rounded-lg border-2 transition-colors ${
+                selectedColor === color ? "border-foreground" : "border-transparent"
               }`}
             />
           ))
@@ -131,9 +101,9 @@ const ColorDetailsPanel: React.FC<Props> = ({
       </div>
 
       <div className="space-y-1.5 mb-3">
-        <ColorField label="HEX" value={displayColor} copied={copied} onCopy={() => copy(displayColor)} compact />
-        <ColorField label="RGB" value={rgb} copied={copied} onCopy={() => copy(rgb)} compact />
-        <ColorField label="HSL" value={hsl} copied={copied} onCopy={() => copy(hsl)} compact />
+        <ColorField label="HEX" value={displayColor} copied={copiedId === "HEX"} onCopy={() => handleCopy("HEX", displayColor)} compact />
+        <ColorField label="RGB" value={rgb} copied={copiedId === "RGB"} onCopy={() => handleCopy("RGB", rgb)} compact />
+        <ColorField label="HSL" value={hsl} copied={copiedId === "HSL"} onCopy={() => handleCopy("HSL", hsl)} compact />
       </div>
 
       <button

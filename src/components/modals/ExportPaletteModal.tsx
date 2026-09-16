@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useCopy } from "react-use-copy";
+import React, { useMemo, useState, useCallback } from "react";
 import { X, Check } from "lucide-react";
 import {
   convertToCss,
@@ -20,7 +19,14 @@ interface Props {
 
 const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
   const [activeTab, setActiveTab] = useState<"css" | "code" | "svg" | "png">("css");
-  const { copied, copy } = useCopy();
+  const [isCopied, setIsCopied] = useState(false);
+  const pngDataUrl = useMemo(() => generatePng(colors), [colors]);
+
+  const handleCopy = useCallback((text: string) => {
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 1500);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -31,7 +37,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         ? convertToCode(colors)
         : activeTab === "svg"
           ? generateSvg(colors)
-          : "";
+          : pngDataUrl;
 
   const handleDownload = () => {
     if (activeTab === "css") downloadFile("palette.css", content, "text/css");
@@ -39,7 +45,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
     else if (activeTab === "svg") downloadFile("palette.svg", content, "image/svg+xml");
     else if (activeTab === "png") {
       const a = document.createElement("a");
-      a.href = generatePng(colors);
+      a.href = pngDataUrl;
       a.download = "palette.png";
       a.click();
     }
@@ -74,7 +80,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         {activeTab === "png" ? (
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <img
-              src={generatePng(colors)}
+              src={pngDataUrl}
               alt="Palette Preview"
               className="rounded-xl shadow-lg border border-border"
             />
@@ -94,10 +100,10 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         <Button
           variant="primary"
           fullWidth
-          onClick={() => copy(content)}
-          icon={copied ? <Check size={14} /> : undefined}
+          onClick={() => handleCopy(content)}
+          icon={isCopied ? <Check size={14} /> : undefined}
         >
-          {copied ? "Copied!" : "Copy"}
+          {isCopied ? "Copied!" : "Copy"}
         </Button>
       </div>
     </ModalShell>

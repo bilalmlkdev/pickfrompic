@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Minus } from "lucide-react";
 import SectionLabel from "../atoms/SectionLabel";
 
@@ -8,6 +8,7 @@ interface Props {
   selectedColor: string;
   setHoveredColor: (color: string | null) => void;
   onImagePick: (color: string) => void;
+  highlightColor?: string | null;
 }
 
 const ImageUploader: React.FC<Props> = ({
@@ -16,6 +17,7 @@ const ImageUploader: React.FC<Props> = ({
   selectedColor,
   setHoveredColor,
   onImagePick,
+  highlightColor,
 }) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const hiddenCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,6 +25,8 @@ const ImageUploader: React.FC<Props> = ({
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [lensGrid, setLensGrid] = useState<string[]>([]);
   const [isLensEnabled, setIsLensEnabled] = useState<boolean>(true);
+  const [containerWidth, setContainerWidth] = useState<number>(400);
+  const [dotPositions, setDotPositions] = useState<{ x: number; y: number }[]>([]);
 
   const handleImageLoad = () => {
     const img = imgRef.current;
@@ -36,12 +40,62 @@ const ImageUploader: React.FC<Props> = ({
     }
   };
 
+  // Scan image for highlight color positions
+  useEffect(() => {
+    if (!highlightColor || !hiddenCanvasRef.current) {
+      setDotPositions([]);
+      return;
+    }
+
+    const canvas = hiddenCanvasRef.current;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return;
+
+    const hex = highlightColor.replace("#", "");
+    const tr = parseInt(hex.substring(0, 2), 16);
+    const tg = parseInt(hex.substring(2, 4), 16);
+    const tb = parseInt(hex.substring(4, 6), 16);
+    const tolerance = 40;
+    const maxDots = 120;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const step = Math.max(1, Math.floor(Math.sqrt((w * h) / (maxDots * 4))));
+
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+    const found: { x: number; y: number }[] = [];
+
+    for (let y = 0; y < h && found.length < maxDots; y += step) {
+      for (let x = 0; x < w && found.length < maxDots; x += step) {
+        const idx = (y * w + x) * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+
+        if (
+          Math.abs(r - tr) <= tolerance &&
+          Math.abs(g - tg) <= tolerance &&
+          Math.abs(b - tb) <= tolerance
+        ) {
+          found.push({ x: (x + 0.5) / w, y: (y + 0.5) / h });
+        }
+      }
+    }
+
+    setDotPositions(found);
+  }, [highlightColor]);
+
   const getColorAtPixel = (x: number, y: number): string => {
     if (!hiddenCanvasRef.current) return "#000000";
     const ctx = hiddenCanvasRef.current.getContext("2d", { willReadFrequently: true });
     if (!ctx) return "#000000";
+    const w = hiddenCanvasRef.current.width;
+    const h = hiddenCanvasRef.current.height;
+    const cx = Math.max(0, Math.min(w - 1, x));
+    const cy = Math.max(0, Math.min(h - 1, y));
     try {
-      const pixelData = ctx.getImageData(x, y, 1, 1).data;
+      const pixelData = ctx.getImageData(cx, cy, 1, 1).data;
       return (
         "#" +
         ((1 << 24) + (pixelData[0] << 16) + (pixelData[1] << 8) + pixelData[2])
@@ -59,6 +113,8 @@ const ImageUploader: React.FC<Props> = ({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    setContainerWidth(rect.width);
 
     const scaleX = imgRef.current.naturalWidth / rect.width;
     const scaleY = imgRef.current.naturalHeight / rect.height;
@@ -104,26 +160,50 @@ const ImageUploader: React.FC<Props> = ({
           setMousePos(null);
           setHoveredColor(null);
         }}
+        role="img"
+        aria-label="Image for color picking. Click to pick a color."
       >
         {loading ? (
           <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground bg-muted">
             Extracting colors...
           </div>
         ) : imageSrc ? (
-          <img
-            ref={imgRef}
-            src={imageSrc}
-            alt="Preview"
-            crossOrigin="anonymous"
-            onLoad={handleImageLoad}
-            className="w-full h-full object-cover pointer-events-none"
-          />
+          <>
+            <img
+              ref={imgRef}
+              src={imageSrc}
+              alt="Preview"
+              crossOrigin="anonymous"
+              onLoad={handleImageLoad}
+              className="w-full h-full object-cover pointer-events-none"
+            />
+            {highlightColor && dotPositions.length > 0 && (
+              <div className="absolute inset-0 pointer-events-none">
+                {dotPositions.map((pos, idx) => (
+                  <div
+                    key={idx}
+                    className="absolute w-2.5 h-2.5 rounded-full border-2 border-white shadow-md"
+                    style={{
+                      left: `${pos.x * 100}%`,
+                      top: `${pos.y * 100}%`,
+                      transform: "translate(-50%, -50%)",
+                      backgroundColor: highlightColor,
+                      boxShadow: `0 0 6px 2px ${highlightColor}60`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : null}
 
         {isLensEnabled && mousePos && imageSrc && (
           <div
             className="absolute pointer-events-none z-50 w-20 h-20 rounded-lg border-2 border-white shadow-2xl overflow-hidden flex flex-col items-center justify-center"
-            style={{ left: mousePos.x - 40, top: mousePos.y + 15 }}
+            style={{
+              left: Math.max(0, Math.min(mousePos.x - 40, containerWidth - 80)),
+              top: Math.max(0, mousePos.y + 15),
+            }}
           >
             <div className="grid grid-cols-5 w-full h-full">
               {lensGrid.map((color, idx) => (
@@ -150,6 +230,7 @@ const ImageUploader: React.FC<Props> = ({
               : "bg-card text-muted-foreground border-border hover:bg-muted"
           }`}
           title="Toggle Magnifier Lens"
+          aria-label="Toggle Magnifier Lens"
         >
           <Minus size={14} strokeWidth={3} />
         </button>

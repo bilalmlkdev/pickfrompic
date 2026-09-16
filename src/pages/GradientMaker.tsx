@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Dices, Download, Save } from "lucide-react";
+import { Dices, Download, Save } from "lucide-react";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
+import Dropdown from "../components/atoms/Dropdown";
 import ToolCard from "../components/templates/ToolCard";
+
+let colorIdCounter = 0;
+const nextColorId = () => `color-${++colorIdCounter}`;
 
 const GradientMaker = () => {
   const [colors, setColors] = useState([
-    { hex: "#ff0000", pos: 0 },
-    { hex: "#0000ff", pos: 100 },
+    { id: nextColorId(), hex: "#ff0000", pos: 0 },
+    { id: nextColorId(), hex: "#0000ff", pos: 100 },
   ]);
   const [angle, setAngle] = useState(90);
   const [type, setType] = useState("Linear");
@@ -23,31 +26,32 @@ const GradientMaker = () => {
     const c1 = "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
     const c2 = "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
     setColors([
-      { hex: c1, pos: 0 },
-      { hex: c2, pos: 100 },
+      { id: nextColorId(), hex: c1, pos: 0 },
+      { id: nextColorId(), hex: c2, pos: 100 },
     ]);
   };
 
   const downloadSvg = () => {
+    const stops = colors
+      .map(
+        (c) =>
+          `<stop offset='${c.pos}%' stop-color='${encodeURIComponent(c.hex)}'/>`
+      )
+      .join("");
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'>${stops}</linearGradient></defs><rect width='400' height='400' fill='url(%23g)'/></svg>`;
     const a = document.createElement("a");
-    a.href = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='${colors[0].hex}'/><stop offset='100%' stop-color='${colors[1].hex}'/></linearGradient></defs><rect width='400' height='400' fill='url(%23g)'/></svg>`;
+    a.href = `data:image/svg+xml;utf8,${svg}`;
     a.download = "gradient.svg";
     a.click();
   };
 
   return (
-    <div className="flex-1 w-full py-8 px-4 mt-20">
+    <div className="flex-1 w-full py-6 px-4 mt-14">
       <div className="max-w-[780px] mx-auto mb-4">
-        <h1 className="text-6xl font-medium text-center text-foreground mb-2">Gradient Maker</h1>
-        <p className="text-center text-muted-foreground text-xl mb-6">
+        <h1 className="text-4xl font-medium text-center text-foreground mb-2">Gradient Maker</h1>
+        <p className="text-center text-muted-foreground text-lg mb-4">
           Simple, creative, versatile - perfect gradients made easy
         </p>
-        <Link
-          to="/dashboard/gradient"
-          className="text-link text-sm font-medium hover:underline mb-5 flex items-center gap-1.5 w-fit"
-        >
-          <ArrowLeft size={14} /> Back to Dashboard
-        </Link>
       </div>
 
       <ToolCard>
@@ -56,10 +60,10 @@ const GradientMaker = () => {
           <div className="flex-1 flex flex-col justify-between">
             <div>
               <div className="relative h-5 rounded-full overflow-hidden mb-7" style={{ background: gradientString }}>
-                {colors.map((c, idx) => (
+                {colors.map((c) => (
                   <div
-                    key={idx}
-                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-white bg-white cursor-pointer shadow"
+                    key={c.id}
+                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-card bg-card cursor-pointer shadow"
                     style={{ left: `${c.pos}%` }}
                   >
                     <div className="w-2.5 h-2.5 rounded-full m-auto mt-[1px]" style={{ backgroundColor: c.hex }}></div>
@@ -87,42 +91,30 @@ const GradientMaker = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1.5">Position</label>
-                  <select
+                  <Dropdown
+                    options={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((p) => ({ label: `${p}`, value: p }))}
                     value={colors[0].pos}
-                    onChange={(e) => setColors([{ ...colors[0], pos: Number(e.target.value) }, colors[1]])}
-                    className="w-full border border-border rounded-lg p-2 text-sm bg-card text-foreground"
-                  >
-                    {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setColors([{ ...colors[0], pos: Number(val) }, colors[1]])}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1.5">Rotation</label>
-                  <select
+                  <Dropdown
+                    options={[0, 45, 90, 135, 180, 225, 270, 315].map((a) => ({ label: `${a}deg`, value: a }))}
                     value={angle}
-                    onChange={(e) => setAngle(Number(e.target.value))}
-                    className="w-full border border-border rounded-lg p-2 text-sm bg-card text-foreground"
-                  >
-                    {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
-                      <option key={a} value={a}>
-                        {a}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setAngle(Number(val))}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1.5">Type</label>
-                  <select
+                  <Dropdown
+                    options={[
+                      { label: "Linear", value: "Linear" },
+                      { label: "Radial", value: "Radial" },
+                    ]}
                     value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full border border-border rounded-lg p-2 text-sm bg-card text-foreground"
-                  >
-                    <option>Linear</option>
-                    <option>Radial</option>
-                  </select>
+                    onChange={(val) => setType(String(val))}
+                  />
                 </div>
               </div>
             </div>

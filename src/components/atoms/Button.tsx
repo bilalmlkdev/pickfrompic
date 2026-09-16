@@ -20,9 +20,9 @@ const variantClasses: Record<Variant, string> = {
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm gap-1.5 rounded-full shadow-sm bg-background",
+  sm: "h-8 px-3 text-xs gap-1.5 rounded-full shadow-sm bg-background",
   md: "h-9 px-4 text-sm gap-2 rounded-full shadow-sm bg-background",
-  lg: "h-9 px-5 text-sm gap-2 rounded-full shadow-sm bg-background",
+  lg: "h-11 px-5 text-sm gap-2 rounded-full shadow-sm bg-background",
 };
 
 const Button: React.FC<Props> = ({

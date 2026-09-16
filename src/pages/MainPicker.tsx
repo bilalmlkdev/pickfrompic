@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useExtractColors } from "react-extract-colors";
-import { Maximize2 } from "lucide-react";
 import ImageUploader from "../components/organisms/ImageUploader";
 import ColorDetailsPanel from "../components/organisms/ColorDetailsPanel";
 import ColorPalette from "../components/organisms/ColorPalette";
@@ -15,6 +14,7 @@ const MainPicker = () => {
   const [hoveredColor, setHoveredColor] = useState<string | null>(null);
   const [maxColors, setMaxColors] = useState<number>(10);
   const [topPicks, setTopPicks] = useState<string[]>([]);
+  const [highlightColor, setHighlightColor] = useState<string | null>(null);
 
   const { colors, loading } = useExtractColors(imageSrc ?? "", {
     maxColors: maxColors,
@@ -33,7 +33,7 @@ const MainPicker = () => {
     setSelectedColor(color);
     setImageSrc(null);
     setHoveredColor(null);
-    setTopPicks([color, color]);
+    setTopPicks([color]);
   };
 
   const handleImagePick = (color: string) => {
@@ -42,15 +42,20 @@ const MainPicker = () => {
     setTopPicks((prev) => [color, prev[0] || color]);
   };
 
+  const handlePaletteColorClick = (color: string) => {
+    setSelectedColor(color);
+    setHighlightColor((prev) => (prev === color ? null : color));
+  };
+
   return (
     <div className="flex-1 flex flex-col">
-      <div className="text-center mt-20 mb-8 px-4">
-        <h1 className="text-[28px] md:text-[50px] font-medium text-foreground tracking-tight leading-tight">
+      <div className="text-center mt-8 md:mt-12 mb-4 md:mb-6 px-4">
+        <h1 className="text-[28px] md:text-[42px] font-medium text-foreground tracking-tight leading-tight">
           Free Color Picker:
           <br />
           Extract colors from any image instantly.
         </h1>
-        <p className="mt-3 text-muted-foreground text-xl">
+        <p className="mt-2 text-muted-foreground text-lg">
           Upload, paste, or enter a URL to get HEX, RGB, HSL and more, no signup
           needed.
         </p>
@@ -58,13 +63,6 @@ const MainPicker = () => {
 
       <div className="relative">
         <ToolCard>
-          <button
-            className="absolute -top-3.5 -right-3.5 w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity"
-            title="Expand"
-          >
-            <Maximize2 size={20} />
-          </button>
-
           {/* Left side: ImageUploader + ColorPalette */}
           <div className="grid grid-cols-1 lg:grid-cols-[67%_30%] gap-10 pr-6">
             {/* Left Column - 75% */}
@@ -75,11 +73,12 @@ const MainPicker = () => {
                 selectedColor={selectedColor}
                 setHoveredColor={setHoveredColor}
                 onImagePick={handleImagePick}
+                highlightColor={highlightColor}
               />
               <ColorPalette
                 colors={paletteColors}
                 selectedColor={selectedColor}
-                setSelectedColor={setSelectedColor}
+                setSelectedColor={handlePaletteColorClick}
                 maxColors={maxColors}
                 setMaxColors={setMaxColors}
               />

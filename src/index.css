@@ -1,10 +1,7 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode in Tailwind v4 */
-@custom-variant dark (&:where(.dark, .dark *));
-
 /* ---------------------------------- */
-/* Light Mode Variables (Default)     */
+/* Theme Variables (Light only)       */
 /* ---------------------------------- */
 :root {
   --background: #ffffff;
@@ -26,31 +23,6 @@
   --link: #2563eb;
 
   --tile-dot: rgba(0, 0, 0, 0.05);
-}
-
-/* ---------------------------------- */
-/* Dark Mode Variables                */
-/* ---------------------------------- */
-.dark {
-  --background: #090a0b;
-  --foreground: #f4f4f5;
-
-  --card: #161618;
-  --card-foreground: #f4f4f5;
-
-  --muted: #232326;
-  --muted-foreground: #a1a1aa;
-
-  --border: #2a2a2e;
-
-  --accent: #eab308;
-  --accent-foreground: #0a0a0b;
-
-  --success: #4ade80;
-  --danger: #f87171;
-  --link: #60a5fa;
-
-  --tile-dot: rgba(255, 255, 255, 0.06);
 }
 
 /* ---------------------------------- */
@@ -82,29 +54,23 @@ body {
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   background-color: var(--background);
   color: var(--foreground);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
 }
 
-
-/* Slim custom scrollbar for horizontal palette strips etc. */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+/* Hide scrollbar completely */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
+*::-webkit-scrollbar {
+  display: none;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: var(--border);
-  border-radius: 999px;
+/* Ensure native form elements respect theme */
+select,
+input[type="color"] {
+  color-scheme: light;
 }
-
-
 
 /* for background */
 /* Keyframes used by .bg-blur-circle */
@@ -118,19 +84,6 @@ body {
   }
 }
 
-/* Tailwind utilities used in the HTML */
-/* .relative {
-  position: relative;
-}
-
-.overflow-hidden {
-  overflow: hidden;
-}
-
-.hidden {
-  display: none;
-} */
-
 @media (min-width: 1024px) {
   .lg\:block {
     display: block;
@@ -140,10 +93,6 @@ body {
 /* ===== bg-gradient-main ===== */
 .bg-gradient-main {
   background: linear-gradient(180deg, #fff, #fff 70%, hsla(60, 9%, 98%, 0));
-}
-
-.dark .bg-gradient-main {
-  background: linear-gradient(180deg, #0a0d12, #0a0d12 70%, rgba(10, 13, 18, 0));
 }
 
 /* ===== bg-fade-bottom: blends hero bg into the flat page bg below it ===== */
@@ -178,12 +127,6 @@ body {
   -webkit-perspective: 1000px;
   contain: layout style paint;
   isolation: isolate;
-  animation: safari-layer-keepalive 1ms linear infinite;
-  animation-fill-mode: both;
-}
-
-.dark .bg-blur-circle {
-  opacity: 0.57;
 }
 
 /* Colored blur circles */
@@ -193,18 +136,10 @@ body {
   background-color: var(--dynamic-left-1, #ff6b00);
 }
 
-.dark .bg-blur-left-orange {
-  background-color: var(--dynamic-left-1, #f38744);
-}
-
 .bg-blur-left-pink {
   left: -77px;
   top: 376px;
   background-color: var(--dynamic-left-2, #ff1493);
-}
-
-.dark .bg-blur-left-pink {
-  background-color: var(--dynamic-left-2, #ee46bc);
 }
 
 .bg-blur-right-cyan {
@@ -213,18 +148,10 @@ body {
   background-color: var(--dynamic-right-1, #00d4ff);
 }
 
-.dark .bg-blur-right-cyan {
-  background-color: var(--dynamic-right-1, #2ce);
-}
-
 .bg-blur-right-green {
   left: calc(100vw - 645px);
   top: 376px;
   background-color: var(--dynamic-right-2, #0f8);
-}
-
-.dark .bg-blur-right-green {
-  background-color: var(--dynamic-right-2, #47cd89);
 }
 
 /* ===== Left fade bars ===== */
@@ -238,11 +165,6 @@ body {
   z-index: 0;
   mask: linear-gradient(180deg, #000, #000 70%, transparent);
   -webkit-mask: linear-gradient(180deg, #000, #000 70%, transparent);
-}
-
-.dark .bg-fade-left-bar {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent);
-  border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .bg-fade-left-bar-1 {
@@ -285,18 +207,6 @@ body {
   opacity: 0.3;
 }
 
-.dark .bg-fade-left-bar-1,
-.dark .bg-fade-left-bar-2,
-.dark .bg-fade-left-bar-3,
-.dark .bg-fade-left-bar-4,
-.dark .bg-fade-left-bar-5,
-.dark .bg-fade-left-bar-6,
-.dark .bg-fade-left-bar-7,
-.dark .bg-fade-left-bar-8 {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), transparent);
-  border: 1px solid rgba(0, 0, 0, 0.25);
-}
-
 /* ===== Right fade bars ===== */
 .bg-fade-right-bar {
   position: absolute;
@@ -308,11 +218,6 @@ body {
   z-index: 1;
   mask: linear-gradient(180deg, #000, #000 70%, transparent);
   -webkit-mask: linear-gradient(180deg, #000, #000 70%, transparent);
-}
-
-.dark .bg-fade-right-bar {
-  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.2));
-  border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .bg-fade-right-bar-1 {
@@ -355,22 +260,9 @@ body {
   opacity: 1;
 }
 
-.dark .bg-fade-right-bar-1,
-.dark .bg-fade-right-bar-2,
-.dark .bg-fade-right-bar-3,
-.dark .bg-fade-right-bar-4,
-.dark .bg-fade-right-bar-5,
-.dark .bg-fade-right-bar-6,
-.dark .bg-fade-right-bar-7,
-.dark .bg-fade-right-bar-8 {
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
-  border: 1px solid rgba(0, 0, 0, 0.25);
-}
-
 /* ===== Mobile (max-width: 768px) ===== */
 @media (max-width: 768px) {
 
-  /* Left bars become horizontal strips at bottom? Actually they become fixed bottom bars */
   .bg-fade-left-bar-1,
   .bg-fade-left-bar-2,
   .bg-fade-left-bar-3,
@@ -386,18 +278,6 @@ body {
     position: fixed;
     left: 0;
     z-index: 0;
-  }
-
-  .dark .bg-fade-left-bar-1,
-  .dark .bg-fade-left-bar-2,
-  .dark .bg-fade-left-bar-3,
-  .dark .bg-fade-left-bar-4,
-  .dark .bg-fade-left-bar-5,
-  .dark .bg-fade-left-bar-6,
-  .dark .bg-fade-left-bar-7,
-  .dark .bg-fade-left-bar-8 {
-    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
-    border: 1px solid rgba(0, 0, 0, 0.25);
   }
 
   .bg-fade-left-bar-1 {
@@ -440,7 +320,6 @@ body {
     opacity: 0.3;
   }
 
-  /* Right bars similar but with bottom positioning */
   .bg-fade-right-bar-1,
   .bg-fade-right-bar-2,
   .bg-fade-right-bar-3,
@@ -456,18 +335,6 @@ body {
     position: fixed;
     left: 0;
     z-index: 0;
-  }
-
-  .dark .bg-fade-right-bar-1,
-  .dark .bg-fade-right-bar-2,
-  .dark .bg-fade-right-bar-3,
-  .dark .bg-fade-right-bar-4,
-  .dark .bg-fade-right-bar-5,
-  .dark .bg-fade-right-bar-6,
-  .dark .bg-fade-right-bar-7,
-  .dark .bg-fade-right-bar-8 {
-    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
-    border: 1px solid rgba(0, 0, 0, 0.25);
   }
 
   .bg-fade-right-bar-1 {
@@ -514,7 +381,6 @@ body {
 /* ===== Tablet (768px – 1023px) ===== */
 @media (min-width: 768px) and (max-width: 1023px) {
 
-  /* Left bars 1–6 become vertical again but with different left offsets */
   .bg-fade-left-bar-1,
   .bg-fade-left-bar-2,
   .bg-fade-left-bar-3,
@@ -527,16 +393,6 @@ body {
     background: linear-gradient(90deg, hsla(0, 0%, 100%, 0.2), hsla(0, 0%, 100%, 0));
     border: none;
     z-index: 0;
-  }
-
-  .dark .bg-fade-left-bar-1,
-  .dark .bg-fade-left-bar-2,
-  .dark .bg-fade-left-bar-3,
-  .dark .bg-fade-left-bar-4,
-  .dark .bg-fade-left-bar-5,
-  .dark .bg-fade-left-bar-6 {
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent);
-    border: none;
   }
 
   .bg-fade-left-bar-1 {
@@ -569,7 +425,6 @@ body {
     opacity: 0.5;
   }
 
-  /* Right bars 1–6 with right offsets */
   .bg-fade-right-bar-1,
   .bg-fade-right-bar-2,
   .bg-fade-right-bar-3,
@@ -582,16 +437,6 @@ body {
     background: linear-gradient(90deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.2));
     border: none;
     z-index: 1;
-  }
-
-  .dark .bg-fade-right-bar-1,
-  .dark .bg-fade-right-bar-2,
-  .dark .bg-fade-right-bar-3,
-  .dark .bg-fade-right-bar-4,
-  .dark .bg-fade-right-bar-5,
-  .dark .bg-fade-right-bar-6 {
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.2));
-    border: none;
   }
 
   .bg-fade-right-bar-1 {
@@ -624,7 +469,6 @@ body {
     opacity: 1;
   }
 
-  /* Ensure no border for these in tablet */
   .bg-fade-left-bar-1,
   .bg-fade-left-bar-2,
   .bg-fade-left-bar-3,

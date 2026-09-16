@@ -47,26 +47,31 @@ interface DashboardContextType {
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+const safeParse = <T,>(key: string, fallback: T): T => {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [palettes, setPalettes] = useState<Palette[]>(() => {
-    const saved = localStorage.getItem("dash_palettes");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [palettes, setPalettes] = useState<Palette[]>(() =>
+    safeParse<Palette[]>("dash_palettes", [])
+  );
 
-  const [colors, setColors] = useState<Color[]>(() => {
-    const saved = localStorage.getItem("dash_colors");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [colors, setColors] = useState<Color[]>(() =>
+    safeParse<Color[]>("dash_colors", [])
+  );
 
-  const [gradients, setGradients] = useState<Gradient[]>(() => {
-    const saved = localStorage.getItem("dash_gradients");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [gradients, setGradients] = useState<Gradient[]>(() =>
+    safeParse<Gradient[]>("dash_gradients", [])
+  );
 
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem("dash_projects");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [projects, setProjects] = useState<Project[]>(() =>
+    safeParse<Project[]>("dash_projects", [])
+  );
 
   useEffect(() => {
     localStorage.setItem("dash_palettes", JSON.stringify(palettes));
@@ -169,6 +174,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDashboard = () => {
   const context = useContext(DashboardContext);
   if (!context) throw new Error("useDashboard must be used within DashboardProvider");

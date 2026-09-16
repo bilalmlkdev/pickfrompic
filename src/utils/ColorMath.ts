@@ -11,7 +11,15 @@ export const hexToRgb = (hex: string) => {
     g = parseInt(hex.substring(3, 5), 16);
     b = parseInt(hex.substring(5, 7), 16);
   }
-  return { r, g, b };
+  return {
+    r: isNaN(r) ? 0 : r,
+    g: isNaN(g) ? 0 : g,
+    b: isNaN(b) ? 0 : b,
+  };
+};
+
+export const isValidHex = (hex: string): boolean => {
+  return /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex);
 };
 
 export const rgbToHsl = (r: number, g: number, b: number) => {
@@ -51,6 +59,7 @@ export const rgbToCmyk = (r: number, g: number, b: number) => {
     m = 1 - g / 255,
     y = 1 - b / 255,
     k = Math.min(c, m, y);
+  if (k === 1) return { c: 0, m: 0, y: 0, k: 100 };
   return {
     c: Math.round(((c - k) / (1 - k)) * 100) || 0,
     m: Math.round(((m - k) / (1 - k)) * 100) || 0,
@@ -100,8 +109,9 @@ export const rgbToLuv = (r: number, g: number, b: number) => {
   const refX = 95.047,
     refY = 100,
     refZ = 108.883;
-  const u = (4 * x) / (x + 15 * y + 3 * z);
-  const v = (9 * y) / (x + 15 * y + 3 * z);
+  const denom = x + 15 * y + 3 * z;
+  const u = denom === 0 ? 0 : (4 * x) / denom;
+  const v = denom === 0 ? 0 : (9 * y) / denom;
   const u_ = (4 * refX) / (refX + 15 * refY + 3 * refZ);
   const v_ = (9 * refY) / (refX + 15 * refY + 3 * refZ);
   const L =

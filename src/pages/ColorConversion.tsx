@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
-import { useCopy } from "react-use-copy";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Check, Copy, Heart, MoreHorizontal, Pencil, Pipette } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Check, Copy, Heart, MoreHorizontal, Pencil, Pipette } from "lucide-react";
 import {
   hexToRgb,
   rgbToHsl,
@@ -14,20 +13,27 @@ import {
   rgbToHsb,
   hsbToHex,
   hslToHex,
+  isValidHex,
 } from "../utils/ColorMath";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
+import Dropdown from "../components/atoms/Dropdown";
 import ToolCard from "../components/templates/ToolCard";
 
 const ColorConversion = () => {
   const { hex } = useParams();
-  const isDetailsPage = !!hex;
   const initialHex = hex ? `#${hex.replace("#", "")}` : "#2596be";
 
   const [currentHex, setCurrentHex] = useState(initialHex);
   const [format, setFormat] = useState("picker");
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const { copied, copy } = useCopy();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = useCallback((id: string, value: string) => {
+    navigator.clipboard.writeText(value);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  }, []);
 
   const rgb = hexToRgb(currentHex);
   const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
@@ -65,16 +71,19 @@ const ColorConversion = () => {
   };
 
   const handleHsbChange = (key: "h" | "s" | "v", value: number) => {
+    if (isNaN(value)) return;
     const newHsb = { ...hsb, [key]: value };
     setCurrentHex(hsbToHex(newHsb.h, newHsb.s, newHsb.v));
   };
 
   const handleHslChange = (key: "h" | "s" | "l", value: number) => {
+    if (isNaN(value)) return;
     const newHsl = { ...hsl, [key]: value };
     setCurrentHex(hslToHex(newHsl.h, newHsl.s, newHsl.l));
   };
 
   const handleRgbChange = (key: "r" | "g" | "b", value: number) => {
+    if (isNaN(value)) return;
     const newRgb = { ...rgb, [key]: value };
     const toHex = (c: number) => {
       const hex = Math.max(0, Math.min(255, c)).toString(16);
@@ -89,34 +98,17 @@ const ColorConversion = () => {
   const hsbVGradient = `linear-gradient(to right, #000000, ${currentHex})`;
   const hslSGradient = `linear-gradient(to right, #888888, ${currentHex})`;
   const hslLGradient = "linear-gradient(to right, #000000, #ffffff)";
-  const rgbGradient = `linear-gradient(to right, #000000, ${currentHex})`;
 
   return (
-    <div className="flex-1 w-full py-8 px-4 mt-24">
-      <div className="max-w-[780px] mx-auto mb-4">
-        <h1 className="text-6xl text-center font-medium text-foreground mb-2.5">
+    <div className="flex-1 w-full py-6 px-4 mt-16">
+      <div className="max-w-[780px] mx-auto mb-3">
+        <h1 className="text-5xl text-center font-medium text-foreground mb-2">
           #{currentHex.replace("#", "").toUpperCase()}
         </h1>
-        <p className="text-muted-foreground text-center text-xl mb-4">
+        <p className="text-muted-foreground text-center text-lg mb-3">
           Generate color codes, variations, harmonies, and check contrast
           ratios.
         </p>
-
-        {isDetailsPage ? (
-          <Link
-            to="/"
-            className="text-link text-sm font-medium hover:underline mb-5 flex items-center gap-1.5 w-fit"
-          >
-            <ArrowLeft size={14} /> Back to Home
-          </Link>
-        ) : (
-          <Link
-            to="/dashboard/color"
-            className="text-link text-sm font-medium hover:underline mb-5 flex items-center gap-1.5 w-fit"
-          >
-            <ArrowLeft size={14} /> Back to Dashboard
-          </Link>
-        )}
       </div>
 
       <ToolCard>
@@ -138,7 +130,11 @@ const ColorConversion = () => {
                   <input
                     type="text"
                     value={currentHex}
-                    onChange={(e) => setCurrentHex(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (isValidHex(val)) setCurrentHex(val);
+                      else if (val === "" || val === "#") setCurrentHex(val);
+                    }}
                     className="flex-1 border border-border rounded-lg p-2 bg-card text-foreground text-sm font-mono focus:outline-none"
                   />
                   <div
@@ -296,7 +292,14 @@ const ColorConversion = () => {
 
               {format === "rgb" && (
                 <div className="space-y-2.5">
-                  {(["r", "g", "b"] as const).map((key) => (
+                  {(["r", "g", "b"] as const).map((key) => {
+                    const channelGradient =
+                      key === "r"
+                        ? `linear-gradient(to right, rgb(0,${rgb.g},${rgb.b}), rgb(255,${rgb.g},${rgb.b}))`
+                        : key === "g"
+                          ? `linear-gradient(to right, rgb(${rgb.r},0,${rgb.b}), rgb(${rgb.r},255,${rgb.b}))`
+                          : `linear-gradient(to right, rgb(${rgb.r},${rgb.g},0), rgb(${rgb.r},${rgb.g},255))`;
+                    return (
                     <div key={key}>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground uppercase">
@@ -320,10 +323,10 @@ const ColorConversion = () => {
                           handleRgbChange(key, parseInt(e.target.value))
                         }
                         className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                        style={{ background: rgbGradient }}
+                        style={{ background: channelGradient }}
                       />
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
 
@@ -364,18 +367,19 @@ const ColorConversion = () => {
               )}
 
               <div className="flex items-center justify-between border-t border-border pt-2.5">
-                <select
+                <Dropdown
+                  options={[
+                    { label: "Picker", value: "picker" },
+                    { label: "HSB", value: "hsb" },
+                    { label: "HSL", value: "hsl" },
+                    { label: "RGB", value: "rgb" },
+                    { label: "CMYK", value: "cmyk" },
+                    { label: "LAB", value: "lab" },
+                  ]}
                   value={format}
-                  onChange={(e) => setFormat(e.target.value)}
-                  className="text-sm border border-border rounded-lg p-1.5 bg-card text-foreground focus:outline-none cursor-pointer"
-                >
-                  <option value="picker">Picker</option>
-                  <option value="hsb">HSB</option>
-                  <option value="hsl">HSL</option>
-                  <option value="rgb">RGB</option>
-                  <option value="cmyk">CMYK</option>
-                  <option value="lab">LAB</option>
-                </select>
+                  onChange={(val) => setFormat(String(val))}
+                  className="w-auto min-w-[100px]"
+                />
                 <div className="flex items-center gap-2.5">
                   <button
                     className="text-muted-foreground hover:text-foreground transition-colors"
@@ -384,11 +388,11 @@ const ColorConversion = () => {
                     <Pencil size={14} />
                   </button>
                   <button
-                    onClick={() => copy(currentHex)}
+                    onClick={() => handleCopy("hex-copy", currentHex)}
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     title="Copy"
                   >
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copiedId === "hex-copy" ? <Check size={14} /> : <Copy size={14} />}
                   </button>
                 </div>
               </div>
@@ -411,18 +415,42 @@ const ColorConversion = () => {
               className="rounded-2xl p-10 mb-5 flex items-center justify-between"
               style={{ backgroundColor: currentHex }}
             >
-              <h2 className="text-xl font-bold text-white drop-shadow-sm">
+              <h2
+                className="text-xl font-bold drop-shadow-sm"
+                style={{
+                  color:
+                    rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114 > 150
+                      ? "#000000"
+                      : "#ffffff",
+                }}
+              >
                 {currentHex.toUpperCase()}
               </h2>
               <div className="flex gap-2">
                 <button
                   onClick={() => setIsSaveModalOpen(true)}
-                  className="bg-white/20 rounded-full p-2 text-white hover:bg-white/40 transition-colors"
+                  className="rounded-full p-2 transition-colors"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    color:
+                      rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114 > 150
+                        ? "#000000"
+                        : "#ffffff",
+                  }}
                   title="Save Color"
                 >
                   <Heart size={16} />
                 </button>
-                <button className="bg-white/20 rounded-full p-2 text-white hover:bg-white/40 transition-colors">
+                <button
+                  className="rounded-full p-2 transition-colors"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    color:
+                      rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114 > 150
+                        ? "#000000"
+                        : "#ffffff",
+                  }}
+                >
                   <MoreHorizontal size={16} />
                 </button>
               </div>
@@ -441,10 +469,10 @@ const ColorConversion = () => {
                     {f.value}
                   </span>
                   <button
-                    onClick={() => copy(f.value)}
+                    onClick={() => handleCopy(`format-${f.label}`, f.value)}
                     className="text-foreground transition-colors shrink-0"
                   >
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copiedId === `format-${f.label}` ? <Check size={14} /> : <Copy size={14} />}
                   </button>
                 </div>
               ))}

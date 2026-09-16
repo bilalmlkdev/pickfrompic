@@ -7,10 +7,10 @@ const PageShell: React.FC<{
 }> = ({ children, className = "" }) => {
   return (
     <div
-      className={`min-h-screen w-full relative overflow-hidden ${className}`}
+      className={`h-screen w-full relative overflow-hidden flex flex-col ${className}`}
     >
       <Background />
-      <div className="relative z-10 flex flex-col min-h-screen">{children}</div>
+      <div className="relative z-10 flex flex-col flex-1 overflow-y-auto">{children}</div>
     </div>
   );
 };
