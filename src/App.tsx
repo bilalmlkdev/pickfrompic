@@ -10,9 +10,11 @@ import NotFound from "./pages/NotFound";
 import TopLoader from "./components/atoms/TopLoader";
 import ErrorBoundary from "./components/organisms/ErrorBoundary";
 import OfflineBanner from "./components/organisms/OfflineBanner";
+import useDocumentTitle from "./hooks/useDocumentTitle";
 
 const DelayedRoutes = () => {
   const location = useLocation();
+  useDocumentTitle();
   const [displayLocation, setDisplayLocation] = useState(location);
   const [loaderKey, setLoaderKey] = useState(0);
   const [showLoader, setShowLoader] = useState(false);
