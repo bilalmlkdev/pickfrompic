@@ -33,13 +33,6 @@ export const generatePng = (colors: string[]) => {
     ctx!.fillRect(index * 50, 0, 50, height);
   });
 
-  // Draw the "Exported from" bottom strip
-  ctx!.fillStyle = "rgba(0,0,0,0.1)"; // Transparent grey
-  ctx!.fillRect(0, 90, width, 10);
-  ctx!.fillStyle = "black";
-  ctx!.font = "8px Arial";
-  ctx!.fillText("Exported from pickfrompic.com", 2, 97);
-
   return canvas.toDataURL("image/png");
 };
 

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Copy, Download, FileCode, FileImage, FileText, Code2 } from "lucide-react";
 import {
   convertToCss,
   convertToCode,
@@ -8,8 +8,6 @@ import {
   downloadFile,
 } from "../../utils/exportUtils";
 import ModalShell from "../molecules/ModalShell";
-import IconButton from "../atoms/IconButton";
-import Button from "../atoms/Button";
 
 interface Props {
   isOpen: boolean;
@@ -17,15 +15,22 @@ interface Props {
   colors: string[];
 }
 
+const tabs = [
+  { key: "css" as const, label: "CSS", icon: FileCode },
+  { key: "code" as const, label: "Code", icon: Code2 },
+  { key: "svg" as const, label: "SVG", icon: FileText },
+  { key: "png" as const, label: "PNG", icon: FileImage },
+];
+
 const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
   const [activeTab, setActiveTab] = useState<"css" | "code" | "svg" | "png">("css");
-  const [isCopied, setIsCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const pngDataUrl = useMemo(() => generatePng(colors), [colors]);
 
-  const handleCopy = useCallback((text: string) => {
+  const handleCopy = useCallback((id: string, text: string) => {
     navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 1500);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
   }, []);
 
   if (!isOpen) return null;
@@ -41,7 +46,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
 
   const handleDownload = () => {
     if (activeTab === "css") downloadFile("palette.css", content, "text/css");
-    else if (activeTab === "code") downloadFile("palette.txt", content, "text/plain");
+    else if (activeTab === "code") downloadFile("palette.json", content, "text/plain");
     else if (activeTab === "svg") downloadFile("palette.svg", content, "image/svg+xml");
     else if (activeTab === "png") {
       const a = document.createElement("a");
@@ -52,59 +57,106 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
   };
 
   return (
-    <ModalShell onClose={onClose} maxWidth="max-w-lg">
-      <div className="flex items-center justify-between p-5 border-b border-border">
-        <h2 className="text-lg font-bold text-foreground">Export Palette</h2>
-        <IconButton size="sm" onClick={onClose} variant="ghost">
-          <X size={16} />
-        </IconButton>
-      </div>
-
-      <div className="flex gap-2 p-3 bg-muted/60 border-b border-border">
-        {(["css", "code", "svg", "png"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-1.5 text-xs font-medium uppercase tracking-wider rounded-full transition-colors ${
-              activeTab === tab
-                ? "bg-foreground text-background shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      <div className="p-5 min-h-[180px]">
-        {activeTab === "png" ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3">
-            <img
-              src={pngDataUrl}
-              alt="Palette Preview"
-              className="rounded-xl shadow-lg border border-border"
-            />
-            <p className="text-xs text-muted-foreground">Live preview of your download</p>
-          </div>
-        ) : (
-          <pre className="bg-muted/60 border border-border rounded-xl p-4 text-xs font-mono text-foreground overflow-auto max-h-56 whitespace-pre-wrap">
-            {content}
-          </pre>
-        )}
-      </div>
-
-      <div className="p-5 pt-0 flex gap-3">
-        <Button variant="secondary" fullWidth onClick={handleDownload}>
-          Download
-        </Button>
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={() => handleCopy(content)}
-          icon={isCopied ? <Check size={14} /> : undefined}
+    <ModalShell onClose={onClose} maxWidth="max-w-md">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-4">
+        <div>
+          <h2 className="text-lg font-bold text-foreground">Export Palette</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Download or copy your palette</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-border transition-colors"
         >
-          {isCopied ? "Copied!" : "Copy"}
-        </Button>
+          <X size={15} />
+        </button>
+      </div>
+
+      {/* Color Swatches */}
+      <div className="px-5 pb-4">
+        <div className="flex h-12 rounded-xl overflow-hidden border border-border">
+          {colors.map((color, idx) => (
+            <div
+              key={idx}
+              className="flex-1 relative group cursor-pointer"
+              style={{ backgroundColor: color }}
+              onClick={() => handleCopy(`swatch-${idx}`, color)}
+            >
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 text-white">
+                {copiedId === `swatch-${idx}` ? <Check size={11} /> : color.toUpperCase()}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="px-5 pb-4">
+        <div className="flex gap-1.5 bg-muted/60 rounded-xl p-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${
+                  activeTab === tab.key
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon size={13} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-5 pb-4">
+        <div className="h-48">
+          {activeTab === "png" ? (
+            <div className="h-full rounded-xl border border-border overflow-hidden bg-muted/30 flex items-center justify-center">
+              <img
+                src={pngDataUrl}
+                alt="Palette Preview"
+                className="max-h-full"
+              />
+            </div>
+          ) : (
+            <div className="relative h-full">
+              <pre className="h-full bg-muted/60 border border-border rounded-xl p-4 text-xs font-mono text-foreground overflow-auto whitespace-pre-wrap leading-relaxed">
+                {content}
+              </pre>
+              <button
+                onClick={() => handleCopy("content", content)}
+                className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Copy code"
+              >
+                {copiedId === "content" ? <Check size={12} /> : <Copy size={12} />}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="px-5 pb-5 flex gap-2.5">
+        <button
+          onClick={handleDownload}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <Download size={14} />
+          Download
+        </button>
+        <button
+          onClick={() => handleCopy("all", content)}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium hover:bg-border transition-colors"
+        >
+          {copiedId === "all" ? <Check size={14} /> : <Copy size={14} />}
+          {copiedId === "all" ? "Copied!" : "Copy"}
+        </button>
       </div>
     </ModalShell>
   );
