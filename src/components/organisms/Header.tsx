@@ -11,7 +11,6 @@ import {
   FolderOpen,
   FolderClosed,
   Coffee,
-  Star,
 } from "lucide-react";
 import Logo from "../molecules/Logo";
 import { LuGithub } from "react-icons/lu";
