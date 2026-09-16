@@ -49,7 +49,7 @@ const ToolCard: React.FC<Props> = ({
         >
           <button
             onClick={() => setIsMaximized(false)}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-foreground  flex items-center justify-center text-card transition-colors z-10"
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-foreground flex items-center justify-center text-card transition-colors z-10"
             title="Exit fullscreen"
           >
             <Minimize2 size={14} />
