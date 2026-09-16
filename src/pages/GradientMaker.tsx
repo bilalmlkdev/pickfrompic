@@ -146,8 +146,8 @@ const GradientMaker = () => {
       </div>
 
       <ToolCard>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+          <div className="flex flex-col h-full">
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="text"
@@ -164,7 +164,7 @@ const GradientMaker = () => {
               </button>
             </div>
 
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2 mb-4 flex-1 overflow-y-auto">
               {colors.map((c, idx) => (
                 <div
                   key={c.id}
@@ -304,9 +304,9 @@ const GradientMaker = () => {
             </div>
           </div>
 
-          <div>
+          <div className="flex flex-col h-full">
             <div
-              className="w-full h-64 rounded-2xl border border-border mb-4"
+              className="w-full flex-1 min-h-64 rounded-2xl border border-border mb-4"
               style={{ background: gradientString }}
             />
 

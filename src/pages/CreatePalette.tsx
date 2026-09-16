@@ -93,8 +93,8 @@ const CreatePalette = () => {
       </div>
 
       <ToolCard>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+          <div className="flex flex-col h-full">
             <div className="flex items-center gap-2 mb-3">
               <Input
                 value={paletteName}
@@ -110,7 +110,7 @@ const CreatePalette = () => {
               </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 flex-1 overflow-y-auto">
               {colors.map((color, idx) => {
                 const r = parseInt(color.slice(1, 3), 16);
                 const g = parseInt(color.slice(3, 5), 16);
@@ -170,7 +170,7 @@ const CreatePalette = () => {
             </Button>
           </div>
 
-          <div>
+          <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-foreground">
                 Fine-tune Color
@@ -185,7 +185,7 @@ const CreatePalette = () => {
               </button>
             </div>
 
-            <div className="rounded-xl overflow-hidden mb-3 border border-border">
+            <div className="flex-1 rounded-xl overflow-hidden mb-3 border border-border">
               <HexColorPicker
                 color={currentColor}
                 onChange={updateColor}

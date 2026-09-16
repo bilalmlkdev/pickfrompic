@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useParams } from "react-router-dom";
-import { Check, Copy, Heart, MoreHorizontal, Pipette } from "lucide-react";
+import { Check, Copy, Heart, Pipette } from "lucide-react";
 import {
   hexToRgb,
   rgbToHsl,
@@ -361,12 +361,6 @@ const ColorConversion = () => {
                   title="Save Color"
                 >
                   <Heart size={16} />
-                </button>
-                <button
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                  style={{ backgroundColor: `${textColor}20`, color: textColor }}
-                >
-                  <MoreHorizontal size={16} />
                 </button>
               </div>
             </div>
