@@ -354,21 +354,6 @@ const GradientMaker = () => {
                 </code>
               </div>
 
-              <div className="border border-border rounded-xl p-3 bg-card/50">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-muted-foreground">SVG</span>
-                  <button
-                    onClick={() => handleCopy("svg", svgCode)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {copiedId === "svg" ? <Check size={13} /> : <Copy size={13} />}
-                  </button>
-                </div>
-                <code className="text-xs font-mono text-foreground break-all leading-relaxed block whitespace-pre">
-                  {svgCode}
-                </code>
-              </div>
-
               {/* Color Swatches */}
               <div className="flex gap-2">
                 {colors.map((c) => (
