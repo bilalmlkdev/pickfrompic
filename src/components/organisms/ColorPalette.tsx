@@ -8,7 +8,6 @@ import SectionLabel from "../atoms/SectionLabel";
 
 interface Props {
   colors: string[];
-  selectedColor: string;
   setSelectedColor: (hex: string) => void;
   maxColors: number;
   setMaxColors: (num: number) => void;
@@ -16,7 +15,6 @@ interface Props {
 
 const ColorPalette: React.FC<Props> = ({
   colors,
-  selectedColor,
   setSelectedColor,
   maxColors,
   setMaxColors,
@@ -50,7 +48,6 @@ const ColorPalette: React.FC<Props> = ({
               <Swatch
                 key={idx}
                 color={color}
-                selected={selectedColor === color}
                 onClick={() => setSelectedColor(color)}
                 className="h-10 flex-1 min-w-[24px] shrink-0"
               />

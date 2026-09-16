@@ -77,7 +77,6 @@ const MainPicker = () => {
               />
               <ColorPalette
                 colors={paletteColors}
-                selectedColor={selectedColor}
                 setSelectedColor={handlePaletteColorClick}
                 maxColors={maxColors}
                 setMaxColors={setMaxColors}
