@@ -75,7 +75,6 @@ const CreatePalette = () => {
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) updateColor(result.sRGBHex);
       } catch {
-        // cancelled
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");
@@ -95,7 +94,6 @@ const CreatePalette = () => {
 
       <ToolCard>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Color List */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Input
@@ -172,7 +170,6 @@ const CreatePalette = () => {
             </Button>
           </div>
 
-          {/* Right Column - Picker & Values */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-foreground">
@@ -220,7 +217,6 @@ const CreatePalette = () => {
               </button>
             </div>
 
-            {/* Format Values */}
             <div className="grid grid-cols-2 gap-2">
               {formatValues.map((f) => (
                 <div

@@ -55,7 +55,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Paste clipboard handler
   const handlePaste = useCallback(
     async (e: ClipboardEvent) => {
       if (activeTab !== "paste-clipboard") return;
@@ -91,7 +90,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
     }
   }, [activeTab, handlePaste]);
 
-  // Focus search input when switching to search tab
   useEffect(() => {
     if (activeTab === "search") {
       setTimeout(() => searchInputRef.current?.focus(), 100);
@@ -127,7 +125,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
         onPickedColor(result.sRGBHex);
         onClose();
       } catch {
-        // cancelled
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");
@@ -147,7 +144,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
 
     try {
       if (type === "image") {
-        // For image URLs, validate it loads as an image
         const img = new Image();
         img.crossOrigin = "anonymous";
         await new Promise<void>((resolve, reject) => {
@@ -163,7 +159,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
           onClose();
         }, 600);
       } else {
-        // For website URLs, use a screenshot service
         const screenshotUrl = `https://image.thum.io/get/width/1200/crop/800/${url}`;
         const img = new Image();
         img.crossOrigin = "anonymous";

@@ -1,6 +1,6 @@
 # pickfrompic
 
-A free, open-source color tool for designers and developers. Pick colors from images, create palettes, generate gradients, and convert color formats — all running entirely in your browser.
+A free, open-source color tool for designers and developers. Pick colors from images, create palettes, generate gradients, and convert color formats - all running entirely in your browser.
 
 **Live Demo:** [pickfrompic.vercel.app](https://pickfrompic.vercel.app)
 
@@ -9,7 +9,7 @@ A free, open-source color tool for designers and developers. Pick colors from im
 ### Image Color Picker
 - Upload any image (PNG, JPG, GIF, WEBP) and extract dominant colors instantly
 - Interactive magnifier lens for precise pixel-level color picking
-- Color dot highlighting — click a palette color to see where it appears on the image
+- Color dot highlighting - click a palette color to see where it appears on the image
 - Pick from screen using the EyeDropper API
 - Load images from URLs, website screenshots, or clipboard paste
 
@@ -164,8 +164,8 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Author
 
-**bilalmlkdev** — [GitHub](https://github.com/bilalmlkdev) · [Ko-fi](https://ko-fi.com/bilalmlkdev)
+**bilalmlkdev** - [GitHub](https://github.com/bilalmlkdev) · [Ko-fi](https://ko-fi.com/bilalmlkdev)

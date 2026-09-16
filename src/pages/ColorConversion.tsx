@@ -93,7 +93,6 @@ const ColorConversion = () => {
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) setCurrentHex(result.sRGBHex);
       } catch {
-        // cancelled
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");
@@ -149,13 +148,11 @@ const ColorConversion = () => {
 
       <ToolCard>
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
-          {/* Left - Picker / Sliders */}
           <div className="flex flex-col">
             <h2 className="text-sm font-semibold text-foreground mb-3">
               Color Conversion
             </h2>
 
-            {/* Picker mode */}
             {format === "picker" && (
               <>
                 <div className="rounded-xl overflow-hidden mb-3 border border-border">
@@ -184,7 +181,6 @@ const ColorConversion = () => {
               </>
             )}
 
-            {/* HSB sliders */}
             {format === "hsb" && (
               <div className="border border-border rounded-xl p-3 bg-muted/50 space-y-2.5">
                 {(["h", "s", "v"] as const).map((key) => (
@@ -214,7 +210,6 @@ const ColorConversion = () => {
               </div>
             )}
 
-            {/* HSL sliders */}
             {format === "hsl" && (
               <div className="border border-border rounded-xl p-3 bg-muted/50 space-y-2.5">
                 {(["h", "s", "l"] as const).map((key) => (
@@ -244,7 +239,6 @@ const ColorConversion = () => {
               </div>
             )}
 
-            {/* RGB sliders */}
             {format === "rgb" && (
               <div className="border border-border rounded-xl p-3 bg-muted/50 space-y-2.5">
                 {(["r", "g", "b"] as const).map((key) => {
@@ -280,7 +274,6 @@ const ColorConversion = () => {
               </div>
             )}
 
-            {/* CMYK */}
             {format === "cmyk" && (
               <div className="border border-border rounded-xl p-3 bg-muted/50 grid grid-cols-2 gap-2.5">
                 {(["c", "m", "y", "k"] as const).map((key) => (
@@ -297,7 +290,6 @@ const ColorConversion = () => {
               </div>
             )}
 
-            {/* LAB */}
             {format === "lab" && (
               <div className="border border-border rounded-xl p-3 bg-muted/50 grid grid-cols-3 gap-2.5">
                 {(["L", "a", "b"] as const).map((key) => (
@@ -314,7 +306,6 @@ const ColorConversion = () => {
               </div>
             )}
 
-            {/* Dropdown + Copy */}
             <div className="flex items-center gap-2 mt-3 mb-4">
               <Dropdown
                 options={[
@@ -349,9 +340,7 @@ const ColorConversion = () => {
             </Button>
           </div>
 
-          {/* Right - Preview & Formats */}
           <div className="flex flex-col">
-            {/* Color Preview Card */}
             <div
               className="rounded-2xl p-8 mb-5 flex items-center justify-between"
               style={{ backgroundColor: currentHex }}
@@ -382,7 +371,6 @@ const ColorConversion = () => {
               </div>
             </div>
 
-            {/* Format Cards Grid */}
             <div className="grid grid-cols-2 gap-3">
               {formats.map((f) => (
                 <div

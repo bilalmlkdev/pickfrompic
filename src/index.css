@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* ---------------------------------- */
-/* Theme Variables (Light only)       */
-/* ---------------------------------- */
 :root {
   --background: #ffffff;
   --foreground: #18181b;
@@ -25,9 +22,6 @@
   --tile-dot: rgba(0, 0, 0, 0.05);
 }
 
-/* ---------------------------------- */
-/* Map Variables to Tailwind v4 Theme */
-/* ---------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -56,7 +50,6 @@ body {
   color: var(--foreground);
 }
 
-/* Hide scrollbar completely */
 * {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -66,14 +59,15 @@ body {
   display: none;
 }
 
-/* Ensure native form elements respect theme */
+button {
+  cursor: pointer;
+}
+
 select,
 input[type="color"] {
   color-scheme: light;
 }
 
-/* for background */
-/* Keyframes used by .bg-blur-circle */
 @keyframes safari-layer-keepalive {
   0% {
     transform: translateZ(0) scale(1);
@@ -90,12 +84,10 @@ input[type="color"] {
   }
 }
 
-/* ===== bg-gradient-main ===== */
 .bg-gradient-main {
   background: linear-gradient(180deg, #fff, #fff 70%, hsla(60, 9%, 98%, 0));
 }
 
-/* ===== bg-fade-bottom: blends hero bg into the flat page bg below it ===== */
 .bg-fade-bottom {
   position: absolute;
   width: 100%;
@@ -107,7 +99,6 @@ input[type="color"] {
   pointer-events: none;
 }
 
-/* ===== bg-blur-circle ===== */
 .bg-blur-circle {
   position: absolute;
   width: 605px;
@@ -129,7 +120,6 @@ input[type="color"] {
   isolation: isolate;
 }
 
-/* Colored blur circles */
 .bg-blur-left-orange {
   left: -209px;
   top: 12px;
@@ -154,7 +144,6 @@ input[type="color"] {
   background-color: var(--dynamic-right-2, #0f8);
 }
 
-/* ===== Left fade bars ===== */
 .bg-fade-left-bar {
   position: absolute;
   width: 80px;
@@ -167,47 +156,15 @@ input[type="color"] {
   -webkit-mask: linear-gradient(180deg, #000, #000 70%, transparent);
 }
 
-.bg-fade-left-bar-1 {
-  left: 0;
-  opacity: 1;
-}
+.bg-fade-left-bar-1 { left: 0; opacity: 1; }
+.bg-fade-left-bar-2 { left: 80px; opacity: 0.9; }
+.bg-fade-left-bar-3 { left: 160px; opacity: 0.8; }
+.bg-fade-left-bar-4 { left: 240px; opacity: 0.7; }
+.bg-fade-left-bar-5 { left: 320px; opacity: 0.6; }
+.bg-fade-left-bar-6 { left: 400px; opacity: 0.5; }
+.bg-fade-left-bar-7 { left: 480px; opacity: 0.4; }
+.bg-fade-left-bar-8 { left: 560px; opacity: 0.3; }
 
-.bg-fade-left-bar-2 {
-  left: 80px;
-  opacity: 0.9;
-}
-
-.bg-fade-left-bar-3 {
-  left: 160px;
-  opacity: 0.8;
-}
-
-.bg-fade-left-bar-4 {
-  left: 240px;
-  opacity: 0.7;
-}
-
-.bg-fade-left-bar-5 {
-  left: 320px;
-  opacity: 0.6;
-}
-
-.bg-fade-left-bar-6 {
-  left: 400px;
-  opacity: 0.5;
-}
-
-.bg-fade-left-bar-7 {
-  left: 480px;
-  opacity: 0.4;
-}
-
-.bg-fade-left-bar-8 {
-  left: 560px;
-  opacity: 0.3;
-}
-
-/* ===== Right fade bars ===== */
 .bg-fade-right-bar {
   position: absolute;
   width: 80px;
@@ -220,49 +177,16 @@ input[type="color"] {
   -webkit-mask: linear-gradient(180deg, #000, #000 70%, transparent);
 }
 
-.bg-fade-right-bar-1 {
-  right: 560px;
-  opacity: 0.3;
-}
+.bg-fade-right-bar-1 { right: 560px; opacity: 0.3; }
+.bg-fade-right-bar-2 { right: 480px; opacity: 0.4; }
+.bg-fade-right-bar-3 { right: 400px; opacity: 0.5; }
+.bg-fade-right-bar-4 { right: 320px; opacity: 0.6; }
+.bg-fade-right-bar-5 { right: 240px; opacity: 0.7; }
+.bg-fade-right-bar-6 { right: 160px; opacity: 0.8; }
+.bg-fade-right-bar-7 { right: 80px; opacity: 0.9; }
+.bg-fade-right-bar-8 { right: 0; opacity: 1; }
 
-.bg-fade-right-bar-2 {
-  right: 480px;
-  opacity: 0.4;
-}
-
-.bg-fade-right-bar-3 {
-  right: 400px;
-  opacity: 0.5;
-}
-
-.bg-fade-right-bar-4 {
-  right: 320px;
-  opacity: 0.6;
-}
-
-.bg-fade-right-bar-5 {
-  right: 240px;
-  opacity: 0.7;
-}
-
-.bg-fade-right-bar-6 {
-  right: 160px;
-  opacity: 0.8;
-}
-
-.bg-fade-right-bar-7 {
-  right: 80px;
-  opacity: 0.9;
-}
-
-.bg-fade-right-bar-8 {
-  right: 0;
-  opacity: 1;
-}
-
-/* ===== Mobile (max-width: 768px) ===== */
 @media (max-width: 768px) {
-
   .bg-fade-left-bar-1,
   .bg-fade-left-bar-2,
   .bg-fade-left-bar-3,
@@ -280,45 +204,14 @@ input[type="color"] {
     z-index: 0;
   }
 
-  .bg-fade-left-bar-1 {
-    top: 0;
-    opacity: 1;
-  }
-
-  .bg-fade-left-bar-2 {
-    top: 50px;
-    opacity: 0.9;
-  }
-
-  .bg-fade-left-bar-3 {
-    top: 100px;
-    opacity: 0.8;
-  }
-
-  .bg-fade-left-bar-4 {
-    top: 150px;
-    opacity: 0.7;
-  }
-
-  .bg-fade-left-bar-5 {
-    top: 200px;
-    opacity: 0.6;
-  }
-
-  .bg-fade-left-bar-6 {
-    top: 250px;
-    opacity: 0.5;
-  }
-
-  .bg-fade-left-bar-7 {
-    top: 300px;
-    opacity: 0.4;
-  }
-
-  .bg-fade-left-bar-8 {
-    top: 350px;
-    opacity: 0.3;
-  }
+  .bg-fade-left-bar-1 { top: 0; opacity: 1; }
+  .bg-fade-left-bar-2 { top: 50px; opacity: 0.9; }
+  .bg-fade-left-bar-3 { top: 100px; opacity: 0.8; }
+  .bg-fade-left-bar-4 { top: 150px; opacity: 0.7; }
+  .bg-fade-left-bar-5 { top: 200px; opacity: 0.6; }
+  .bg-fade-left-bar-6 { top: 250px; opacity: 0.5; }
+  .bg-fade-left-bar-7 { top: 300px; opacity: 0.4; }
+  .bg-fade-left-bar-8 { top: 350px; opacity: 0.3; }
 
   .bg-fade-right-bar-1,
   .bg-fade-right-bar-2,
@@ -337,50 +230,17 @@ input[type="color"] {
     z-index: 0;
   }
 
-  .bg-fade-right-bar-1 {
-    bottom: 350px;
-    opacity: 0.3;
-  }
-
-  .bg-fade-right-bar-2 {
-    bottom: 300px;
-    opacity: 0.4;
-  }
-
-  .bg-fade-right-bar-3 {
-    bottom: 250px;
-    opacity: 0.5;
-  }
-
-  .bg-fade-right-bar-4 {
-    bottom: 200px;
-    opacity: 0.6;
-  }
-
-  .bg-fade-right-bar-5 {
-    bottom: 150px;
-    opacity: 0.7;
-  }
-
-  .bg-fade-right-bar-6 {
-    bottom: 100px;
-    opacity: 0.8;
-  }
-
-  .bg-fade-right-bar-7 {
-    bottom: 50px;
-    opacity: 0.9;
-  }
-
-  .bg-fade-right-bar-8 {
-    bottom: 0;
-    opacity: 1;
-  }
+  .bg-fade-right-bar-1 { bottom: 350px; opacity: 0.3; }
+  .bg-fade-right-bar-2 { bottom: 300px; opacity: 0.4; }
+  .bg-fade-right-bar-3 { bottom: 250px; opacity: 0.5; }
+  .bg-fade-right-bar-4 { bottom: 200px; opacity: 0.6; }
+  .bg-fade-right-bar-5 { bottom: 150px; opacity: 0.7; }
+  .bg-fade-right-bar-6 { bottom: 100px; opacity: 0.8; }
+  .bg-fade-right-bar-7 { bottom: 50px; opacity: 0.9; }
+  .bg-fade-right-bar-8 { bottom: 0; opacity: 1; }
 }
 
-/* ===== Tablet (768px – 1023px) ===== */
 @media (min-width: 768px) and (max-width: 1023px) {
-
   .bg-fade-left-bar-1,
   .bg-fade-left-bar-2,
   .bg-fade-left-bar-3,
@@ -395,35 +255,12 @@ input[type="color"] {
     z-index: 0;
   }
 
-  .bg-fade-left-bar-1 {
-    left: 0;
-    opacity: 1;
-  }
-
-  .bg-fade-left-bar-2 {
-    left: 50px;
-    opacity: 0.9;
-  }
-
-  .bg-fade-left-bar-3 {
-    left: 100px;
-    opacity: 0.8;
-  }
-
-  .bg-fade-left-bar-4 {
-    left: 150px;
-    opacity: 0.7;
-  }
-
-  .bg-fade-left-bar-5 {
-    left: 200px;
-    opacity: 0.6;
-  }
-
-  .bg-fade-left-bar-6 {
-    left: 250px;
-    opacity: 0.5;
-  }
+  .bg-fade-left-bar-1 { left: 0; opacity: 1; }
+  .bg-fade-left-bar-2 { left: 50px; opacity: 0.9; }
+  .bg-fade-left-bar-3 { left: 100px; opacity: 0.8; }
+  .bg-fade-left-bar-4 { left: 150px; opacity: 0.7; }
+  .bg-fade-left-bar-5 { left: 200px; opacity: 0.6; }
+  .bg-fade-left-bar-6 { left: 250px; opacity: 0.5; }
 
   .bg-fade-right-bar-1,
   .bg-fade-right-bar-2,
@@ -439,35 +276,12 @@ input[type="color"] {
     z-index: 1;
   }
 
-  .bg-fade-right-bar-1 {
-    right: 250px;
-    opacity: 0.5;
-  }
-
-  .bg-fade-right-bar-2 {
-    right: 200px;
-    opacity: 0.6;
-  }
-
-  .bg-fade-right-bar-3 {
-    right: 150px;
-    opacity: 0.7;
-  }
-
-  .bg-fade-right-bar-4 {
-    right: 100px;
-    opacity: 0.8;
-  }
-
-  .bg-fade-right-bar-5 {
-    right: 50px;
-    opacity: 0.9;
-  }
-
-  .bg-fade-right-bar-6 {
-    right: 0;
-    opacity: 1;
-  }
+  .bg-fade-right-bar-1 { right: 250px; opacity: 0.5; }
+  .bg-fade-right-bar-2 { right: 200px; opacity: 0.6; }
+  .bg-fade-right-bar-3 { right: 150px; opacity: 0.7; }
+  .bg-fade-right-bar-4 { right: 100px; opacity: 0.8; }
+  .bg-fade-right-bar-5 { right: 50px; opacity: 0.9; }
+  .bg-fade-right-bar-6 { right: 0; opacity: 1; }
 
   .bg-fade-left-bar-1,
   .bg-fade-left-bar-2,
@@ -485,9 +299,7 @@ input[type="color"] {
   }
 }
 
-/* ===== Desktop small (1024px – 1279px) ===== */
 @media (min-width: 1024px) and (max-width: 1279px) {
-
   .bg-fade-left-bar-8,
   .bg-fade-right-bar-1 {
     display: none;

@@ -58,7 +58,6 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
 
   return (
     <ModalShell onClose={onClose} maxWidth="max-w-md">
-      {/* Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div>
           <h2 className="text-lg font-bold text-foreground">Export Palette</h2>
@@ -73,7 +72,6 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         </button>
       </div>
 
-      {/* Color Swatches */}
       <div className="px-5 pb-4">
         <div className="flex h-12 rounded-xl overflow-hidden border border-border">
           {colors.map((color, idx) => (
@@ -91,7 +89,6 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="px-5 pb-4">
         <div className="flex gap-1.5 bg-muted/60 rounded-xl p-1">
           {tabs.map((tab) => {
@@ -114,7 +111,6 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-5 pb-4">
         <div className="h-48">
           {activeTab === "png" ? (
@@ -142,7 +138,6 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="px-5 pb-5 flex gap-2.5">
         <button
           onClick={handleDownload}

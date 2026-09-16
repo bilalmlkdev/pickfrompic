@@ -49,7 +49,7 @@ const ToolCard: React.FC<Props> = ({
         >
           <button
             onClick={() => setIsMaximized(false)}
-            className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-muted hover:bg-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10"
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-foreground  flex items-center justify-center text-card transition-colors z-10"
             title="Exit fullscreen"
           >
             <Minimize2 size={14} />
@@ -69,10 +69,10 @@ const ToolCard: React.FC<Props> = ({
       {!noMaximize && (
         <button
           onClick={() => setIsMaximized(true)}
-          className="absolute top-5 -right-4 w-8 h-8 rounded-l-lg rounded-r-full bg-card border border-border border-r-0 shadow-md hover:shadow-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-all z-10"
+          className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-foreground border border-border border-r-0 shadow-md hover:shadow-lg flex items-center justify-center text-card transition-all z-10"
           title="Maximize"
         >
-          <Maximize2 size={14} />
+          <Maximize2 size={18} />
         </button>
       )}
       {children}

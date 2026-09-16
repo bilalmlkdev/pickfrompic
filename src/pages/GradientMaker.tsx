@@ -99,7 +99,6 @@ const GradientMaker = () => {
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) updateColorHex(index, result.sRGBHex);
       } catch {
-        // cancelled
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");
@@ -148,7 +147,6 @@ const GradientMaker = () => {
 
       <ToolCard>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Controls */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <input
@@ -166,7 +164,6 @@ const GradientMaker = () => {
               </button>
             </div>
 
-            {/* Color Stops */}
             <div className="space-y-2 mb-4">
               {colors.map((c, idx) => (
                 <div
@@ -242,7 +239,6 @@ const GradientMaker = () => {
               Add Stop
             </button>
 
-            {/* Angle & Type */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
@@ -277,7 +273,6 @@ const GradientMaker = () => {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-2.5">
               <Button
                 variant="secondary"
@@ -309,15 +304,12 @@ const GradientMaker = () => {
             </div>
           </div>
 
-          {/* Right Column - Preview & Codes */}
           <div>
-            {/* Preview */}
             <div
               className="w-full h-64 rounded-2xl border border-border mb-4"
               style={{ background: gradientString }}
             />
 
-            {/* Gradient Bar */}
             <div
               className="relative h-5 rounded-full overflow-hidden mb-5 border border-border"
               style={{ background: gradientString }}
@@ -337,7 +329,6 @@ const GradientMaker = () => {
               ))}
             </div>
 
-            {/* Format Codes */}
             <div className="space-y-3">
               <div className="border border-border rounded-xl p-3 bg-card/50">
                 <div className="flex items-center justify-between mb-2">
@@ -354,7 +345,6 @@ const GradientMaker = () => {
                 </code>
               </div>
 
-              {/* Color Swatches */}
               <div className="flex gap-2">
                 {colors.map((c) => (
                   <button

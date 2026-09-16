@@ -23,7 +23,7 @@ const OfflineBanner: React.FC = () => {
     <div className="fixed top-0 left-0 right-0 z-[9999] bg-muted border-b border-border px-4 py-2.5 flex items-center justify-center gap-2">
       <WifiOff size={14} className="text-muted-foreground" />
       <span className="text-sm text-muted-foreground font-medium">
-        You're offline — some features may not work
+        You're offline - some features may not work
       </span>
     </div>
   );

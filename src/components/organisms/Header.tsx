@@ -51,7 +51,6 @@ const Header: React.FC = () => {
       <Logo />
 
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Tools Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsToolsOpen(!isToolsOpen)}
@@ -127,7 +126,6 @@ const Header: React.FC = () => {
           )}
         </div>
 
-        {/* Color / Image Picker toggle */}
         <button
           onClick={handlePickerToggle}
           aria-label={isMainPage ? "Switch to color picker" : "Switch to image picker"}
@@ -137,7 +135,6 @@ const Header: React.FC = () => {
           <span className="hidden sm:inline">{isMainPage ? "Color picker" : "Image picker"}</span>
         </button>
 
-        {/* Support on Ko-fi */}
         <a
           href="https://ko-fi.com/bilalmlkdev"
           target="_blank"
@@ -149,7 +146,6 @@ const Header: React.FC = () => {
           <span className="hidden sm:inline">Support</span>
         </a>
 
-        {/* GitHub Repo */}
         <a
           href="https://github.com/bilalmlkdev/pickfrompic"
           target="_blank"

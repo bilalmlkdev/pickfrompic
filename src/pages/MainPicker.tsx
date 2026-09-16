@@ -49,7 +49,7 @@ const MainPicker = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="text-center mt-8 md:mt-12 mb-4 md:mb-6 px-4">
+      <div className="text-center mt-8 mb-4 md:mb-6 px-4">
         <h1 className="text-[28px] md:text-[42px] font-medium text-foreground tracking-tight leading-tight">
           Free Color Picker:
           <br />
@@ -63,9 +63,7 @@ const MainPicker = () => {
 
       <div className="relative">
         <ToolCard>
-          {/* Left side: ImageUploader + ColorPalette */}
           <div className="grid grid-cols-1 lg:grid-cols-[67%_30%] gap-10 pr-6">
-            {/* Left Column - 75% */}
             <div className="flex flex-col gap-5">
               <ImageUploader
                 imageSrc={imageSrc}
@@ -83,7 +81,6 @@ const MainPicker = () => {
               />
             </div>
 
-            {/* Right Column - 25% */}
             <div>
               <ColorDetailsPanel
                 colors={extractedColors}

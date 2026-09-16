@@ -40,7 +40,6 @@ const ImageUploader: React.FC<Props> = ({
     }
   };
 
-  // Scan image for highlight color positions
   useEffect(() => {
     if (!highlightColor || !hiddenCanvasRef.current) {
       setDotPositions([]);
