@@ -4,17 +4,17 @@ import { useLocation } from "react-router-dom";
 const titles: Record<string, string> = {
   "/": "Image Color Picker - pickfrompic",
   "/dashboard": "Dashboard - pickfrompic",
-  "/dashboard/palettes": "Saved Palettes - pickfrompic",
-  "/dashboard/colors": "Saved Colors - pickfrompic",
-  "/dashboard/gradients": "Saved Gradients - pickfrompic",
-  "/dashboard/palette": "Palette Generator - pickfrompic",
-  "/dashboard/gradient": "Gradient Maker - pickfrompic",
+  "/dashboard/palette": "Saved Palettes - pickfrompic",
+  "/dashboard/color": "Saved Colors - pickfrompic",
+  "/dashboard/gradient": "Saved Gradients - pickfrompic",
+  "/dashboard/palette/create": "Palette Generator - pickfrompic",
+  "/dashboard/gradient/create": "Gradient Maker - pickfrompic",
+  "/dashboard/color/create": "Color Conversion - pickfrompic",
 };
 
 const getDynamicTitle = (pathname: string): string => {
   if (titles[pathname]) return titles[pathname];
   if (pathname.startsWith("/color/")) return "Color Conversion - pickfrompic";
-  if (pathname === "/404" || pathname === "*") return "Page Not Found - pickfrompic";
   return "pickfrompic - Image Color Picker & Palette Tool";
 };
 
