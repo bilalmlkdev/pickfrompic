@@ -11,15 +11,19 @@ import ErrorBoundary from "./components/organisms/ErrorBoundary";
 import OfflineBanner from "./components/organisms/OfflineBanner";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 
-function App() {
+const DocumentTitle = () => {
   useDocumentTitle();
+  return null;
+};
 
+function App() {
   return (
     <ErrorBoundary>
       <DashboardProvider>
         <BrowserRouter>
           <OfflineBanner />
           <PageShell>
+            <DocumentTitle />
             <TopLoader />
             <Header />
             <Routes>
