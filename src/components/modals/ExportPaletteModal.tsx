@@ -8,6 +8,7 @@ import {
   downloadFile,
 } from "../../utils/exportUtils";
 import ModalShell from "../molecules/ModalShell";
+import CodeBlock from "../atoms/CodeBlock";
 
 interface Props {
   isOpen: boolean;
@@ -123,9 +124,10 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
             </div>
           ) : (
             <div className="relative h-full">
-              <pre className="h-full bg-muted/60 border border-border rounded-xl p-4 text-xs font-mono text-foreground overflow-auto whitespace-pre-wrap leading-relaxed">
-                {content}
-              </pre>
+              <CodeBlock
+                code={content}
+                language={activeTab === "svg" ? "svg" : activeTab === "code" ? "json" : "css"}
+              />
               <button
                 onClick={() => handleCopy("content", content)}
                 aria-label="Copy code to clipboard"

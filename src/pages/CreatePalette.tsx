@@ -29,6 +29,7 @@ import {
 } from "../utils/exportUtils";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
+import CodeBlock from "../components/atoms/CodeBlock";
 import Input from "../components/atoms/Input";
 import ToolCard from "../components/templates/ToolCard";
 
@@ -394,10 +395,11 @@ const CreatePalette = () => {
                 ))}
               </div>
               {exportTab !== "png" && (
-                <div className="border border-border rounded-xl p-3 bg-card/50 max-h-24 overflow-y-auto">
-                  <code className="text-xs font-mono text-foreground break-all leading-relaxed">
-                    {exportCode}
-                  </code>
+                <div className="border border-border rounded-xl overflow-hidden bg-[#1e1e1e]">
+                  <CodeBlock
+                    code={exportCode}
+                    language={exportTab === "svg" ? "svg" : exportTab === "json" ? "json" : "css"}
+                  />
                 </div>
               )}
               <Button

@@ -13,6 +13,7 @@ import {
 import { isValidHex } from "../utils/ColorMath";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
+import CodeBlock from "../components/atoms/CodeBlock";
 import Dropdown from "../components/atoms/Dropdown";
 import ToolCard from "../components/templates/ToolCard";
 
@@ -390,8 +391,8 @@ const GradientMaker = () => {
             </div>
 
             <div className="space-y-3">
-              <div className="border border-border rounded-xl p-3 bg-card/50">
-                <div className="flex items-center justify-between mb-2">
+              <div className="border border-border rounded-xl overflow-hidden bg-[#1e1e1e]">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border">
                   <span className="text-xs font-medium text-muted-foreground">CSS</span>
                   <button
                     onClick={() => handleCopy("css", cssCode)}
@@ -400,9 +401,9 @@ const GradientMaker = () => {
                     {copiedId === "css" ? <Check size={13} /> : <Copy size={13} />}
                   </button>
                 </div>
-                <code className="text-xs font-mono text-foreground break-all leading-relaxed block">
-                  {cssCode}
-                </code>
+                <div className="p-4">
+                  <CodeBlock code={cssCode} language="css" />
+                </div>
               </div>
 
               <div className="flex gap-2">
