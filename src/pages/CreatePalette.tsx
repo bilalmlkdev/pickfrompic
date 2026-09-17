@@ -395,12 +395,10 @@ const CreatePalette = () => {
                 ))}
               </div>
               {exportTab !== "png" && (
-                <div className="border border-border rounded-xl overflow-hidden bg-[#1e1e1e]">
-                  <CodeBlock
-                    code={exportCode}
-                    language={exportTab === "svg" ? "svg" : exportTab === "json" ? "json" : "css"}
-                  />
-                </div>
+                <CodeBlock
+                  code={exportCode}
+                  language={exportTab === "svg" ? "svg" : exportTab === "json" ? "json" : "css"}
+                />
               )}
               <Button
                 variant="secondary"
