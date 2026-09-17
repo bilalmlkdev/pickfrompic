@@ -8,7 +8,7 @@ import ToolCard from "../components/templates/ToolCard";
 
 const MainPicker = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(
-    "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&q=80",
   );
   const [selectedColor, setSelectedColor] = useState<string>("#2596be");
   const [hoveredColor, setHoveredColor] = useState<string | null>(null);

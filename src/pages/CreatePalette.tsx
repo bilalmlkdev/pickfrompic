@@ -1,60 +1,62 @@
 import { useState, useCallback } from "react";
-import { HexColorPicker } from "react-colorful";
-import {
-  Check,
-  Copy,
-  Dices,
-  Pipette,
-  Plus,
-  Trash2,
-  Download,
-  Sparkles,
-} from "lucide-react";
-import {
-  hexToRgb,
-  rgbToHsl,
-  rgbToCmyk,
-  isValidHex,
-  getComplementary,
-  getAnalogous,
-  getTriadic,
-  getSplitComplementary,
-} from "../utils/ColorMath";
-import {
-  convertToCss,
-  convertToCode,
-  generateSvg,
-  generatePng,
-  downloadFile,
-} from "../utils/exportUtils";
+import { useParams } from "react-router-dom";
+import { Check, Copy, Heart, Pipette, LayoutGrid, Paintbrush, CreditCard, Plus, Shuffle } from "lucide-react";
+import ExportPaletteModal from "../components/modals/ExportPaletteModal";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
-import CodeBlock from "../components/atoms/CodeBlock";
-import Input from "../components/atoms/Input";
 import ToolCard from "../components/templates/ToolCard";
 
-const presetPalettes = [
-  { name: "Sunset", colors: ["#FF6B6B", "#FFA07A", "#FFD700", "#FF4500", "#FF1493"] },
-  { name: "Ocean", colors: ["#006994", "#0099CC", "#00CED1", "#20B2AA", "#48D1CC"] },
-  { name: "Forest", colors: ["#228B22", "#32CD32", "#90EE90", "#98FB98", "#006400"] },
-  { name: "Lavender", colors: ["#E6E6FA", "#D8BFD8", "#DDA0DD", "#EE82EE", "#9370DB"] },
-  { name: "Peach", colors: ["#FFDAB9", "#FFE4B5", "#FFECD2", "#FFD1BA", "#FFC3A0"] },
-  { name: "Midnight", colors: ["#191970", "#000080", "#00008B", "#003366", "#1A1A2E"] },
+const colorNames: Record<string, string> = {
+  "#e59f71": "Peach", "#ba5a31": "Rust", "#0c0c0c": "Jet Black", "#69dc9e": "Mint",
+  "#ff0000": "Red", "#00ff00": "Green", "#0000ff": "Blue", "#ffff00": "Yellow",
+  "#ff00ff": "Magenta", "#00ffff": "Cyan", "#ffffff": "White", "#000000": "Black",
+  "#2596be": "Fjord Signal", "#f59e0b": "Amber", "#8b5cf6": "Violet",
+};
+
+const getColorName = (hex: string): string => {
+  const lower = hex.toLowerCase();
+  if (colorNames[lower]) return colorNames[lower];
+  return "Custom";
+};
+
+const defaultColors = ["#2596be", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444"];
+
+const colorPresets = [
+  ["#ff6b6b", "#feca57", "#48dbfb", "#ff9ff3"],
+  ["#00d2d3", "#ff9f43", "#ee5a24", "#0abde3"],
+  ["#10ac84", "#1dd1a1", "#10ac84", "#01a3a4"],
+  ["#5f27cd", "#341f97", "#c44dff", "#6c5ce7"],
+  ["#ff6348", "#ffa502", "#eccc68", "#a4b0be"],
+  ["#2ed573", "#7bed9f", "#70a1ff", "#1e90ff"],
 ];
 
+const PRESET_PALETTES: Record<string, string[]> = {
+  "Warm Sunset": ["#ff6b35", "#f7931a", "#ffd700", "#ff4500"],
+  "Cool Ocean": ["#0077be", "#00a9ce", "#00d4ff", "#005f73"],
+  "Forest": ["#228b22", "#32cd32", "#90ee90", "#2e8b57"],
+  "Royal Purple": ["#8b008b", "#9370db", "#dda0dd", "#4b0082"],
+  "Hot Pink": ["#ff1493", "#ff69b4", "#ffb6c1", "#c71585"],
+  "Neon": ["#00ff00", "#ff00ff", "#00ffff", "#ffff00"],
+};
+
+const randomHex = () => {
+  const h = Math.floor(Math.random() * 16777215).toString(16);
+  return `#${"0".repeat(6 - h.length)}${h}`;
+};
+
 const CreatePalette = () => {
-  const [colors, setColors] = useState<string[]>([
-    "#E59F71",
-    "#BA5A31",
-    "#0C0C0C",
-    "#69DC9E",
-  ]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [paletteName, setPaletteName] = useState("New Color Palette");
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const { colors: urlColors } = useParams();
+  const initialColors = urlColors
+    ? urlColors.split("-").map((c) => `#${c}`)
+    : defaultColors;
+
+  const [colors, setColors] = useState<string[]>(initialColors);
+  const [name, setName] = useState("");
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [exportTab, setExportTab] = useState<"css" | "json" | "svg" | "png">("css");
-  const [showPresets, setShowPresets] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [showAllPresets, setShowAllPresets] = useState(false);
+  const [previewTab, setPreviewTab] = useState("strip");
 
   const handleCopy = useCallback((id: string, value: string) => {
     navigator.clipboard.writeText(value);
@@ -62,374 +64,390 @@ const CreatePalette = () => {
     setTimeout(() => setCopiedId(null), 1500);
   }, []);
 
-  const currentColor = colors[selectedIndex] || "#000000";
-  const rgb = hexToRgb(currentColor);
-  const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-  const cmyk = rgbToCmyk(rgb.r, rgb.g, rgb.b);
-
-  const formatValues = [
-    { label: "HEX", value: currentColor.toUpperCase() },
-    { label: "RGB", value: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` },
-    { label: "HSL", value: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` },
-    { label: "CMYK", value: `${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k}` },
-  ];
-
-  const exportCode = (() => {
-    switch (exportTab) {
-      case "css": return convertToCss(colors);
-      case "json": return convertToCode(colors);
-      case "svg": return generateSvg(colors);
-      case "png": return "";
-    }
-  })();
-
-  const updateColor = (newColor: string) => {
-    const newColors = [...colors];
-    newColors[selectedIndex] = newColor;
-    setColors(newColors);
-  };
-
-  const addColor = (index: number) => {
-    const newColors = [...colors];
-    newColors.splice(index + 1, 0, "#FFFFFF");
-    setColors(newColors);
-    setSelectedIndex(index + 1);
-  };
-
-  const removeColor = (index: number) => {
-    if (colors.length <= 2) return;
-    const newColors = colors.filter((_, i) => i !== index);
-    setColors(newColors);
-    if (selectedIndex >= newColors.length) {
-      setSelectedIndex(newColors.length - 1);
-    } else if (selectedIndex > index) {
-      setSelectedIndex(selectedIndex - 1);
-    }
-  };
-
-  const randomize = () => {
-    const random = () =>
-      "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
-    setColors(Array.from({ length: colors.length }, random));
-  };
-
   const pickFromScreen = async () => {
     if ("EyeDropper" in window) {
       try {
         // @ts-expect-error EyeDropper API not in TS lib types
         const eyeDropper = new window.EyeDropper();
         const result = await eyeDropper.open();
-        if (result && result.sRGBHex) updateColor(result.sRGBHex);
+        if (result && result.sRGBHex) setColors((prev) => [...prev, result.sRGBHex]);
       } catch {
         // user cancelled eyeDropper
       }
-    } else {
-      alert("Your browser does not support the EyeDropper API.");
     }
   };
 
-  const generateHarmony = (type: string) => {
-    const base = colors[0] || "#2596be";
-    let newColors: string[];
-    switch (type) {
-      case "complementary": newColors = getComplementary(base); break;
-      case "analogous": newColors = getAnalogous(base); break;
-      case "triadic": newColors = getTriadic(base); break;
-      case "split": newColors = getSplitComplementary(base); break;
-      default: newColors = getComplementary(base);
-    }
-    setColors(newColors);
-    setSelectedIndex(0);
+  const removeColor = (index: number) => {
+    if (colors.length <= 1) return;
+    setColors((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const loadPreset = (preset: typeof presetPalettes[0]) => {
-    setColors(preset.colors);
-    setPaletteName(preset.name);
-    setSelectedIndex(0);
-    setShowPresets(false);
+  const loadPreset = (preset: string[]) => {
+    setColors(preset);
+    setShowAllPresets(false);
   };
 
-  const handleExport = () => {
-    if (exportTab === "png") {
-      const dataUrl = generatePng(colors);
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `${paletteName.toLowerCase().replace(/\s+/g, "-")}.png`;
-      a.click();
-    } else {
-      const ext = exportTab === "svg" ? "svg" : exportTab === "json" ? "json" : "css";
-      downloadFile(
-        `${paletteName.toLowerCase().replace(/\s+/g, "-")}.${ext}`,
-        exportCode,
-        exportTab === "svg" ? "image/svg+xml" : "text/plain"
-      );
-    }
+  const lum = (hex: string) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return r * 0.299 + g * 0.587 + b * 0.114;
+  };
+
+  const avgColor = () => {
+    const r = Math.round(colors.reduce((a, c) => a + parseInt(c.slice(1, 3), 16), 0) / colors.length);
+    const g = Math.round(colors.reduce((a, c) => a + parseInt(c.slice(3, 5), 16), 0) / colors.length);
+    const b = Math.round(colors.reduce((a, c) => a + parseInt(c.slice(5, 7), 16), 0) / colors.length);
+    const toHex = (c: number) => c.toString(16).padStart(2, "0");
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
   return (
-    <div className="flex-1 w-full py-6 px-4 mt-16">
-      <div className="text-center mb-6 px-4">
+    <div className="flex-1 flex flex-col">
+      <div className="text-center mt-8 mb-4 md:mb-6 px-4">
         <h1 className="text-[28px] md:text-[42px] font-medium text-foreground tracking-tight leading-tight">
           Palette Generator
         </h1>
         <p className="mt-2 text-muted-foreground text-lg">
-          Create, customize, and export beautiful color palettes
+          Create custom color palettes with presets, pick from screen, and export as CSS or JSON.
         </p>
       </div>
 
-      <ToolCard>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center gap-2 mb-3">
-              <Input
-                value={paletteName}
-                onChange={(e) => setPaletteName(e.target.value)}
-                className="flex-1"
-              />
-              <button
-                onClick={randomize}
-                className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
-                title="Randomize"
-              >
-                <Dices size={15} />
-              </button>
-            </div>
-
-            <div className="flex gap-1.5 mb-3">
-              <button
-                onClick={() => setShowPresets(!showPresets)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Sparkles size={12} />
-                Presets
-              </button>
-              <div className="flex gap-1">
-                {["complementary", "analogous", "triadic", "split"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => generateHarmony(type)}
-                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1, 4)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {showPresets && (
-              <div className="mb-3 p-3 border border-border rounded-xl bg-muted/50">
-                <div className="grid grid-cols-2 gap-2">
-                  {presetPalettes.map((preset) => (
-                    <button
-                      key={preset.name}
-                      onClick={() => loadPreset(preset)}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-card transition-colors text-left"
-                    >
-                      <div className="flex gap-0.5">
-                        {preset.colors.slice(0, 5).map((c, i) => (
-                          <div
-                            key={i}
-                            className="w-4 h-4 rounded-sm"
-                            style={{ backgroundColor: c }}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs text-muted-foreground">{preset.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2 flex-1 overflow-y-auto">
-              {colors.map((color, idx) => {
-                const r = parseInt(color.slice(1, 3), 16);
-                const g = parseInt(color.slice(3, 5), 16);
-                const b = parseInt(color.slice(5, 7), 16);
-                const luminance = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
-                const textColor = luminance > 0.5 ? "#000000" : "#ffffff";
-                const overlayColor = luminance > 0.5 ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.2)";
+      <div className="relative w-full max-w-[1050px] mx-auto px-4 mb-8">
+        <ToolCard noMaximize className="px-6 pb-6 pt-4">
+          <div
+            className="rounded-2xl overflow-hidden mb-5 shadow-sm"
+            style={{ height: "120px" }}
+          >
+            <div className="flex h-full">
+              {colors.map((color, index) => {
+                const textColor = lum(color) > 150 ? "#000000" : "#ffffff";
                 return (
-                  <div key={idx}>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSelectedIndex(idx)}
-                        className={`flex-1 h-14 rounded-xl flex items-center px-4 shadow-sm transition-colors border-2 ${
-                          selectedIndex === idx
-                            ? "border-foreground"
-                            : "border-transparent"
-                        }`}
-                        style={{ backgroundColor: color, color: textColor }}
-                      >
-                        <span
-                          className="backdrop-blur-sm px-2 py-1 rounded-full text-xs font-mono"
-                          style={{ backgroundColor: overlayColor }}
-                        >
-                          {color}
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => removeColor(idx)}
-                        disabled={colors.length <= 2}
-                        className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Remove color"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                    <div className="flex justify-center -mt-2 z-10 relative">
-                      <button
-                        onClick={() => addColor(idx)}
-                        className="bg-card border border-border shadow-md rounded-full w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
+                  <div
+                    key={index}
+                    className="flex-1 relative group flex flex-col items-center justify-center transition-all hover:flex-[1.5] cursor-pointer min-w-0"
+                    style={{ backgroundColor: color }}
+                  >
+                    <span className="text-xs font-bold truncate px-1" style={{ color: textColor }}>
+                      {getColorName(color)}
+                    </span>
+                    <span className="text-[10px] font-mono opacity-80 truncate px-1" style={{ color: textColor }}>
+                      {color}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopy(`color-${index}`, color);
+                      }}
+                      className="absolute bottom-1.5 right-1.5 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ color: textColor }}
+                    >
+                      {copiedId === `color-${index}` ? <Check size={11} /> : <Copy size={11} />}
+                    </button>
                   </div>
                 );
               })}
             </div>
-
-            <Button
-              variant="primary"
-              fullWidth
-              size="lg"
-              onClick={() => setIsSaveModalOpen(true)}
-              className="mt-4"
-            >
-              Save Palette
-            </Button>
           </div>
 
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-foreground">
-                Fine-tune Color
-              </h2>
-              <button
-                onClick={pickFromScreen}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                title="Pick from screen"
-              >
-                <Pipette size={13} />
-                Pick
-              </button>
-            </div>
-
-            <div className="flex-1 rounded-xl overflow-hidden mb-3 border border-border">
-              <HexColorPicker
-                color={currentColor}
-                onChange={updateColor}
-                className="w-full h-48!"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 mb-4">
-              <input
-                type="text"
-                value={currentColor}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (isValidHex(val)) updateColor(val);
-                  else if (val === "" || val === "#") updateColor(val);
-                }}
-                className="flex-1 border border-border rounded-lg px-3 py-2 bg-card text-foreground text-sm font-mono focus:outline-none focus:ring-2 focus:ring-foreground/10"
-              />
-              <div
-                className="w-9 h-9 rounded-lg border border-border shrink-0"
-                style={{ backgroundColor: currentColor }}
-              />
-              <button
-                onClick={() => handleCopy(`picker-hex`, currentColor)}
-                className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
-                title="Copy HEX"
-              >
-                {copiedId === "picker-hex" ? <Check size={14} /> : <Copy size={14} />}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {formatValues.map((f) => (
-                <div
-                  key={f.label}
-                  className="flex items-center justify-between border border-border rounded-xl p-3 bg-card/50 hover:bg-card transition-colors"
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Palette name"
+                  className="flex-1 border border-border rounded-lg px-3 py-2 bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                />
+                <button
+                  onClick={() => handleCopy("palette-url", `https://pickfrompic.com/palette/${colors.map((c) => c.replace("#", "")).join("-")}`)}
+                  className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+                  title="Copy link"
                 >
-                  <span className="text-sm font-medium text-muted-foreground w-11 shrink-0">
-                    {f.label}
-                  </span>
-                  <span className="font-mono text-sm text-foreground flex-1 ml-2 truncate">
-                    {f.value}
-                  </span>
+                  {copiedId === "palette-url" ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-muted-foreground uppercase">Colors</span>
+                  <span className="text-[10px] text-muted-foreground">{colors.length} colors</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((c, i) => (
+                    <div key={i} className="relative group">
+                      <label
+                        className="block w-11 h-11 rounded-xl border-2 border-border cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                        style={{ backgroundColor: c }}
+                      >
+                        <span
+                          className="absolute inset-0 flex items-center justify-center text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ color: lum(c) > 150 ? "#000" : "#fff" }}
+                        >
+                          {c.replace("#", "").toUpperCase()}
+                        </span>
+                        <input
+                          type="color"
+                          value={c}
+                          onChange={(e) => {
+                            const newColors = [...colors];
+                            newColors[i] = e.target.value;
+                            setColors(newColors);
+                          }}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                      </label>
+                      <button
+                        onClick={() => removeColor(i)}
+                        className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-muted text-muted-foreground border border-border text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-white hover:border-destructive transition-all cursor-pointer"
+                      >
+                        x
+                      </button>
+                    </div>
+                  ))}
                   <button
-                    onClick={() => handleCopy(`format-${f.label}`, f.value)}
-                    className="text-muted-foreground hover:text-foreground transition-colors shrink-0 ml-2"
+                    onClick={() => setColors((prev) => [...prev, randomHex()])}
+                    className="w-11 h-11 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                   >
-                    {copiedId === `format-${f.label}` ? (
-                      <Check size={14} />
-                    ) : (
-                      <Copy size={14} />
-                    )}
+                    <Plus size={16} />
                   </button>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="mb-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Download size={12} className="text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">Export</span>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={pickFromScreen} icon={<Pipette size={13} />} className="flex-1">
+                  Pick from Screen
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setColors(Array.from({ length: 5 }, randomHex))} icon={<Shuffle size={13} />} className="flex-1">
+                  Random
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setIsSaveModalOpen(true)} icon={<Heart size={13} />}>
+                  Save
+                </Button>
               </div>
-              <div className="flex gap-1 mb-2">
-                {(["css", "json", "svg", "png"] as const).map((tab) => (
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-muted-foreground uppercase">Presets</span>
                   <button
-                    key={tab}
-                    onClick={() => setExportTab(tab)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      exportTab === tab
-                        ? "bg-foreground text-card"
-                        : "bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
+                    onClick={() => setShowAllPresets(!showAllPresets)}
+                    className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    {tab.toUpperCase()}
+                    {showAllPresets ? "Less" : "All"}
                   </button>
-                ))}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {colorPresets.slice(0, showAllPresets ? colorPresets.length : 6).map((preset, i) => (
+                    <button
+                      key={i}
+                      onClick={() => loadPreset(preset)}
+                      className="flex h-6 rounded-md overflow-hidden border border-border hover:scale-105 transition-transform"
+                      title="Load preset"
+                    >
+                      {preset.map((c, j) => (
+                        <div key={j} className="w-4 h-full" style={{ backgroundColor: c }} />
+                      ))}
+                    </button>
+                  ))}
+                </div>
               </div>
-              {exportTab !== "png" && (
-                <CodeBlock
-                  code={exportCode}
-                  language={exportTab === "svg" ? "svg" : exportTab === "json" ? "json" : "css"}
-                />
+
+              {showAllPresets && (
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground uppercase block mb-2">Named Palettes</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(PRESET_PALETTES).map(([paletteName, preset]) => (
+                      <button
+                        key={paletteName}
+                        onClick={() => loadPreset(preset)}
+                        className="flex h-6 rounded-md overflow-hidden border border-border hover:scale-105 transition-transform"
+                        title={paletteName}
+                      >
+                        {preset.map((c, j) => (
+                          <div key={j} className="w-4 h-full" style={{ backgroundColor: c }} />
+                        ))}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
+
               <Button
-                variant="secondary"
+                variant="primary"
                 fullWidth
-                size="sm"
-                icon={<Download size={13} />}
-                onClick={handleExport}
-                className="mt-2"
+                size="md"
+                onClick={() => setIsExportOpen(true)}
               >
-                Download {exportTab.toUpperCase()}
+                Export Palette
               </Button>
             </div>
 
-            <div>
-              <span className="text-xs font-medium text-muted-foreground mb-2 block">Preview</span>
-              <div className="flex h-12 rounded-xl overflow-hidden border border-border">
-                {colors.map((c, i) => (
-                  <div key={i} className="flex-1" style={{ backgroundColor: c }} />
-                ))}
+            <div className="flex flex-col min-h-0">
+              <div className="flex gap-1 mb-4">
+                {[
+                  { label: "Strip", value: "strip", icon: LayoutGrid },
+                  { label: "Gradient", value: "gradient", icon: Paintbrush },
+                  { label: "Cards", value: "card", icon: CreditCard },
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => setPreviewTab(tab.value)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        previewTab === tab.value
+                          ? "bg-foreground text-card"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon size={13} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                {previewTab === "strip" && (
+                  <div className="space-y-3">
+                    <div className="flex gap-0 rounded-xl overflow-hidden border border-border shadow-sm" style={{ height: "100px" }}>
+                      {colors.map((color, index) => (
+                        <div
+                          key={index}
+                          className="flex-1 relative group flex flex-col items-center justify-center transition-all hover:flex-[1.5] cursor-pointer min-w-0"
+                          style={{ backgroundColor: color }}
+                        >
+                          <span className="text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity px-1 truncate" style={{ color: lum(color) > 150 ? "#000" : "#fff" }}>
+                            {getColorName(color)}
+                          </span>
+                          <span className="text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity px-1 truncate" style={{ color: lum(color) > 150 ? "#000" : "#fff" }}>
+                            {color}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-0 rounded-xl overflow-hidden border border-border shadow-sm" style={{ height: "48px" }}>
+                      {colors.map((color, index) => (
+                        <div key={index} className="flex-1" style={{ backgroundColor: color }} />
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {colors.map((color, index) => (
+                        <div key={index} className="rounded-xl border border-border p-3 text-center shadow-sm" style={{ backgroundColor: color }}>
+                          <span className="text-[10px] font-mono font-bold block" style={{ color: lum(color) > 150 ? "#000" : "#fff" }}>
+                            {color.toUpperCase()}
+                          </span>
+                          <span className="text-[9px] block mt-0.5" style={{ color: lum(color) > 150 ? "#000" : "#fff", opacity: 0.7 }}>
+                            {getColorName(color)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="rounded-xl border border-border p-4 flex items-center gap-4 shadow-sm">
+                      <div className="w-16 h-16 rounded-xl shrink-0" style={{ backgroundColor: avgColor() }} />
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase block mb-0.5">Average Color</span>
+                        <span className="text-sm font-mono font-bold text-foreground">{avgColor().toUpperCase()}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {previewTab === "gradient" && (
+                  <div className="space-y-3">
+                    <div className="rounded-xl overflow-hidden border border-border shadow-sm h-28" style={{
+                      background: `linear-gradient(to right, ${colors.join(", ")})`,
+                    }} />
+                    <div className="rounded-xl overflow-hidden border border-border shadow-sm h-28" style={{
+                      background: `linear-gradient(135deg, ${colors.join(", ")})`,
+                    }} />
+                    <div className="rounded-xl overflow-hidden border border-border shadow-sm h-28" style={{
+                      background: `radial-gradient(circle, ${colors.join(", ")})`,
+                    }} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl overflow-hidden border border-border shadow-sm h-24" style={{
+                        background: `linear-gradient(to bottom, ${colors.join(", ")})`,
+                      }} />
+                      <div className="rounded-xl overflow-hidden border border-border shadow-sm h-24" style={{
+                        background: `conic-gradient(from 0deg, ${colors.join(", ")})`,
+                      }} />
+                    </div>
+                  </div>
+                )}
+
+                {previewTab === "card" && (
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
+                      <div className="h-24 flex" style={{
+                        background: `linear-gradient(135deg, ${colors[0]}, ${colors[1] || colors[0]})`,
+                      }} />
+                      <div className="p-4 bg-card">
+                        <div className="h-3 rounded-full mb-2" style={{ backgroundColor: colors[0], width: "60%" }} />
+                        <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "90%" }} />
+                        <div className="h-2 rounded-full bg-muted" style={{ width: "70%" }} />
+                        <div className="flex gap-2 mt-3">
+                          {colors.slice(0, 4).map((c, i) => (
+                            <div key={i} className="w-8 h-8 rounded-lg shadow-sm" style={{ backgroundColor: c }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border overflow-hidden shadow-sm p-5" style={{
+                      background: `linear-gradient(135deg, ${colors[0]}, ${colors[colors.length - 1]})`,
+                    }}>
+                      <div className="h-4 rounded-full mb-3" style={{ backgroundColor: `${lum(colors[0]) > 150 ? "#000" : "#fff"}30`, width: "50%" }} />
+                      <div className="h-2 rounded-full mb-1.5" style={{ backgroundColor: `${lum(colors[0]) > 150 ? "#000" : "#fff"}20`, width: "80%" }} />
+                      <div className="h-2 rounded-full" style={{ backgroundColor: `${lum(colors[0]) > 150 ? "#000" : "#fff"}20`, width: "60%" }} />
+                      <div className="flex gap-2 mt-4">
+                        <div className="px-4 py-1.5 rounded-full text-[10px] font-medium" style={{ backgroundColor: colors[1] || colors[0], color: lum(colors[1] || colors[0]) > 150 ? "#000" : "#fff" }}>
+                          Button
+                        </div>
+                        <div className="px-4 py-1.5 rounded-full text-[10px] font-medium border" style={{ borderColor: `${lum(colors[0]) > 150 ? "#000" : "#fff"}40`, color: lum(colors[0]) > 150 ? "#000" : "#fff" }}>
+                          Outline
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
+                      <div className="flex">
+                        {colors.map((c, i) => (
+                          <div key={i} className="flex-1 h-3" style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                      <div className="p-4 bg-card">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: colors[0] }} />
+                          <div>
+                            <div className="h-2 rounded-full bg-muted" style={{ width: "80px" }} />
+                            <div className="h-1.5 rounded-full bg-muted/50 mt-1" style={{ width: "50px" }} />
+                          </div>
+                        </div>
+                        <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "100%" }} />
+                        <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "95%" }} />
+                        <div className="h-2 rounded-full bg-muted" style={{ width: "40%" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </ToolCard>
+        </ToolCard>
+      </div>
+
+      <ExportPaletteModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        colors={colors}
+      />
 
       <SaveItemModal
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
         type="palette"
         data={colors}
-        initialName={paletteName}
       />
     </div>
   );

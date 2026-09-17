@@ -10,10 +10,10 @@ import {
   LayoutGrid,
   FolderOpen,
   FolderClosed,
-  Coffee,
 } from "lucide-react";
 import Logo from "../molecules/Logo";
 import { LuGithub } from "react-icons/lu";
+import { SiBuymeacoffee } from "react-icons/si";
 
 const tools = [
   { to: "/", icon: ImageIcon, label: "Image picker", desc: "Extract from image" },
@@ -27,9 +27,16 @@ const Header: React.FC = () => {
   const location = useLocation();
 
   const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isMainPage = location.pathname === "/";
+
+  useEffect(() => {
+    if (pendingPath && location.pathname === pendingPath) {
+      setPendingPath(null);
+    }
+  }, [location.pathname, pendingPath]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -42,9 +49,14 @@ const Header: React.FC = () => {
   }, []);
 
   const handlePickerToggle = () => {
-    if (isMainPage) navigate("/color/2596be");
-    else navigate("/");
+    const target = isMainPage ? "/color/2596be" : "/";
+    setPendingPath(target);
+    navigate(target);
   };
+
+  const displayAsMainPage = pendingPath
+    ? pendingPath === "/color/2596be"
+    : isMainPage;
 
   return (
     <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3 px-4 lg:px-0 relative z-50">
@@ -79,7 +91,10 @@ const Header: React.FC = () => {
                   className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted transition-colors group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-muted group-hover:bg-card flex items-center justify-center shrink-0 transition-colors">
-                    <tool.icon size={15} className="text-muted-foreground group-hover:text-foreground" />
+                    <tool.icon
+                      size={15}
+                      className="text-muted-foreground group-hover:text-foreground"
+                    />
                   </div>
                   <div>
                     <span className="block text-[13px] font-medium text-foreground leading-tight">
@@ -128,11 +143,15 @@ const Header: React.FC = () => {
 
         <button
           onClick={handlePickerToggle}
-          aria-label={isMainPage ? "Switch to color picker" : "Switch to image picker"}
+          aria-label={
+            displayAsMainPage ? "Switch to color picker" : "Switch to image picker"
+          }
           className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8  text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
         >
           <Pipette size={13} />
-          <span className="hidden sm:inline">{isMainPage ? "Color picker" : "Image picker"}</span>
+          <span className="hidden sm:inline">
+            {displayAsMainPage ? "Color picker" : "Image picker"}
+          </span>
         </button>
 
         <a
@@ -140,9 +159,9 @@ const Header: React.FC = () => {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Support on Ko-fi"
-          className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md rounded-full px-2.5 h-8  text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
+          className="flex items-center gap-1 bg-black text-white rounded-full px-3 h-8 text-xs sm:text-sm font-medium hover:bg-gray-800 shadow-sm transition-colors"
         >
-          <Coffee size={14.5} />
+          <SiBuymeacoffee size={14} />
           <span className="hidden sm:inline">Support</span>
         </a>
 

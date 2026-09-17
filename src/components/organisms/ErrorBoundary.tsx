@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home, ArrowLeft } from "lucide-react";
 import Button from "../atoms/Button";
 
 interface Props {
@@ -34,41 +34,64 @@ class ErrorBoundary extends React.Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
+  handleGoHome = () => {
+    this.setState({ hasError: false, error: null });
+    window.location.href = "/";
+  };
+
+  handleGoBack = () => {
+    this.setState({ hasError: false, error: null });
+    window.history.back();
+  };
+
   render() {
     if (this.state.hasError) {
       return (
         <div className="h-screen w-full flex items-center justify-center bg-background p-4">
-          <div className="text-center max-w-md">
-            <div className="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto mb-5">
-              <AlertTriangle size={28} className="text-danger" />
+          <div className="text-center max-w-sm">
+            <div className="text-[100px] font-bold text-foreground/5 leading-none select-none mb-2">
+              !
             </div>
-            <h1 className="text-xl font-bold text-foreground mb-2">Something went wrong</h1>
-            <p className="text-muted-foreground text-sm mb-6">
-              An unexpected error occurred. You can try refreshing the page or resetting the state.
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={24} className="text-muted-foreground" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground mb-1.5">
+              Something went wrong
+            </h1>
+            <p className="text-muted-foreground text-sm mb-5 leading-relaxed">
+              An unexpected error occurred. Try going back or reloading the page.
             </p>
             {this.state.error && (
-              <div className="bg-muted border border-border rounded-xl p-3 mb-6 text-left">
-                <p className="text-xs font-mono text-muted-foreground break-all">
+              <div className="bg-muted border border-border rounded-xl p-3 mb-5 text-left">
+                <p className="text-[11px] font-mono text-muted-foreground break-all leading-relaxed">
                   {this.state.error.message}
                 </p>
               </div>
             )}
-            <div className="flex gap-3 justify-center">
+            <div className="flex gap-2.5 justify-center">
               <Button
                 variant="secondary"
-                size="lg"
-                icon={<RefreshCw size={15} />}
-                onClick={this.handleReset}
+                size="md"
+                icon={<ArrowLeft size={14} />}
+                onClick={this.handleGoBack}
               >
-                Try again
+                Go back
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                icon={<Home size={14} />}
+                onClick={this.handleGoHome}
+              >
+                Home
               </Button>
               <Button
                 variant="primary"
-                size="lg"
-                icon={<RefreshCw size={15} />}
+                size="md"
+                icon={<RefreshCw size={14} />}
                 onClick={this.handleReload}
               >
-                Reload page
+                Reload
               </Button>
             </div>
           </div>
