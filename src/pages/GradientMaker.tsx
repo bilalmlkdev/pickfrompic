@@ -1,5 +1,15 @@
 import { useState, useCallback } from "react";
-import { Check, Copy, Dices, Download, Pipette, Plus, Save, Trash2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Dices,
+  Download,
+  Pipette,
+  Plus,
+  Save,
+  Trash2,
+  Sparkles,
+} from "lucide-react";
 import { isValidHex } from "../utils/ColorMath";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
@@ -12,6 +22,17 @@ const nextColorId = () => `color-${++colorIdCounter}`;
 const randomHex = () =>
   "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
 
+const presetGradients = [
+  { name: "Sunset", colors: [{ hex: "#ff512f", pos: 0 }, { hex: "#f09819", pos: 100 }] },
+  { name: "Ocean", colors: [{ hex: "#2193b0", pos: 0 }, { hex: "#6dd5ed", pos: 100 }] },
+  { name: "Purple", colors: [{ hex: "#6a11cb", pos: 0 }, { hex: "#2575fc", pos: 100 }] },
+  { name: "Fire", colors: [{ hex: "#f12711", pos: 0 }, { hex: "#f5af19", pos: 100 }] },
+  { name: "Midnight", colors: [{ hex: "#232526", pos: 0 }, { hex: "#414345", pos: 100 }] },
+  { name: "Peach", colors: [{ hex: "#ffecd2", pos: 0 }, { hex: "#fcb69f", pos: 100 }] },
+  { name: "Rainbow", colors: [{ hex: "#ff0000", pos: 0 }, { hex: "#ff8800", pos: 20 }, { hex: "#ffff00", pos: 40 }, { hex: "#00ff00", pos: 60 }, { hex: "#0000ff", pos: 80 }, { hex: "#8800ff", pos: 100 }] },
+  { name: "Aurora", colors: [{ hex: "#00c6ff", pos: 0 }, { hex: "#0072ff", pos: 50 }, { hex: "#7c3aed", pos: 100 }] },
+];
+
 const GradientMaker = () => {
   const [colors, setColors] = useState([
     { id: nextColorId(), hex: "#ff0000", pos: 0 },
@@ -23,6 +44,7 @@ const GradientMaker = () => {
   const [paletteName, setPaletteName] = useState("New Gradient");
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showPresets, setShowPresets] = useState(false);
 
   const handleCopy = useCallback((id: string, value: string) => {
     navigator.clipboard.writeText(value);
@@ -106,6 +128,13 @@ const GradientMaker = () => {
     }
   };
 
+  const loadPreset = (preset: typeof presetGradients[0]) => {
+    setColors(preset.colors.map((c) => ({ ...c, id: nextColorId() })));
+    setPaletteName(preset.name);
+    setSelectedIndex(0);
+    setShowPresets(false);
+  };
+
   const downloadSvg = () => {
     const blob = new Blob([svgCode], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
@@ -137,11 +166,11 @@ const GradientMaker = () => {
 
   return (
     <div className="flex-1 w-full py-6 px-4 mt-16">
-      <div className="max-w-[780px] mx-auto mb-4">
-        <h1 className="text-4xl font-medium text-center text-foreground mb-2">
+      <div className="text-center mb-6 px-4">
+        <h1 className="text-[28px] md:text-[42px] font-medium text-foreground tracking-tight leading-tight">
           Gradient Maker
         </h1>
-        <p className="text-center text-muted-foreground text-lg mb-4">
+        <p className="mt-2 text-muted-foreground text-lg">
           Create, customize, and export beautiful gradients
         </p>
       </div>
@@ -164,6 +193,36 @@ const GradientMaker = () => {
                 <Dices size={15} />
               </button>
             </div>
+
+            <button
+              onClick={() => setShowPresets(!showPresets)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:text-foreground transition-colors mb-3 w-fit"
+            >
+              <Sparkles size={12} />
+              Presets
+            </button>
+
+            {showPresets && (
+              <div className="mb-3 p-3 border border-border rounded-xl bg-muted/50">
+                <div className="grid grid-cols-2 gap-2">
+                  {presetGradients.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => loadPreset(preset)}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-card transition-colors text-left"
+                    >
+                      <div
+                        className="w-12 h-6 rounded-md border border-border"
+                        style={{
+                          background: `linear-gradient(to right, ${preset.colors.map((c) => `${c.hex} ${c.pos}%`).join(", ")})`,
+                        }}
+                      />
+                      <span className="text-xs text-muted-foreground">{preset.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2 mb-4 flex-1 overflow-y-auto">
               {colors.map((c, idx) => (

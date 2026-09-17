@@ -1,12 +1,20 @@
 import { useState, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useParams } from "react-router-dom";
-import { Check, Copy, Heart, Pipette } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Heart,
+  Pipette,
+  Palette,
+  Droplets,
+  Sun,
+  Contrast,
+} from "lucide-react";
 import {
   hexToRgb,
   rgbToHsl,
   rgbToCmyk,
-  rgbToXyz,
   rgbToLab,
   rgbToLuv,
   rgbToHwb,
@@ -14,6 +22,14 @@ import {
   hsbToHex,
   hslToHex,
   isValidHex,
+  getComplementary,
+  getAnalogous,
+  getTriadic,
+  getSplitComplementary,
+  getTetradic,
+  getShades,
+  getTints,
+  getContrastRatio,
 } from "../utils/ColorMath";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
@@ -56,6 +72,9 @@ const ColorConversion = () => {
   const [format, setFormat] = useState("picker");
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [recentColors, setRecentColors] = useState<string[]>([]);
+  const [contrastBg, setContrastBg] = useState("#ffffff");
+  const [harmonyTab, setHarmonyTab] = useState("complementary");
 
   const handleCopy = useCallback((id: string, value: string) => {
     navigator.clipboard.writeText(value);
@@ -63,27 +82,49 @@ const ColorConversion = () => {
     setTimeout(() => setCopiedId(null), 1500);
   }, []);
 
+  const addToRecent = (color: string) => {
+    setRecentColors((prev) => {
+      const filtered = prev.filter((c) => c !== color);
+      return [color, ...filtered].slice(0, 12);
+    });
+  };
+
   const rgb = hexToRgb(currentHex);
   const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
   const hsb = rgbToHsb(rgb.r, rgb.g, rgb.b);
   const cmyk = rgbToCmyk(rgb.r, rgb.g, rgb.b);
-  const xyz = rgbToXyz(rgb.r, rgb.g, rgb.b);
   const lab = rgbToLab(rgb.r, rgb.g, rgb.b);
   const luv = rgbToLuv(rgb.r, rgb.g, rgb.b);
   const hwb = rgbToHwb(rgb.r, rgb.g, rgb.b);
 
   const allFormats = [
     { label: "HEX", value: currentHex },
-    { label: "HSL", value: `${hsl.h}, ${hsl.s}, ${hsl.l}` },
-    { label: "RGB", value: `${rgb.r}, ${rgb.g}, ${rgb.b}` },
-    { label: "XYZ", value: `${xyz.x}, ${xyz.y}, ${xyz.z}` },
+    { label: "HSL", value: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` },
+    { label: "RGB", value: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` },
+    { label: "HSB", value: `hsb(${hsb.h}, ${hsb.s}%, ${hsb.v}%)` },
     { label: "CMYK", value: `${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k}` },
-    { label: "LUV", value: `${luv.L}, ${luv.U}, ${luv.V}` },
     { label: "LAB", value: `${lab.L}, ${lab.a}, ${lab.b}` },
-    { label: "HWB", value: `${hwb.h}, ${hwb.w}, ${hwb.b}` },
+    { label: "LUV", value: `${luv.L}, ${luv.U}, ${luv.V}` },
+    { label: "HWB", value: `hwb(${hwb.h}, ${hwb.w}%, ${hwb.b}%)` },
   ];
 
-  const formats = allFormats;
+  const harmonyColors = (() => {
+    switch (harmonyTab) {
+      case "complementary": return getComplementary(currentHex);
+      case "analogous": return getAnalogous(currentHex);
+      case "triadic": return getTriadic(currentHex);
+      case "split": return getSplitComplementary(currentHex);
+      case "tetradic": return getTetradic(currentHex);
+      default: return getComplementary(currentHex);
+    }
+  })();
+
+  const shades = getShades(currentHex, 6);
+  const tints = getTints(currentHex, 6);
+
+  const contrastRatio = getContrastRatio(currentHex, contrastBg);
+  const wcagAA = contrastRatio >= 4.5;
+  const wcagAAA = contrastRatio >= 7;
 
   const pickFromScreen = async () => {
     if ("EyeDropper" in window) {
@@ -91,7 +132,10 @@ const ColorConversion = () => {
         // @ts-expect-error EyeDropper API not in TS lib types
         const eyeDropper = new window.EyeDropper();
         const result = await eyeDropper.open();
-        if (result && result.sRGBHex) setCurrentHex(result.sRGBHex);
+        if (result && result.sRGBHex) {
+          setCurrentHex(result.sRGBHex);
+          addToRecent(result.sRGBHex);
+        }
       } catch {
         // user cancelled eyeDropper
       }
@@ -139,27 +183,48 @@ const ColorConversion = () => {
 
   return (
     <div className="flex-1 w-full py-6 px-4 mt-16">
-      <div className="max-w-[780px] mx-auto mb-4">
-        <h1 className="text-4xl font-medium text-center text-foreground mb-2">Color Conversion</h1>
-        <p className="text-center text-muted-foreground text-lg mb-1">
-          Generate color codes, variations, harmonies, and check contrast ratios
+      <div className="text-center mb-6 px-4">
+        <h1 className="text-[28px] md:text-[42px] font-medium text-foreground tracking-tight leading-tight">
+          Color Conversion
+        </h1>
+        <p className="mt-2 text-muted-foreground text-lg">
+          Convert between formats, explore harmonies, check contrast ratios
         </p>
-        <p className="text-center font-mono text-sm text-foreground mb-4">{currentHex.toUpperCase()}</p>
       </div>
 
       <ToolCard>
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
           <div className="flex flex-col">
-            <h2 className="text-sm font-semibold text-foreground mb-3">
-              Color Conversion
-            </h2>
+            <div className="flex items-center gap-2 mb-3">
+              <Dropdown
+                options={[
+                  { label: "Picker", value: "picker" },
+                  { label: "HSB", value: "hsb" },
+                  { label: "HSL", value: "hsl" },
+                  { label: "RGB", value: "rgb" },
+                  { label: "CMYK", value: "cmyk" },
+                  { label: "LAB", value: "lab" },
+                ]}
+                value={format}
+                onChange={handleFormatChange}
+                className="w-auto min-w-[100px]"
+              />
+              <button
+                onClick={pickFromScreen}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                title="Pick from screen"
+              >
+                <Pipette size={13} />
+                Pick
+              </button>
+            </div>
 
             {format === "picker" && (
               <>
                 <div className="rounded-xl overflow-hidden mb-3 border border-border">
                   <HexColorPicker
                     color={currentHex}
-                    onChange={setCurrentHex}
+                    onChange={(c) => { setCurrentHex(c); addToRecent(c); }}
                     className="w-full h-48!"
                   />
                 </div>
@@ -178,6 +243,13 @@ const ColorConversion = () => {
                     className="w-9 h-9 rounded-lg border border-border shrink-0"
                     style={{ backgroundColor: currentHex }}
                   />
+                  <button
+                    onClick={() => handleCopy("hex-copy", currentHex)}
+                    className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+                    title="Copy HEX"
+                  >
+                    {copiedId === "hex-copy" ? <Check size={14} /> : <Copy size={14} />}
+                  </button>
                 </div>
               </>
             )}
@@ -307,56 +379,54 @@ const ColorConversion = () => {
               </div>
             )}
 
-            <div className="flex items-center gap-2 mt-3 mb-4">
-              <Dropdown
-                options={[
-                  { label: "Picker", value: "picker" },
-                  { label: "HSB", value: "hsb" },
-                  { label: "HSL", value: "hsl" },
-                  { label: "RGB", value: "rgb" },
-                  { label: "CMYK", value: "cmyk" },
-                  { label: "LAB", value: "lab" },
-                ]}
-                value={format}
-                onChange={handleFormatChange}
-                className="w-auto min-w-[100px]"
-              />
-              <button
-                onClick={() => handleCopy("hex-copy", currentHex)}
-                className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                title="Copy HEX"
-              >
-                {copiedId === "hex-copy" ? <Check size={14} /> : <Copy size={14} />}
-              </button>
-            </div>
-
             <Button
               variant="primary"
               fullWidth
               size="lg"
               icon={<Pipette size={15} />}
               onClick={pickFromScreen}
+              className="mt-3"
             >
               Pick from screen
             </Button>
+
+            {recentColors.length > 0 && (
+              <div className="mt-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Sun size={12} className="text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground">Recent</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {recentColors.map((c, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentHex(c)}
+                      className="w-7 h-7 rounded-lg border border-border hover:scale-110 transition-transform shrink-0"
+                      style={{ backgroundColor: c }}
+                      title={c}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col">
             <div
-              className="rounded-2xl p-8 mb-5 flex items-center justify-between"
+              className="rounded-2xl p-6 mb-5 flex items-center justify-between"
               style={{ backgroundColor: currentHex }}
             >
               <div className="flex items-baseline gap-3">
-                <h2 className="text-3xl font-bold" style={{ color: textColor }}>
+                <h2 className="text-2xl font-bold" style={{ color: textColor }}>
                   {currentHex.toUpperCase()}
                 </h2>
-                <span className="text-lg font-medium" style={{ color: textColor, opacity: 0.8 }}>
+                <span className="text-base font-medium" style={{ color: textColor, opacity: 0.8 }}>
                   {colorName}
                 </span>
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setIsSaveModalOpen(true)}
+                  onClick={() => { setIsSaveModalOpen(true); addToRecent(currentHex); }}
                   className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
                   style={{ backgroundColor: `${textColor}20`, color: textColor }}
                   title="Save Color"
@@ -366,8 +436,8 @@ const ColorConversion = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {formats.map((f) => (
+            <div className="grid grid-cols-2 gap-2 mb-5">
+              {allFormats.map((f) => (
                 <div
                   key={f.label}
                   className="flex items-center justify-between border border-border rounded-xl p-3 bg-card/50 hover:bg-card transition-colors"
@@ -386,6 +456,125 @@ const ColorConversion = () => {
                   </button>
                 </div>
               ))}
+            </div>
+
+            <div className="mb-5">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Palette size={14} className="text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">Harmonies</span>
+              </div>
+              <div className="flex gap-1 mb-3">
+                {(["complementary", "analogous", "triadic", "split", "tetradic"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setHarmonyTab(tab)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      harmonyTab === tab
+                        ? "bg-foreground text-card"
+                        : "bg-muted text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab === "split" ? "Split" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                {harmonyColors.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                    className="flex-1 h-12 rounded-xl border-2 border-transparent hover:border-foreground/30 transition-colors relative group"
+                    style={{ backgroundColor: c }}
+                  >
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 text-white rounded-xl">
+                      {c.toUpperCase()}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Droplets size={14} className="text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">Shades</span>
+              </div>
+              <div className="flex gap-1.5">
+                {shades.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                    className="flex-1 h-8 rounded-lg hover:scale-110 transition-transform"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Droplets size={14} className="text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">Tints</span>
+              </div>
+              <div className="flex gap-1.5">
+                {tints.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                    className="flex-1 h-8 rounded-lg hover:scale-110 transition-transform"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center gap-1.5 mb-3">
+                <Contrast size={14} className="text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">Contrast Checker</span>
+              </div>
+              <div className="border border-border rounded-xl p-4 bg-card/50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1">
+                    <label className="text-xs text-muted-foreground mb-1 block">Background</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={contrastBg}
+                        onChange={(e) => setContrastBg(e.target.value)}
+                        className="w-8 h-8 rounded-lg cursor-pointer border border-border"
+                      />
+                      <input
+                        type="text"
+                        value={contrastBg}
+                        onChange={(e) => { if (isValidHex(e.target.value)) setContrastBg(e.target.value); }}
+                        className="flex-1 border border-border rounded-lg px-2 py-1.5 text-xs font-mono bg-card text-foreground"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="rounded-xl p-4 mb-3 text-center"
+                  style={{ backgroundColor: contrastBg, color: currentHex }}
+                >
+                  <p className="text-lg font-bold">Sample Text</p>
+                  <p className="text-sm">The quick brown fox</p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-muted-foreground">Ratio: </span>
+                    <span className="text-sm font-mono font-bold text-foreground">{contrastRatio.toFixed(2)}:1</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-lg ${wcagAA ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                      AA {wcagAA ? "Pass" : "Fail"}
+                    </span>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-lg ${wcagAAA ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                      AAA {wcagAAA ? "Pass" : "Fail"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -209,3 +209,60 @@ export const hslToHex = (h: number, s: number, l: number) => {
   };
   return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
 };
+
+export const getComplementary = (hex: string): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return [hex, hslToHex((h + 180) % 360, s, l)];
+};
+
+export const getAnalogous = (hex: string): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return [
+    hslToHex((h + 330) % 360, s, l),
+    hex,
+    hslToHex((h + 30) % 360, s, l),
+  ];
+};
+
+export const getTriadic = (hex: string): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return [hex, hslToHex((h + 120) % 360, s, l), hslToHex((h + 240) % 360, s, l)];
+};
+
+export const getSplitComplementary = (hex: string): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return [hex, hslToHex((h + 150) % 360, s, l), hslToHex((h + 210) % 360, s, l)];
+};
+
+export const getTetradic = (hex: string): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return [
+    hex,
+    hslToHex((h + 90) % 360, s, l),
+    hslToHex((h + 180) % 360, s, l),
+    hslToHex((h + 270) % 360, s, l),
+  ];
+};
+
+export const getShades = (hex: string, count: number = 5): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return Array.from({ length: count }, (_, i) => {
+    const l = 95 - (i * 80) / (count - 1);
+    return hslToHex(h, s, Math.round(l));
+  });
+};
+
+export const getTints = (hex: string, count: number = 5): string[] => {
+  const rgb = hexToRgb(hex);
+  const { h, s } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  return Array.from({ length: count }, (_, i) => {
+    const l = 10 + (i * 80) / (count - 1);
+    return hslToHex(h, s, Math.round(l));
+  });
+};
