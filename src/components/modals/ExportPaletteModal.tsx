@@ -123,7 +123,7 @@ const ExportPaletteModal: React.FC<Props> = ({ isOpen, onClose, colors }) => {
               />
             </div>
           ) : (
-            <div className="relative h-full">
+            <div className="relative h-full overflow-hidden">
               <CodeBlock
                 code={content}
                 language={activeTab === "svg" ? "svg" : activeTab === "code" ? "json" : "css"}

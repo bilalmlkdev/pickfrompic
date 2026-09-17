@@ -135,7 +135,7 @@ const CodeBlock: React.FC<Props> = ({ code, language }) => {
   })();
 
   return (
-    <pre className="bg-muted border border-border rounded-xl p-3 text-xs font-mono overflow-auto whitespace-pre-wrap leading-relaxed">
+    <pre className="bg-muted border border-border rounded-xl p-3 text-xs font-mono overflow-auto whitespace-pre-wrap leading-relaxed h-full">
       {highlighted}
     </pre>
   );
