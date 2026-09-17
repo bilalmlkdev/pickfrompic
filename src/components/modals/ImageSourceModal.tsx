@@ -125,6 +125,7 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
         onPickedColor(result.sRGBHex);
         onClose();
       } catch {
+        // user cancelled eyeDropper
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");

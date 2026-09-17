@@ -99,6 +99,7 @@ const GradientMaker = () => {
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) updateColorHex(index, result.sRGBHex);
       } catch {
+        // user cancelled eyeDropper
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");

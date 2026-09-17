@@ -62,6 +62,7 @@ const ColorDetailsPanel: React.FC<Props> = ({
         const result = await eyeDropper.open();
         onPickedColor(result.sRGBHex);
       } catch {
+        // user cancelled eyeDropper
       }
     } else {
       alert("Your browser does not support the EyeDropper API.");
