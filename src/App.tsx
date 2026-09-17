@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState, useCallback, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/organisms/Header";
 import PageShell from "./components/templates/PageShell";
 import Dashboard from "./pages/Dashboard";
@@ -12,49 +11,25 @@ import ErrorBoundary from "./components/organisms/ErrorBoundary";
 import OfflineBanner from "./components/organisms/OfflineBanner";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 
-const DelayedRoutes = () => {
-  const location = useLocation();
-  useDocumentTitle();
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [loaderKey, setLoaderKey] = useState(0);
-  const [showLoader, setShowLoader] = useState(false);
-
-  useEffect(() => {
-    if (location.pathname !== displayLocation.pathname && !showLoader) {
-      setShowLoader(true);
-      setLoaderKey((k) => k + 1);
-    }
-  }, [location, displayLocation, showLoader]);
-
-  const handleLoaderComplete = useCallback(() => {
-    setDisplayLocation(location);
-    setShowLoader(false);
-  }, [location]);
-
-  return (
-    <>
-      {showLoader && <TopLoader key={loaderKey} onComplete={handleLoaderComplete} />}
-      <Routes location={showLoader ? displayLocation : location}>
-        <Route path="/" element={<MainPicker />} />
-        <Route path="/color/:hex" element={<ColorConversion />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard/:tab" element={<Dashboard />} />
-        <Route path="/dashboard/:tab/create" element={<Dashboard />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </>
-  );
-};
-
 function App() {
+  useDocumentTitle();
+
   return (
     <ErrorBoundary>
       <DashboardProvider>
         <BrowserRouter>
           <OfflineBanner />
+          <TopLoader />
           <PageShell>
             <Header />
-            <DelayedRoutes />
+            <Routes>
+              <Route path="/" element={<MainPicker />} />
+              <Route path="/color/:hex" element={<ColorConversion />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/:tab" element={<Dashboard />} />
+              <Route path="/dashboard/:tab/create" element={<Dashboard />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </PageShell>
         </BrowserRouter>
       </DashboardProvider>

@@ -29,6 +29,7 @@ const Header: React.FC = () => {
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const isMainPage = location.pathname === "/";
 
@@ -58,12 +59,26 @@ const Header: React.FC = () => {
     ? pendingPath === "/color/2596be"
     : isMainPage;
 
+  const handleMouseEnter = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setIsToolsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => setIsToolsOpen(false), 150);
+  };
+
   return (
     <header className="w-full max-w-[1120px] mx-auto flex items-center justify-between py-3 px-4 lg:px-0 relative z-50">
       <Logo />
 
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="relative" ref={dropdownRef}>
+        <div
+          className="relative"
+          ref={dropdownRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <button
             onClick={() => setIsToolsOpen(!isToolsOpen)}
             aria-label="Open tools menu"
@@ -181,3 +196,4 @@ const Header: React.FC = () => {
 };
 
 export default Header;
+
