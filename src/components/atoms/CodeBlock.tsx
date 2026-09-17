@@ -5,36 +5,50 @@ interface Props {
   language: "css" | "json" | "svg";
 }
 
+const C = {
+  comment: "#5c6370",
+  property: "#c678dd",
+  value: "#98c379",
+  string: "#98c379",
+  number: "#d19a66",
+  hex: "#56b6c2",
+  func: "#61afef",
+  punct: "#abb2bf",
+  tag: "#e06c75",
+  attr: "#d19a66",
+  text: "#abb2bf",
+};
+
 const highlightCss = (code: string): React.ReactNode[] => {
   const tokens: React.ReactNode[] = [];
-  const regex = /(\/\*[\s\S]*?\*\/)|(--[\w-]+)|(:\s*[^;{]+)|([{};,])|(#[0-9a-fA-F]{3,8})|(rgb|hsl|hsl|linear-gradient|radial-gradient)/g;
+  const regex = /(\/\*[\s\S]*?\*\/)|(--[\w-]+)|(:\s*[^;{]+)|([{};,])|(#[0-9a-fA-F]{3,8})|(rgb|hsl|linear-gradient|radial-gradient)/g;
   let lastIndex = 0;
   let match;
 
   while ((match = regex.exec(code)) !== null) {
     if (match.index > lastIndex) {
-      tokens.push(<span key={lastIndex}>{code.slice(lastIndex, match.index)}</span>);
+      tokens.push(<span key={lastIndex} style={{ color: C.text }}>{code.slice(lastIndex, match.index)}</span>);
     }
     if (match[1]) {
-      tokens.push(<span key={match.index} className="text-emerald-600">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.comment, fontStyle: "italic" }}>{match[0]}</span>);
     } else if (match[2]) {
-      tokens.push(<span key={match.index} className="text-sky-400">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.property }}>{match[0]}</span>);
     } else if (match[3]) {
-      tokens.push(<span key={match.index} className="text-amber-300">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.value }}>{match[0]}</span>);
     } else if (match[4]) {
-      tokens.push(<span key={match.index} className="text-muted-foreground">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.punct }}>{match[0]}</span>);
     } else if (match[5]) {
-      tokens.push(<span key={match.index} className="text-rose-400">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.hex }}>{match[0]}</span>);
     } else if (match[6]) {
-      tokens.push(<span key={match.index} className="text-purple-400">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.func }}>{match[0]}</span>);
     } else {
-      tokens.push(<span key={match.index}>{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.text }}>{match[0]}</span>);
     }
     lastIndex = match.index + match[0].length;
   }
 
   if (lastIndex < code.length) {
-    tokens.push(<span key={lastIndex}>{code.slice(lastIndex)}</span>);
+    tokens.push(<span key={lastIndex} style={{ color: C.text }}>{code.slice(lastIndex)}</span>);
   }
 
   return tokens;
@@ -61,29 +75,29 @@ const highlightJson = (code: string): React.ReactNode[] => {
 
     while ((allMatch = allRegex.exec(line)) !== null) {
       if (allMatch.index > lineLastIndex) {
-        lineTokens.push(<span key={`${lineIndex}-${lineLastIndex}`}>{line.slice(lineLastIndex, allMatch.index)}</span>);
+        lineTokens.push(<span key={`${lineIndex}-${lineLastIndex}`} style={{ color: C.text }}>{line.slice(lineLastIndex, allMatch.index)}</span>);
       }
 
       if (allMatch[1]) {
         const isKey = keyPositions.includes(allMatch.index);
         lineTokens.push(
-          <span key={`${lineIndex}-${allMatch.index}`} className={isKey ? "text-sky-400" : "text-amber-300"}>
+          <span key={`${lineIndex}-${allMatch.index}`} style={{ color: isKey ? C.property : C.string }}>
             {allMatch[0]}
           </span>
         );
       } else if (allMatch[2]) {
-        lineTokens.push(<span key={`${lineIndex}-${allMatch.index}`} className="text-rose-400">{allMatch[0]}</span>);
+        lineTokens.push(<span key={`${lineIndex}-${allMatch.index}`} style={{ color: C.number }}>{allMatch[0]}</span>);
       } else if (allMatch[3]) {
-        lineTokens.push(<span key={`${lineIndex}-${allMatch.index}`} className="text-muted-foreground">{allMatch[0]}</span>);
+        lineTokens.push(<span key={`${lineIndex}-${allMatch.index}`} style={{ color: C.punct }}>{allMatch[0]}</span>);
       } else if (allMatch[4] || allMatch[5]) {
-        lineTokens.push(<span key={`${lineIndex}-${allMatch.index}`} className="text-muted-foreground">{allMatch[0]}</span>);
+        lineTokens.push(<span key={`${lineIndex}-${allMatch.index}`} style={{ color: C.punct }}>{allMatch[0]}</span>);
       }
 
       lineLastIndex = allMatch.index + allMatch[0].length;
     }
 
     if (lineLastIndex < line.length) {
-      lineTokens.push(<span key={`${lineIndex}-end`}>{line.slice(lineLastIndex)}</span>);
+      lineTokens.push(<span key={`${lineIndex}-end`} style={{ color: C.text }}>{line.slice(lineLastIndex)}</span>);
     }
 
     result.push(<span key={`line-${lineIndex}`}>{lineTokens}</span>);
@@ -103,22 +117,22 @@ const highlightSvg = (code: string): React.ReactNode[] => {
 
   while ((match = regex.exec(code)) !== null) {
     if (match.index > lastIndex) {
-      tokens.push(<span key={lastIndex}>{code.slice(lastIndex, match.index)}</span>);
+      tokens.push(<span key={lastIndex} style={{ color: C.text }}>{code.slice(lastIndex, match.index)}</span>);
     }
     if (match[1]) {
-      tokens.push(<span key={match.index} className="text-rose-400">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.tag }}>{match[0]}</span>);
     } else if (match[2]) {
-      tokens.push(<span key={match.index} className="text-sky-400">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.attr }}>{match[0]}</span>);
     } else if (match[3]) {
-      tokens.push(<span key={match.index} className="text-amber-300">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.string }}>{match[0]}</span>);
     } else {
-      tokens.push(<span key={match.index} className="text-muted-foreground">{match[0]}</span>);
+      tokens.push(<span key={match.index} style={{ color: C.punct }}>{match[0]}</span>);
     }
     lastIndex = match.index + match[0].length;
   }
 
   if (lastIndex < code.length) {
-    tokens.push(<span key={lastIndex}>{code.slice(lastIndex)}</span>);
+    tokens.push(<span key={lastIndex} style={{ color: C.text }}>{code.slice(lastIndex)}</span>);
   }
 
   return tokens;
@@ -135,7 +149,10 @@ const CodeBlock: React.FC<Props> = ({ code, language }) => {
   })();
 
   return (
-    <pre className="bg-muted border border-border rounded-xl p-3 text-xs font-mono overflow-auto whitespace-pre-wrap leading-relaxed h-full">
+    <pre
+      className="rounded-xl p-3 text-xs font-mono overflow-auto whitespace-pre-wrap leading-relaxed h-full"
+      style={{ backgroundColor: "#282c34", color: C.text }}
+    >
       {highlighted}
     </pre>
   );
