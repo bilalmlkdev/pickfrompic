@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useMemo } from "react";
-import { useParams } from "react-router-dom";
 import {
   Plus,
   Trash2,
@@ -100,21 +99,10 @@ const randomGradients = [
 ];
 
 const GradientMaker = () => {
-  const { id } = useParams();
-
-  const initialStops: Stop[] = id
-    ? decodeURIComponent(id)
-        .split("-")
-        .map((c, i, arr) => ({
-          color: c.startsWith("#") ? c : `#${c}`,
-          position: Math.round((i / (arr.length - 1)) * 100),
-        }))
-    : [
-        { color: "#667eea", position: 0 },
-        { color: "#764ba2", position: 100 },
-      ];
-
-  const [stops, setStops] = useState<Stop[]>(initialStops);
+  const [stops, setStops] = useState<Stop[]>([
+    { color: "#667eea", position: 0 },
+    { color: "#764ba2", position: 100 },
+  ]);
   const [gradientType, setGradientType] = useState<"linear" | "radial" | "conic">("linear");
   const [angle, setAngle] = useState(135);
   const [position, setPosition] = useState({ x: 50, y: 50 });

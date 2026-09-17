@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
 import { Check, Copy, Heart, Pipette, LayoutGrid, Paintbrush, CreditCard, Plus, Shuffle } from "lucide-react";
 import ExportPaletteModal from "../components/modals/ExportPaletteModal";
 import SaveItemModal from "../components/modals/SaveItemModal";
@@ -45,12 +44,7 @@ const randomHex = () => {
 };
 
 const CreatePalette = () => {
-  const { colors: urlColors } = useParams();
-  const initialColors = urlColors
-    ? urlColors.split("-").map((c) => `#${c}`)
-    : defaultColors;
-
-  const [colors, setColors] = useState<string[]>(initialColors);
+  const [colors, setColors] = useState<string[]>(defaultColors);
   const [name, setName] = useState("");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);

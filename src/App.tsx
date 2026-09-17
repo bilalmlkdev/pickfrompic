@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Header from "./components/organisms/Header";
 import PageShell from "./components/templates/PageShell";
 import Dashboard from "./pages/Dashboard";
@@ -19,10 +19,12 @@ const DelayedRoutes = () => {
   const [loaderKey, setLoaderKey] = useState(0);
   const [showLoader, setShowLoader] = useState(false);
 
-  if (location.pathname !== displayLocation.pathname && !showLoader) {
-    setShowLoader(true);
-    setLoaderKey((k) => k + 1);
-  }
+  useEffect(() => {
+    if (location.pathname !== displayLocation.pathname && !showLoader) {
+      setShowLoader(true);
+      setLoaderKey((k) => k + 1);
+    }
+  }, [location, displayLocation, showLoader]);
 
   const handleLoaderComplete = useCallback(() => {
     setDisplayLocation(location);
