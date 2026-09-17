@@ -5,9 +5,7 @@ import {
   Globe,
   Link2,
   Clipboard,
-  Search,
   ShieldCheck,
-  ExternalLink,
   ArrowRight,
   Loader2,
   CheckCircle,
@@ -16,7 +14,6 @@ import {
 import ModalShell from "../molecules/ModalShell";
 import PillTabs from "../molecules/PillTabs";
 import Button from "../atoms/Button";
-import Input from "../atoms/Input";
 
 interface Props {
   isOpen: boolean;
@@ -30,8 +27,7 @@ type TabValue =
   | "color-on-your-screen"
   | "website-url"
   | "image-url"
-  | "paste-clipboard"
-  | "search";
+  | "paste-clipboard";
 
 const tabs: { value: TabValue; label: string; icon: React.ReactNode }[] = [
   { value: "upload-image", label: "Upload image", icon: <Upload size={13} /> },
@@ -39,21 +35,17 @@ const tabs: { value: TabValue; label: string; icon: React.ReactNode }[] = [
   { value: "website-url", label: "Website URL", icon: <Globe size={13} /> },
   { value: "image-url", label: "Image URL", icon: <Link2 size={13} /> },
   { value: "paste-clipboard", label: "Paste clipboard", icon: <Clipboard size={13} /> },
-  { value: "search", label: "Search", icon: <Search size={13} /> },
 ];
 
 const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPickedColor }) => {
   const [activeTab, setActiveTab] = useState<TabValue>("upload-image");
   const [urlInput, setUrlInput] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<string[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [pasteStatus, setPasteStatus] = useState<"idle" | "success" | "error">("idle");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handlePaste = useCallback(
     async (e: ClipboardEvent) => {
@@ -89,12 +81,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
       return () => document.removeEventListener("paste", handlePaste);
     }
   }, [activeTab, handlePaste]);
-
-  useEffect(() => {
-    if (activeTab === "search") {
-      setTimeout(() => searchInputRef.current?.focus(), 100);
-    }
-  }, [activeTab]);
 
   if (!isOpen) return null;
 
@@ -186,37 +172,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-
-    setIsLoading(true);
-    try {
-      const results = Array.from({ length: 6 }, (_, i) =>
-        `https://images.unsplash.com/photo-${1500000000000 + i}?w=400&h=300&fit=crop&q=80&sig=${encodeURIComponent(searchTerm)}-${i}`
-      );
-      setSearchResults(results);
-    } catch {
-      setSearchResults(placeholderImages);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
-  const placeholderImages = [
-    "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=400&q=80",
-    "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80",
-    "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=80",
-    "https://images.unsplash.com/photo-1493612276216-ee3925520721?w=400&q=80",
-    "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=400&q=80",
-    "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80",
-  ];
-
-  const displayImages = searchResults.length > 0 ? searchResults : placeholderImages;
-
   return (
     <ModalShell onClose={onClose} maxWidth="max-w-4xl">
       <div className="p-6">
@@ -232,12 +187,16 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
         <div className="min-h-[340px] rounded-2xl p-8 flex flex-col justify-center items-center bg-gradient-to-b from-muted/30 to-transparent border border-border/50">
           {activeTab === "upload-image" && (
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Upload image file"
               className={`w-full max-w-lg h-64 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ${
                 isDragOver
                   ? "border-foreground bg-foreground/5 scale-[1.02]"
                   : "border-border hover:border-foreground/30 hover:bg-muted/40"
               }`}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click(); }}
               onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
               onDragLeave={() => setIsDragOver(false)}
               onDrop={handleDrop}
@@ -390,56 +349,6 @@ const ImageSourceModal: React.FC<Props> = ({ isOpen, onClose, setImageSrc, onPic
                   Waiting for paste...
                 </div>
               )}
-            </div>
-          )}
-
-          {activeTab === "search" && (
-            <div className="w-full">
-              <div className="relative w-full max-w-md mx-auto mb-6">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search photos (e.g. nature, city, food)..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  className="rounded-full pl-11 pr-12 py-2.5"
-                />
-                <button
-                  onClick={handleSearch}
-                  disabled={isLoading || !searchTerm.trim()}
-                  aria-label="Search images"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                  {isLoading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
-                {displayImages.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="group relative h-32 rounded-xl overflow-hidden cursor-pointer border border-border/50 hover:border-foreground/30 transition-all hover:shadow-lg"
-                    onClick={() => {
-                      setImageSrc(img);
-                      onClose();
-                    }}
-                  >
-                    <img
-                      src={img}
-                      alt={`Search result for ${searchTerm}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                      <span className="text-white text-xs font-medium">Use this image</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-center text-link text-xs font-medium cursor-pointer flex items-center justify-center gap-1 hover:underline">
-                Photos provided by Unsplash <ExternalLink size={12} />
-              </p>
             </div>
           )}
         </div>

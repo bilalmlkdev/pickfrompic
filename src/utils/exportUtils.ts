@@ -23,10 +23,11 @@ export const generatePng = (colors: string[]) => {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
 
   colors.forEach((color, index) => {
-    ctx!.fillStyle = color;
-    ctx!.fillRect(index * 50, 0, 50, height);
+    ctx.fillStyle = color;
+    ctx.fillRect(index * 50, 0, 50, height);
   });
 
   return canvas.toDataURL("image/png");

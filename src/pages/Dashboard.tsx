@@ -83,17 +83,25 @@ const Dashboard: React.FC = () => {
     setSelectMode(false);
   };
 
-  const handleCopyURL = (id: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/item/${id}`);
+  const handleCopyURL = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/item/${id}`);
+    } catch {
+      // clipboard access denied
+    }
     setOpenMenuId(null);
   };
 
-  const handleDownload = (item: Palette | Color | Gradient) => {
+  const handleDownload = async (item: Palette | Color | Gradient) => {
     if (displayTab === "Palettes") {
       const p = item as Palette;
       downloadFile(`${p.name}.css`, convertToCss(p.colors), "text/css");
     } else if (displayTab === "Colors") {
-      navigator.clipboard.writeText((item as Color).hex);
+      try {
+        await navigator.clipboard.writeText((item as Color).hex);
+      } catch {
+        // clipboard access denied
+      }
     } else if (displayTab === "Gradients") {
       const g = item as Gradient;
       const c0 = encodeURIComponent(g.colors[0]);
