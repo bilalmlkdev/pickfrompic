@@ -19,8 +19,8 @@ function App() {
       <DashboardProvider>
         <BrowserRouter>
           <OfflineBanner />
-          <TopLoader />
           <PageShell>
+            <TopLoader />
             <Header />
             <Routes>
               <Route path="/" element={<MainPicker />} />
