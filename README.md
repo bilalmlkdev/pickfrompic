@@ -12,6 +12,8 @@ A free, open-source color tool for designers and developers. Pick colors from im
 [![GitHub Stars](https://img.shields.io/github/stars/bilalmlkdev/pickfrompic?style=for-the-badge&logo=github&color=yellow)](https://github.com/bilalmlkdev/pickfrompic)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
+<a href="https://www.producthunt.com/products/pickfrompic?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-pickfrompic" target="_blank" rel="noopener noreferrer"><img alt="Pickfrompic - Pick colors from images, create palettes, generate gradients | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1252990&theme=light&t=1789734008668"></a>
+
 </div>
 
 <p align="center">

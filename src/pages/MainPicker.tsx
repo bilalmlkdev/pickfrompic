@@ -95,6 +95,20 @@ const MainPicker = () => {
           </div>
         </ToolCard>
       </div>
+
+      <a
+        href="https://www.producthunt.com/products/pickfrompic?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-pickfrompic"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 hover:scale-105 transition-transform duration-200 drop-shadow-lg"
+      >
+        <img
+          alt="Pickfrompic - Pick colors from images, create palettes, generate gradients | Product Hunt"
+          width="250"
+          height="54"
+          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1252990&theme=light&t=1789734008668"
+        />
+      </a>
     </div>
   );
 };

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Logo from "../molecules/Logo";
 import { LuGithub } from "react-icons/lu";
-import { SiBuymeacoffee } from "react-icons/si";
+import { SiBuymeacoffee, SiProducthunt } from "react-icons/si";
 
 const tools = [
   { to: "/", icon: ImageIcon, label: "Image picker", desc: "Extract from image" },
@@ -168,6 +168,17 @@ const Header: React.FC = () => {
             {displayAsMainPage ? "Color picker" : "Image picker"}
           </span>
         </button>
+
+        <a
+          href="https://www.producthunt.com/products/pickfrompic?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-pickfrompic"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Featured on Product Hunt"
+          className="flex items-center gap-1 bg-white/80 backdrop-blur-md rounded-full pl-2.5 pr-3 h-8 text-xs sm:text-sm font-medium text-foreground hover:bg-gray-100 shadow-sm transition-colors"
+        >
+          <SiProducthunt size={14} />
+          <span className="hidden sm:inline">Product Hunt</span>
+        </a>
 
         <a
           href="https://ko-fi.com/bilalmlkdev"
