@@ -272,7 +272,7 @@ const ColorConversion = () => {
                       <HexColorPicker
                         color={currentHex}
                         onChange={(c) => { applyHex(c); addToRecent(c); }}
-                        className="w-full h-44!"
+                        className="w-full! h-44!"
                       />
                     </div>
                     <div className="flex items-center gap-2">

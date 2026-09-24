@@ -68,6 +68,10 @@ input[type="color"] {
   color-scheme: light;
 }
 
+.react-colorful {
+  width: 100% !important;
+}
+
 @keyframes safari-layer-keepalive {
   0% {
     transform: translateZ(0) scale(1);
