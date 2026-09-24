@@ -104,7 +104,7 @@ pickfrompic/
 ├── src/
 │   ├── components/
 │   │   ├── atoms/          Button, Input, Swatch, Dropdown, TopLoader
-│   │   ├── molecules/      Logo, ModalShell, PillTabs, RangeSlider
+│   │   ├── molecules/      Logo, ModalShell, PillTabs, ColorField
 │   │   ├── organisms/      Header, ImageUploader, ColorPalette, ColorDetailsPanel
 │   │   ├── modals/         ExportPaletteModal, SaveItemModal, ImageSourceModal
 │   │   └── templates/      ToolCard, PageShell

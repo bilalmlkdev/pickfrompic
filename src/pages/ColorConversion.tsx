@@ -63,14 +63,34 @@ const getColorName = (hex: string): string => {
 
 const ColorConversion = () => {
   const { hex } = useParams();
-  const initialHex = hex ? `#${hex.replace("#", "")}` : "#2596be";
+  const routeHex = hex ? `#${hex.replace("#", "")}` : "#2596be";
 
-  const [currentHex, setCurrentHex] = useState(initialHex);
+  const [currentHex, setCurrentHex] = useState(routeHex);
+  const [hexDraft, setHexDraft] = useState(routeHex);
+  const [prevRouteHex, setPrevRouteHex] = useState(routeHex);
   const [format, setFormat] = useState("picker");
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
   const [harmonyTab, setHarmonyTab] = useState("complementary");
+
+  if (routeHex !== prevRouteHex) {
+    setPrevRouteHex(routeHex);
+    if (isValidHex(routeHex)) {
+      setCurrentHex(routeHex);
+      setHexDraft(routeHex);
+    }
+  }
+
+  const applyHex = (val: string) => {
+    setCurrentHex(val);
+    setHexDraft(val);
+  };
+
+  const handleHexDraft = (val: string) => {
+    setHexDraft(val);
+    if (isValidHex(val)) setCurrentHex(val);
+  };
 
   const handleCopy = useCallback((id: string, value: string) => {
     navigator.clipboard.writeText(value);
@@ -125,7 +145,7 @@ const ColorConversion = () => {
         const eyeDropper = new window.EyeDropper();
         const result = await eyeDropper.open();
         if (result && result.sRGBHex) {
-          setCurrentHex(result.sRGBHex);
+          applyHex(result.sRGBHex);
           addToRecent(result.sRGBHex);
         }
       } catch {
@@ -143,13 +163,13 @@ const ColorConversion = () => {
   const handleHsbChange = (key: "h" | "s" | "v", value: number) => {
     if (isNaN(value)) return;
     const newHsb = { ...hsb, [key]: value };
-    setCurrentHex(hsbToHex(newHsb.h, newHsb.s, newHsb.v));
+    applyHex(hsbToHex(newHsb.h, newHsb.s, newHsb.v));
   };
 
   const handleHslChange = (key: "h" | "s" | "l", value: number) => {
     if (isNaN(value)) return;
     const newHsl = { ...hsl, [key]: value };
-    setCurrentHex(hslToHex(newHsl.h, newHsl.s, newHsl.l));
+    applyHex(hslToHex(newHsl.h, newHsl.s, newHsl.l));
   };
 
   const handleRgbChange = (key: "r" | "g" | "b", value: number) => {
@@ -159,7 +179,7 @@ const ColorConversion = () => {
       const h = Math.max(0, Math.min(255, c)).toString(16);
       return h.length === 1 ? "0" + h : h;
     };
-    setCurrentHex(`#${toHex(newRgb.r)}${toHex(newRgb.g)}${toHex(newRgb.b)}`);
+    applyHex(`#${toHex(newRgb.r)}${toHex(newRgb.g)}${toHex(newRgb.b)}`);
   };
 
   const hueGradient =
@@ -251,19 +271,15 @@ const ColorConversion = () => {
                     <div className="rounded-xl overflow-hidden border border-border shadow-sm">
                       <HexColorPicker
                         color={currentHex}
-                        onChange={(c) => { setCurrentHex(c); addToRecent(c); }}
+                        onChange={(c) => { applyHex(c); addToRecent(c); }}
                         className="w-full h-44!"
                       />
                     </div>
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
-                        value={currentHex}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (isValidHex(val)) setCurrentHex(val);
-                          else if (val === "" || val === "#") setCurrentHex(val);
-                        }}
+                        value={hexDraft}
+                        onChange={(e) => handleHexDraft(e.target.value)}
                         className="flex-1 border border-border rounded-lg px-3 py-2 bg-card text-foreground text-sm font-mono focus:outline-none focus:ring-2 focus:ring-foreground/10"
                       />
                       <button
@@ -394,7 +410,7 @@ const ColorConversion = () => {
                       {recentColors.map((c, i) => (
                         <button
                           key={i}
-                          onClick={() => setCurrentHex(c)}
+                          onClick={() => applyHex(c)}
                           className="w-7 h-7 rounded-lg border border-border hover:scale-110 transition-transform shrink-0"
                           style={{ backgroundColor: c }}
                           title={c}
@@ -453,7 +469,7 @@ const ColorConversion = () => {
                   {harmonyColors.map((c, i) => (
                     <button
                       key={i}
-                      onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                      onClick={() => { applyHex(c); addToRecent(c); }}
                       className="flex-1 h-11 rounded-xl border-2 border-transparent hover:border-foreground/30 transition-all relative group shadow-sm"
                       style={{ backgroundColor: c }}
                     >
@@ -475,7 +491,7 @@ const ColorConversion = () => {
                     {shades.map((c, i) => (
                       <button
                         key={i}
-                        onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                        onClick={() => { applyHex(c); addToRecent(c); }}
                         className="flex-1 h-8 rounded-lg hover:scale-110 transition-transform shadow-sm"
                         style={{ backgroundColor: c }}
                       />
@@ -491,7 +507,7 @@ const ColorConversion = () => {
                     {tints.map((c, i) => (
                       <button
                         key={i}
-                        onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                        onClick={() => { applyHex(c); addToRecent(c); }}
                         className="flex-1 h-8 rounded-lg hover:scale-110 transition-transform shadow-sm"
                         style={{ backgroundColor: c }}
                       />
@@ -514,7 +530,7 @@ const ColorConversion = () => {
                   return (
                     <button
                       key={i}
-                      onClick={() => { setCurrentHex(c); addToRecent(c); }}
+                      onClick={() => { applyHex(c); addToRecent(c); }}
                       className="flex-1 relative group flex flex-col items-center justify-center hover:flex-[1.5] transition-all min-w-0"
                       style={{ backgroundColor: c }}
                     >

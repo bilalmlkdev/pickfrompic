@@ -83,9 +83,19 @@ const Dashboard: React.FC = () => {
     setSelectMode(false);
   };
 
-  const handleCopyURL = async (id: string) => {
+  const handleCopyURL = async (item: Palette | Color | Gradient) => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/item/${id}`);
+      if ("hex" in item) {
+        await navigator.clipboard.writeText(
+          `${window.location.origin}/color/${String(item.hex).replace("#", "")}`,
+        );
+      } else if ("colors" in item && displayTab === "Palettes") {
+        await navigator.clipboard.writeText(convertToCss(item.colors));
+      } else if ("colors" in item) {
+        await navigator.clipboard.writeText(
+          `background: linear-gradient(90deg, ${item.colors.join(", ")});`,
+        );
+      }
     } catch {
       // clipboard access denied
     }
@@ -142,10 +152,11 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="py-1">
             <button
-              onClick={() => handleCopyURL(id)}
+              onClick={() => handleCopyURL(item)}
               className="w-full text-left px-4 py-2 text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5"
             >
-              <Link2 size={14} /> Copy share URL
+              <Link2 size={14} />{" "}
+              {"hex" in item ? "Copy color URL" : "Copy CSS"}
             </button>
             <button
               onClick={() => handleDownload(item)}

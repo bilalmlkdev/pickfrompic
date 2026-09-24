@@ -155,11 +155,16 @@ const CreatePalette = () => {
                   className="flex-1 border border-border rounded-lg px-3 py-2 bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
                 />
                 <button
-                  onClick={() => handleCopy("palette-url", `https://pickfrompic.com/palette/${colors.map((c) => c.replace("#", "")).join("-")}`)}
+                  onClick={() =>
+                    handleCopy(
+                      "palette-css",
+                      `/* CSS HEX */\n${colors.map((c, i) => `--color-${i + 1}: ${c};`).join("\n")}`,
+                    )
+                  }
                   className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
-                  title="Copy link"
+                  title="Copy CSS"
                 >
-                  {copiedId === "palette-url" ? <Check size={14} /> : <Copy size={14} />}
+                  {copiedId === "palette-css" ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </div>
 
@@ -194,7 +199,7 @@ const CreatePalette = () => {
                       </label>
                       <button
                         onClick={() => removeColor(i)}
-                        className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-muted text-muted-foreground border border-border text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-white hover:border-destructive transition-all cursor-pointer"
+                        className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-muted text-muted-foreground border border-border text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-danger hover:text-white hover:border-danger transition-all cursor-pointer"
                       >
                         x
                       </button>
@@ -442,6 +447,7 @@ const CreatePalette = () => {
         onClose={() => setIsSaveModalOpen(false)}
         type="palette"
         data={colors}
+        initialName={name}
       />
     </div>
   );

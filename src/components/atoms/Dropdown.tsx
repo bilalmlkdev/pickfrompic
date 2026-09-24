@@ -68,7 +68,7 @@ const Dropdown: React.FC<Props> = ({
       </button>
 
       {isOpen && (
-        <div role="listbox" className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+        <div role="listbox" className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
           <div className="max-h-60 overflow-y-auto py-1">
             {options.map((option) => (
               <button

@@ -7,23 +7,28 @@ const TopLoader: React.FC = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(true);
-    setProgress(30);
+    let tHide: ReturnType<typeof setTimeout> | undefined;
+    const raf = requestAnimationFrame(() => {
+      setVisible(true);
+      setProgress(30);
+    });
 
     const t1 = setTimeout(() => setProgress(60), 150);
     const t2 = setTimeout(() => setProgress(85), 350);
     const t3 = setTimeout(() => {
       setProgress(100);
-      setTimeout(() => {
+      tHide = setTimeout(() => {
         setVisible(false);
         setProgress(0);
       }, 200);
     }, 500);
 
     return () => {
+      cancelAnimationFrame(raf);
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      if (tHide) clearTimeout(tHide);
     };
   }, [location.pathname]);
 

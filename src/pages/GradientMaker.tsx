@@ -12,7 +12,6 @@ import {
   RotateCw,
   Layers,
 } from "lucide-react";
-import { isValidHex } from "../utils/ColorMath";
 import ExportPaletteModal from "../components/modals/ExportPaletteModal";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
@@ -151,6 +150,7 @@ const GradientMaker = () => {
   };
 
   const updateStopPosition = (index: number, position: number) => {
+    if (!Number.isFinite(position)) return;
     const newStops = [...stops];
     newStops[index].position = Math.max(0, Math.min(100, position));
     setStops(newStops);
@@ -183,9 +183,10 @@ const GradientMaker = () => {
   };
 
   const handleHexInput = (index: number, value: string) => {
-    if (isValidHex(value)) {
-      updateStopColor(index, value);
-    }
+    const next = value.startsWith("#") ? value : `#${value}`;
+    const newStops = [...stops];
+    newStops[index].color = next;
+    setStops(newStops);
   };
 
   const copyCss = () => {
@@ -327,7 +328,7 @@ const GradientMaker = () => {
                           max={100}
                           value={stop.position}
                           onChange={(e) =>
-                            updateStopPosition(index, parseInt(e.target.value))
+                            updateStopPosition(index, parseInt(e.target.value, 10))
                           }
                           className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-muted"
                         />
@@ -455,7 +456,7 @@ const GradientMaker = () => {
                         type="number"
                         value={stop.position}
                         onChange={(e) =>
-                          updateStopPosition(index, parseInt(e.target.value))
+                          updateStopPosition(index, parseInt(e.target.value, 10))
                         }
                         className="w-12 border border-border rounded-lg px-2 py-1.5 text-xs text-center bg-card text-foreground"
                       />
@@ -464,7 +465,7 @@ const GradientMaker = () => {
                     <button
                       onClick={() => removeStop(index)}
                       disabled={stops.length <= 2}
-                      className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-muted"
+                      className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-danger disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-muted"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -583,7 +584,7 @@ const GradientMaker = () => {
       <SaveItemModal
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
-        type="palette"
+        type="gradient"
         data={stops.map((s) => s.color)}
       />
     </div>

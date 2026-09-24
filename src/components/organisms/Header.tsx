@@ -32,12 +32,14 @@ const Header: React.FC = () => {
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const isMainPage = location.pathname === "/";
+  const [prevPath, setPrevPath] = useState(location.pathname);
 
-  useEffect(() => {
+  if (location.pathname !== prevPath) {
+    setPrevPath(location.pathname);
     if (pendingPath && location.pathname === pendingPath) {
       setPendingPath(null);
     }
-  }, [location.pathname, pendingPath]);
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

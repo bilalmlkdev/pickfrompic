@@ -27,7 +27,6 @@ interface DashboardContextType {
   colors: Color[];
   gradients: Gradient[];
   addPalette: (name: string, collection: string, colors: string[]) => void;
-  updatePalette: (id: string, collection: string) => void;
   deletePalette: (id: string) => void;
   addColor: (name: string, hex: string) => void;
   deleteColor: (id: string) => void;
@@ -60,9 +59,13 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 
   useEffect(() => {
-    localStorage.setItem("dash_palettes", JSON.stringify(palettes));
-    localStorage.setItem("dash_colors", JSON.stringify(colors));
-    localStorage.setItem("dash_gradients", JSON.stringify(gradients));
+    try {
+      localStorage.setItem("dash_palettes", JSON.stringify(palettes));
+      localStorage.setItem("dash_colors", JSON.stringify(colors));
+      localStorage.setItem("dash_gradients", JSON.stringify(gradients));
+    } catch {
+      // quota exceeded or private mode
+    }
   }, [palettes, colors, gradients]);
 
   const addPalette = (name: string, collection: string, colors: string[]) => {
@@ -74,10 +77,6 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       createdAt: new Date().toISOString(),
     };
     setPalettes((prev) => [newPalette, ...prev]);
-  };
-
-  const updatePalette = (id: string, collection: string) => {
-    setPalettes((prev) => prev.map((p) => (p.id === id ? { ...p, collection } : p)));
   };
 
   const deletePalette = (id: string) => {
@@ -119,7 +118,6 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         colors,
         gradients,
         addPalette,
-        updatePalette,
         deletePalette,
         addColor,
         deleteColor,
