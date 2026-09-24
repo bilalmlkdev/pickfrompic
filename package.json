@@ -3,6 +3,17 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "description": "Free open-source image color picker, palette generator, gradient maker, and color converter",
+  "license": "MIT",
+  "author": "Bilal Malik",
+  "homepage": "https://pickfrompic.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bilalmlkdev/pickfrompic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bilalmlkdev/pickfrompic/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
