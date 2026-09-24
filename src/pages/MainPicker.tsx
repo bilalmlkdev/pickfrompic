@@ -1,27 +1,42 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useExtractColors } from "react-extract-colors";
 import ImageUploader from "../components/organisms/ImageUploader";
 import ColorDetailsPanel from "../components/organisms/ColorDetailsPanel";
 import ColorPalette from "../components/organisms/ColorPalette";
 import ToolCard from "../components/templates/ToolCard";
 
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&q=80";
 
 const MainPicker = () => {
-  const [imageSrc, setImageSrc] = useState<string | null>(
-    "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&q=80",
-  );
-  const [selectedColor, setSelectedColor] = useState<string>("#2596be");
+  const [imageSrc, setImageSrc] = useState<string | null>(DEFAULT_IMAGE);
+  const [manualColor, setManualColor] = useState<string | null>(null);
   const [hoveredColor, setHoveredColor] = useState<string | null>(null);
   const [maxColors, setMaxColors] = useState<number>(10);
-  const [topPicks, setTopPicks] = useState<string[]>([]);
   const [highlightColor, setHighlightColor] = useState<string | null>(null);
 
-  const { colors, loading } = useExtractColors(imageSrc ?? "", {
+  const { colors, dominantColor, loading } = useExtractColors(imageSrc ?? "", {
     maxColors: maxColors,
     format: "hex",
   });
 
-  const safeColors = Array.isArray(colors) ? colors : [];
+  const safeColors = useMemo(
+    () => (Array.isArray(colors) ? colors : []),
+    [colors],
+  );
+  const selectedColor =
+    manualColor ?? dominantColor ?? safeColors[0] ?? "#2596be";
+
+  const topPicks = useMemo(() => {
+    if (manualColor) {
+      return [manualColor, ...safeColors.filter((c) => c !== manualColor)].slice(
+        0,
+        2,
+      );
+    }
+    return safeColors.slice(0, 2);
+  }, [manualColor, safeColors]);
+
   const extractedColors = imageSrc ? safeColors : [];
   const paletteColors = imageSrc
     ? safeColors
@@ -29,21 +44,27 @@ const MainPicker = () => {
       ? [topPicks[0]]
       : [];
 
+  const changeImageSrc = (src: string) => {
+    setImageSrc(src);
+    setManualColor(null);
+    setHighlightColor(null);
+    setHoveredColor(null);
+  };
+
   const handlePickedColor = (color: string) => {
-    setSelectedColor(color);
+    setManualColor(color);
     setImageSrc(null);
     setHoveredColor(null);
-    setTopPicks([color]);
+    setHighlightColor(null);
   };
 
   const handleImagePick = (color: string) => {
-    setSelectedColor(color);
+    setManualColor(color);
     setHoveredColor(null);
-    setTopPicks((prev) => [color, prev[0] || color]);
   };
 
   const handlePaletteColorClick = (color: string) => {
-    setSelectedColor(color);
+    setManualColor(color);
     setHighlightColor((prev) => (prev === color ? null : color));
   };
 
@@ -87,8 +108,8 @@ const MainPicker = () => {
                 topPicks={topPicks}
                 selectedColor={selectedColor}
                 hoveredColor={hoveredColor}
-                setSelectedColor={setSelectedColor}
-                setImageSrc={setImageSrc}
+                setSelectedColor={setManualColor}
+                setImageSrc={changeImageSrc}
                 onPickedColor={handlePickedColor}
               />
             </div>
