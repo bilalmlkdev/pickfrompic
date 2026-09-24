@@ -9,14 +9,16 @@ import {
   Repeat,
   Copy,
   Check,
-  RotateCw,
   Layers,
 } from "lucide-react";
 import ExportPaletteModal from "../components/modals/ExportPaletteModal";
 import SaveItemModal from "../components/modals/SaveItemModal";
 import Button from "../components/atoms/Button";
+import IconButton from "../components/atoms/IconButton";
 import ToolCard from "../components/templates/ToolCard";
 import CodeBlock from "../components/atoms/CodeBlock";
+import SectionLabel from "../components/atoms/SectionLabel";
+import { hexToRgb } from "../utils/ColorMath";
 
 interface Stop {
   color: string;
@@ -97,6 +99,46 @@ const randomGradients = [
   ["#55a3f0", "#7b68ee", "#9b59b6", "#8e44ad"],
 ];
 
+const angleChips = [
+  { deg: 0, label: "↑" },
+  { deg: 45, label: "↗" },
+  { deg: 90, label: "→" },
+  { deg: 135, label: "↘" },
+  { deg: 180, label: "↓" },
+  { deg: 225, label: "↙" },
+  { deg: 270, label: "←" },
+  { deg: 315, label: "↖" },
+];
+
+const toHex = (r: number, g: number, b: number) =>
+  `#${[r, g, b]
+    .map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0"))
+    .join("")}`;
+
+const colorAtPosition = (stops: Stop[], pos: number): string => {
+  const sorted = [...stops].sort((a, b) => a.position - b.position);
+  if (sorted.length === 0) return "#888888";
+  if (pos <= sorted[0].position) return sorted[0].color;
+  const last = sorted[sorted.length - 1];
+  if (pos >= last.position) return last.color;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i];
+    const b = sorted[i + 1];
+    if (pos >= a.position && pos <= b.position) {
+      const span = b.position - a.position || 1;
+      const t = (pos - a.position) / span;
+      const c1 = hexToRgb(a.color);
+      const c2 = hexToRgb(b.color);
+      return toHex(
+        c1.r + (c2.r - c1.r) * t,
+        c1.g + (c2.g - c1.g) * t,
+        c1.b + (c2.b - c1.b) * t
+      );
+    }
+  }
+  return "#888888";
+};
+
 const GradientMaker = () => {
   const [stops, setStops] = useState<Stop[]>([
     { color: "#667eea", position: 0 },
@@ -108,10 +150,14 @@ const GradientMaker = () => {
   const [repeat, setRepeat] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [activeStop, setActiveStop] = useState<number | null>(null);
+  const [activeStop, setActiveStop] = useState<number | null>(0);
   const [copiedCss, setCopiedCss] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
-  const gradientBarRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState<"light" | "dark" | "check">("light");
+  const railRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const dragIndexRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
 
   const gradientCSS = useMemo(() => {
     const stopsStr = stops.map((s) => `${s.color} ${s.position}%`).join(", ");
@@ -122,17 +168,29 @@ const GradientMaker = () => {
     return `${prefix}conic-gradient(from ${angle}deg at ${position.x}% ${position.y}%, ${stopsStr})`;
   }, [stops, gradientType, angle, position, repeat]);
 
-  const exportColors = stops.map((s) => s.color);
+  const railCSS = useMemo(() => {
+    const stopsStr = [...stops]
+      .sort((a, b) => a.position - b.position)
+      .map((s) => `${s.color} ${s.position}%`)
+      .join(", ");
+    return `linear-gradient(to right, ${stopsStr})`;
+  }, [stops]);
 
-  const addStop = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!gradientBarRef.current) return;
-      const rect = gradientBarRef.current.getBoundingClientRect();
-      const pos = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-      const newStops = [...stops, { color: "#888888", position: pos }];
-      newStops.sort((a, b) => a.position - b.position);
-      setStops(newStops);
-      setActiveStop(newStops.findIndex((s) => s.position === pos && s.color === "#888888"));
+  const exportColors = stops.map((s) => s.color);
+  const cssCode = `background: ${gradientCSS};`;
+
+  const posFromClientX = useCallback((clientX: number) => {
+    if (!railRef.current) return 0;
+    const rect = railRef.current.getBoundingClientRect();
+    return Math.max(0, Math.min(100, Math.round(((clientX - rect.left) / rect.width) * 100)));
+  }, []);
+
+  const addStopAt = useCallback(
+    (pos: number) => {
+      const color = colorAtPosition(stops, pos);
+      const next = [...stops, { color, position: pos }].sort((a, b) => a.position - b.position);
+      setStops(next);
+      setActiveStop(next.findIndex((s) => s.position === pos && s.color === color));
     },
     [stops]
   );
@@ -141,19 +199,22 @@ const GradientMaker = () => {
     if (stops.length <= 2) return;
     setStops(stops.filter((_, i) => i !== index));
     if (activeStop === index) setActiveStop(null);
+    else if (activeStop !== null && activeStop > index) setActiveStop(activeStop - 1);
   };
 
   const updateStopColor = (index: number, color: string) => {
-    const newStops = [...stops];
-    newStops[index].color = color;
-    setStops(newStops);
+    setStops(stops.map((s, i) => (i === index ? { ...s, color } : s)));
   };
 
-  const updateStopPosition = (index: number, position: number) => {
-    if (!Number.isFinite(position)) return;
-    const newStops = [...stops];
-    newStops[index].position = Math.max(0, Math.min(100, position));
-    setStops(newStops);
+  const updateStopPosition = (index: number, nextPos: number) => {
+    if (!Number.isFinite(nextPos)) return;
+    const clamped = Math.max(0, Math.min(100, nextPos));
+    setStops(stops.map((s, i) => (i === index ? { ...s, position: clamped } : s)));
+  };
+
+  const handleHexInput = (index: number, value: string) => {
+    const next = value.startsWith("#") ? value : `#${value}`;
+    updateStopColor(index, next);
   };
 
   const reverseStops = () => {
@@ -169,7 +230,7 @@ const GradientMaker = () => {
       }))
     );
     setAngle(Math.floor(Math.random() * 360));
-    setActiveStop(null);
+    setActiveStop(0);
   };
 
   const loadPreset = (colors: string[]) => {
@@ -179,23 +240,72 @@ const GradientMaker = () => {
         position: Math.round((i / (colors.length - 1)) * 100),
       }))
     );
-    setActiveStop(null);
+    setActiveStop(0);
   };
 
-  const handleHexInput = (index: number, value: string) => {
-    const next = value.startsWith("#") ? value : `#${value}`;
-    const newStops = [...stops];
-    newStops[index].color = next;
-    setStops(newStops);
+  const addMidStop = () => {
+    const avg = Math.round(stops.reduce((a, s) => a + s.position, 0) / stops.length);
+    addStopAt(avg);
   };
 
   const copyCss = () => {
-    navigator.clipboard.writeText(`background: ${gradientCSS};`);
+    navigator.clipboard.writeText(cssCode);
     setCopiedCss(true);
     setTimeout(() => setCopiedCss(false), 1500);
   };
 
-  const cssCode = `background: ${gradientCSS};`;
+  const startDrag = (index: number, e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setActiveStop(index);
+    dragIndexRef.current = index;
+    suppressClickRef.current = true;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onDragMove = (e: React.PointerEvent) => {
+    const index = dragIndexRef.current;
+    if (index === null) return;
+    updateStopPosition(index, posFromClientX(e.clientX));
+  };
+
+  const endDrag = (index: number) => {
+    if (dragIndexRef.current === null) return;
+    dragIndexRef.current = null;
+    const moved = stops[index];
+    if (!moved) return;
+    const sorted = [...stops].sort((a, b) => a.position - b.position);
+    setStops(sorted);
+    const newIdx = sorted.findIndex((s) => s.color === moved.color && s.position === moved.position);
+    setActiveStop(newIdx >= 0 ? newIdx : null);
+    setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+  };
+
+  const onRailClick = (e: React.MouseEvent) => {
+    if (suppressClickRef.current) return;
+    addStopAt(posFromClientX(e.clientX));
+  };
+
+  const onPreviewPointerDown = (e: React.PointerEvent) => {
+    if (gradientType === "linear") return;
+    if (!previewRef.current) return;
+    const rect = previewRef.current.getBoundingClientRect();
+    setPosition({
+      x: Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100))),
+      y: Math.max(0, Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100))),
+    });
+  };
+
+  const stageClass =
+    stage === "dark"
+      ? "bg-zinc-950"
+      : stage === "check"
+        ? "bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0px] bg-[image:linear-gradient(45deg,#e5e5e5_25%,transparent_25%),linear-gradient(-45deg,#e5e5e5_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e5e5_75%),linear-gradient(-45deg,transparent_75%,#e5e5e5_75%)]"
+        : "bg-white";
+
+  const selected = activeStop !== null ? stops[activeStop] : null;
 
   return (
     <div className="flex-1 flex flex-col">
@@ -208,303 +318,424 @@ const GradientMaker = () => {
         </p>
       </div>
 
-      <ToolCard noMaximize className="max-w-[1050px]">
-        <div className="flex flex-col lg:flex-row gap-5">
-          {/* Left Column - Controls */}
-          <div className="flex-1 flex flex-col gap-4 min-w-0">
-            {/* Gradient Type + Actions Row */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex gap-1 bg-muted/60 rounded-xl p-1">
-                {(["linear", "radial", "conic"] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setGradientType(type)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      gradientType === type
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </button>
-                ))}
-              </div>
+      <ToolCard noMaximize className="max-w-[1100px]">
+        <div className="flex flex-col gap-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex gap-1 bg-muted/60 rounded-xl p-1">
+              {(["linear", "radial", "conic"] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setGradientType(type)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    gradientType === type
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </button>
+              ))}
+            </div>
 
-              <div className="w-px h-6 bg-border" />
-
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <IconButton
+                size="sm"
+                onClick={reverseStops}
+                title="Reverse stops"
+              >
+                <ArrowLeftRight size={14} />
+              </IconButton>
+              <IconButton size="sm" onClick={randomize} title="Random gradient">
+                <Shuffle size={14} />
+              </IconButton>
               <button
                 onClick={() => setRepeat(!repeat)}
-                className={`flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-2.5 h-8 rounded-full text-xs font-medium transition-colors ${
                   repeat
-                    ? "bg-foreground text-card"
-                    : "bg-muted/60 text-muted-foreground hover:text-foreground"
+                    ? "bg-foreground text-background"
+                    : "border border-border bg-card/60 text-muted-foreground hover:text-foreground"
                 }`}
                 title="Toggle repeat gradient"
               >
                 <Repeat size={12} />
-                <span className="hidden sm:inline">Repeat</span>
+                Repeat
               </button>
-
-              <button
-                onClick={reverseStops}
-                className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-xs font-medium bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
-                title="Reverse stops"
-              >
-                <ArrowLeftRight size={12} />
-                <span className="hidden sm:inline">Reverse</span>
-              </button>
-
-              <button
-                onClick={randomize}
-                className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-xs font-medium bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
-                title="Random gradient"
-              >
-                <Shuffle size={12} />
-                <span className="hidden sm:inline">Random</span>
-              </button>
-            </div>
-
-            {/* Gradient Bar */}
-            <div className="relative">
-              <div
-                ref={gradientBarRef}
-                className="relative w-full h-[160px] rounded-2xl cursor-crosshair overflow-hidden border border-border shadow-sm"
-                onClick={addStop}
-              >
-                <div
-                  className="absolute inset-0 rounded-2xl"
-                  style={{ background: gradientCSS }}
-                />
-                {/* Checkerboard pattern behind for transparency visualization */}
-                <div
-                  className="absolute inset-0 rounded-2xl opacity-0 hover:opacity-100 transition-opacity"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)",
-                    backgroundSize: "16px 16px",
-                    backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0px",
-                    opacity: 0,
-                  }}
-                />
-                {stops.map((stop, index) => (
-                  <div
-                    key={index}
-                    className="absolute w-5 h-5 rounded-full border-[2.5px] border-white cursor-grab active:cursor-grabbing hover:scale-110 transition-transform z-10"
-                    style={{
-                      left: `calc(${stop.position}% - 10px)`,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      backgroundColor: stop.color,
-                      boxShadow:
-                        "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveStop(activeStop === index ? null : index);
-                    }}
+              <div className="flex gap-1 bg-muted/60 rounded-xl p-1 ml-1">
+                {(["light", "dark", "check"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setStage(s)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                      stage === s
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    title={`${s} stage`}
                   >
-                    {activeStop === index && (
-                      <div className="absolute -top-28 left-1/2 -translate-x-1/2 bg-card border border-border rounded-xl p-3 shadow-xl w-48 z-30">
-                        <input
-                          type="color"
-                          value={stop.color}
-                          onChange={(e) => updateStopColor(index, e.target.value)}
-                          className="w-full h-8 rounded-lg cursor-pointer border border-border mb-2"
-                        />
-                        <div className="flex gap-2 mb-2">
-                          <input
-                            type="text"
-                            value={stop.color}
-                            onChange={(e) => handleHexInput(index, e.target.value)}
-                            className="flex-1 border border-border rounded-lg px-2 py-1 text-xs font-mono bg-card text-foreground"
-                          />
-                          <span className="text-xs text-muted-foreground flex items-center">
-                            {stop.position}%
-                          </span>
-                        </div>
-                        <input
-                          type="range"
-                          min={0}
-                          max={100}
-                          value={stop.position}
-                          onChange={(e) =>
-                            updateStopPosition(index, parseInt(e.target.value, 10))
-                          }
-                          className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-muted"
-                        />
-                      </div>
-                    )}
-                  </div>
+                    {s === "check" ? "Grid" : s === "light" ? "Light" : "Dark"}
+                  </button>
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Angle / Position Controls */}
-            <div className="bg-muted/50 rounded-xl p-3 border border-border">
-              {gradientType === "linear" ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground w-12">Angle</span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={360}
-                    value={angle}
-                    onChange={(e) => setAngle(Number(e.target.value))}
-                    className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+          <div
+            ref={previewRef}
+            onPointerDown={onPreviewPointerDown}
+            className={`relative w-full h-[240px] sm:h-[300px] rounded-2xl overflow-hidden border border-border shadow-sm ${stageClass} ${
+              gradientType === "linear" ? "cursor-default" : "cursor-crosshair"
+            }`}
+          >
+            <div className="absolute inset-0" style={{ background: gradientCSS }} />
+            {gradientType !== "linear" && (
+              <div
+                className="absolute w-5 h-5 rounded-full border-2 border-white shadow-md -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{
+                  left: `${position.x}%`,
+                  top: `${position.y}%`,
+                  backgroundColor: stops[0]?.color || "#667eea",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+                }}
+              />
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-foreground">Color stops</span>
+              <span className="text-[11px] text-muted-foreground">
+                Click rail to add · Drag handles to move
+              </span>
+            </div>
+
+            <div
+              ref={railRef}
+              onClick={onRailClick}
+              className="relative h-12 rounded-xl cursor-crosshair select-none touch-none"
+            >
+              <div className="absolute inset-x-0 top-3.5 h-5 rounded-full border border-border shadow-sm overflow-hidden">
+                <div className="w-full h-full" style={{ background: railCSS }} />
+              </div>
+
+              {stops.map((stop, index) => (
+                <div
+                  key={`${stop.color}-${index}-${stop.position}`}
+                  role="slider"
+                  aria-label={`Color stop ${index + 1}`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={stop.position}
+                  tabIndex={0}
+                  onPointerDown={(e) => startDrag(index, e)}
+                  onPointerMove={onDragMove}
+                  onPointerUp={() => endDrag(index)}
+                  onPointerCancel={() => endDrag(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                      e.preventDefault();
+                      const delta = e.key === "ArrowLeft" ? -1 : 1;
+                      const step = e.shiftKey ? 5 : 1;
+                      updateStopPosition(index, stop.position + delta * step);
+                      setActiveStop(index);
+                    }
+                    if (e.key === "Delete" || e.key === "Backspace") {
+                      e.preventDefault();
+                      removeStop(index);
+                    }
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveStop(index);
+                  }}
+                  className={`absolute top-1.5 w-9 h-9 -translate-x-1/2 flex items-center justify-center rounded-full cursor-grab active:cursor-grabbing focus:outline-none ${
+                    activeStop === index ? "z-20" : "z-10"
+                  }`}
+                  style={{ left: `${stop.position}%` }}
+                >
+                  <span
+                    className={`block w-6 h-6 rounded-full border-[2.5px] border-white transition-transform ${
+                      activeStop === index ? "scale-110 ring-2 ring-foreground/40" : "hover:scale-105"
+                    }`}
                     style={{
-                      background:
-                        "linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)",
+                      backgroundColor: stop.color,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
                     }}
                   />
-                  <span className="text-xs font-mono text-foreground w-12 text-right">
-                    {angle}deg
-                  </span>
-                  <button
-                    onClick={() => setAngle(0)}
-                    className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                    title="Reset to 0"
-                  >
-                    <RotateCw size={12} />
-                  </button>
                 </div>
+              ))}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2 p-2.5 rounded-xl bg-muted/50 border border-border min-h-[52px]">
+              {selected && activeStop !== null ? (
+                <>
+                  <label className="relative w-9 h-9 rounded-lg overflow-hidden border border-border shrink-0 cursor-pointer">
+                    <span
+                      className="absolute inset-0"
+                      style={{ backgroundColor: selected.color }}
+                    />
+                    <input
+                      type="color"
+                      value={selected.color}
+                      onChange={(e) => updateStopColor(activeStop, e.target.value)}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    value={selected.color}
+                    onChange={(e) => handleHexInput(activeStop, e.target.value)}
+                    className="w-24 border border-border rounded-lg px-2.5 py-1.5 text-xs font-mono bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                    aria-label="Hex color"
+                  />
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={selected.position}
+                      onChange={(e) => updateStopPosition(activeStop, Number(e.target.value))}
+                      className="flex-1 h-1.5 min-w-0 rounded-full appearance-none cursor-pointer bg-border"
+                      aria-label="Stop position"
+                    />
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={selected.position}
+                        onChange={(e) => updateStopPosition(activeStop, parseInt(e.target.value, 10))}
+                        className="w-14 border border-border rounded-lg px-2 py-1.5 text-xs text-center bg-card text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                        aria-label="Position percent"
+                      />
+                      <span className="text-[11px] text-muted-foreground">%</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={addMidStop}
+                    icon={<Plus size={13} />}
+                  >
+                    Add
+                  </Button>
+                  <IconButton
+                    size="sm"
+                    onClick={() => removeStop(activeStop)}
+                    disabled={stops.length <= 2}
+                    title="Remove stop"
+                    className="hover:text-danger"
+                  >
+                    <Trash2 size={14} />
+                  </IconButton>
+                </>
               ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-12">
-                      {gradientType === "conic" ? "Rotation" : "Angle"}
-                    </span>
+                <>
+                  <span className="text-xs text-muted-foreground px-1">
+                    Select a stop to edit color and position
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={addMidStop}
+                    icon={<Plus size={13} />}
+                    className="ml-auto"
+                  >
+                    Add stop
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-border bg-muted/40 p-3.5">
+              <SectionLabel className="!mb-2 !text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
+                {gradientType === "linear" ? "Direction" : "Center"}
+              </SectionLabel>
+
+              {gradientType === "linear" ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {angleChips.map((chip) => (
+                      <button
+                        key={chip.deg}
+                        onClick={() => setAngle(chip.deg)}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors border ${
+                          angle === chip.deg
+                            ? "bg-foreground text-background border-foreground"
+                            : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                        }`}
+                        title={`${chip.deg}deg`}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-10">Angle</span>
                     <input
                       type="range"
                       min={0}
                       max={360}
                       value={angle}
                       onChange={(e) => setAngle(Number(e.target.value))}
-                      className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-border"
+                      className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-border"
+                      aria-label="Angle"
                     />
-                    <span className="text-xs font-mono text-foreground w-12 text-right">
-                      {angle}deg
-                    </span>
+                    <div className="flex items-center gap-0.5">
+                      <input
+                        type="number"
+                        min={0}
+                        max={360}
+                        value={angle}
+                        onChange={(e) => {
+                          const v = parseInt(e.target.value, 10);
+                          if (Number.isFinite(v)) setAngle(Math.max(0, Math.min(360, v)));
+                        }}
+                        className="w-14 border border-border rounded-lg px-2 py-1.5 text-xs text-center bg-card text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                        aria-label="Angle degrees"
+                      />
+                      <span className="text-[11px] text-muted-foreground">deg</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-12">Center X</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={position.x}
-                      onChange={(e) =>
-                        setPosition({ ...position, x: Number(e.target.value) })
-                      }
-                      className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-border"
-                    />
-                    <span className="text-xs font-mono text-foreground w-12 text-right">
-                      {position.x}%
-                    </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <div className="grid grid-cols-3 gap-1.5 shrink-0">
+                    {[
+                      { x: 0, y: 0 },
+                      { x: 50, y: 0 },
+                      { x: 100, y: 0 },
+                      { x: 0, y: 50 },
+                      { x: 50, y: 50 },
+                      { x: 100, y: 50 },
+                      { x: 0, y: 100 },
+                      { x: 50, y: 100 },
+                      { x: 100, y: 100 },
+                    ].map((cell) => {
+                      const active =
+                        Math.abs(position.x - cell.x) < 8 &&
+                        Math.abs(position.y - cell.y) < 8;
+                      return (
+                        <button
+                          key={`${cell.x}-${cell.y}`}
+                          onClick={() => setPosition(cell)}
+                          className={`w-8 h-8 rounded-md border transition-colors ${
+                            active
+                              ? "bg-foreground border-foreground"
+                              : "bg-card border-border hover:border-foreground/40"
+                          }`}
+                          title={`${cell.x}% ${cell.y}%`}
+                          aria-label={`Center ${cell.x} ${cell.y}`}
+                        />
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-12">Center Y</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={position.y}
-                      onChange={(e) =>
-                        setPosition({ ...position, y: Number(e.target.value) })
-                      }
-                      className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-border"
-                    />
-                    <span className="text-xs font-mono text-foreground w-12 text-right">
-                      {position.y}%
-                    </span>
+                  <div className="flex flex-col gap-2 min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground w-4">X</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={position.x}
+                        onChange={(e) => setPosition({ ...position, x: Number(e.target.value) })}
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-border"
+                        aria-label="Center X"
+                      />
+                      <span className="text-[11px] font-mono text-foreground w-8 text-right">
+                        {position.x}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground w-4">Y</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={position.y}
+                        onChange={(e) => setPosition({ ...position, y: Number(e.target.value) })}
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-border"
+                        aria-label="Center Y"
+                      />
+                      <span className="text-[11px] font-mono text-foreground w-8 text-right">
+                        {position.y}%
+                      </span>
+                    </div>
+                    {gradientType === "conic" && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground w-4">R</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={360}
+                          value={angle}
+                          onChange={(e) => setAngle(Number(e.target.value))}
+                          className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-border"
+                          aria-label="Rotation"
+                        />
+                        <span className="text-[11px] font-mono text-foreground w-8 text-right">
+                          {angle}°
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground">Click preview to move center</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Color Stops */}
-            <div>
+            <div className="rounded-xl border border-border bg-muted/40 p-3.5 flex flex-col">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-foreground">
-                  Color Stops
+                <span className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
+                  CSS
                 </span>
-                <span className="text-[10px] text-muted-foreground">
-                  Click bar to add
-                </span>
+                <button
+                  onClick={copyCss}
+                  className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {copiedCss ? <Check size={12} /> : <Copy size={12} />}
+                  {copiedCss ? "Copied" : "Copy"}
+                </button>
               </div>
-              <div className="flex flex-col gap-1.5">
-                {stops.map((stop, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-2 p-1.5 rounded-lg transition-colors ${
-                      activeStop === index ? "bg-muted" : "hover:bg-muted/50"
-                    }`}
-                  >
-                    <input
-                      type="color"
-                      value={stop.color}
-                      onChange={(e) => updateStopColor(index, e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer border border-border shrink-0"
-                    />
-                    <input
-                      type="text"
-                      value={stop.color}
-                      onChange={(e) => handleHexInput(index, e.target.value)}
-                      className="w-20 border border-border rounded-lg px-2.5 py-1.5 text-xs font-mono bg-card text-foreground"
-                    />
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        value={stop.position}
-                        onChange={(e) =>
-                          updateStopPosition(index, parseInt(e.target.value, 10))
-                        }
-                        className="w-12 border border-border rounded-lg px-2 py-1.5 text-xs text-center bg-card text-foreground"
-                      />
-                      <span className="text-[10px] text-muted-foreground">%</span>
-                    </div>
-                    <button
-                      onClick={() => removeStop(index)}
-                      disabled={stops.length <= 2}
-                      className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-danger disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-muted"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                ))}
+              <div className="rounded-xl overflow-hidden border border-border flex-1 min-h-[88px]">
+                <CodeBlock code={cssCode} language="css" />
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const avg = Math.round(
-                    stops.reduce((a, s) => a + s.position, 0) / stops.length
-                  );
-                  setStops([...stops, { color: "#888888", position: avg }]);
-                }}
-                icon={<Plus size={12} />}
-                className="mt-1.5"
-              >
-                Add Stop
-              </Button>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsExportOpen(true)}
+                  icon={<Download size={13} />}
+                  fullWidth
+                >
+                  Export
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsSaveModalOpen(true)}
+                  icon={<Heart size={13} />}
+                  fullWidth
+                >
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Right Column - Presets + Code + Actions */}
-          <div className="flex-1 flex flex-col gap-4 min-w-0 lg:max-w-[420px]">
-            {/* Presets */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Layers size={13} className="text-muted-foreground" />
-                <span className="text-xs font-medium text-foreground">Presets</span>
-              </div>
-              <div className="flex gap-1 mb-3 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Layers size={13} className="text-muted-foreground" />
+              <span className="text-xs font-medium text-foreground">Presets</span>
+              <div className="flex gap-1 ml-2 flex-wrap">
                 {presetCategories.map((cat, i) => (
                   <button
                     key={cat.name}
                     onClick={() => setActiveCategory(i)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                       activeCategory === i
-                        ? "bg-foreground text-card"
+                        ? "bg-foreground text-background"
                         : "bg-muted/60 text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -512,64 +743,25 @@ const GradientMaker = () => {
                   </button>
                 ))}
               </div>
-              <div className="grid grid-cols-5 gap-1.5">
-                {presetCategories[activeCategory].presets.map((preset, i) => (
-                  <button
-                    key={i}
-                    onClick={() => loadPreset(preset.colors)}
-                    className="group flex flex-col items-center gap-1"
-                  >
-                    <div
-                      className="w-full h-8 rounded-lg overflow-hidden border border-border group-hover:scale-105 transition-transform shadow-sm"
-                      style={{
-                        background: `linear-gradient(to right, ${preset.colors.join(", ")})`,
-                      }}
-                    />
-                    <span className="text-[9px] text-muted-foreground group-hover:text-foreground transition-colors truncate w-full text-center">
-                      {preset.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
             </div>
-
-            {/* CSS Code Preview */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-foreground">CSS Code</span>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-0.5 px-0.5">
+              {presetCategories[activeCategory].presets.map((preset, i) => (
                 <button
-                  onClick={copyCss}
-                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                  key={i}
+                  onClick={() => loadPreset(preset.colors)}
+                  className="group shrink-0 w-[104px] text-left"
                 >
-                  {copiedCss ? <Check size={11} /> : <Copy size={11} />}
-                  {copiedCss ? "Copied!" : "Copy"}
+                  <div
+                    className="h-14 rounded-xl overflow-hidden border border-border group-hover:scale-[1.03] group-hover:border-foreground/30 transition-all shadow-sm"
+                    style={{
+                      background: `linear-gradient(to right, ${preset.colors.join(", ")})`,
+                    }}
+                  />
+                  <span className="block mt-1 text-[11px] text-muted-foreground group-hover:text-foreground transition-colors truncate">
+                    {preset.name}
+                  </span>
                 </button>
-              </div>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <CodeBlock code={cssCode} language="css" />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 pt-0.5">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsExportOpen(true)}
-                icon={<Download size={13} />}
-                fullWidth
-              >
-                Export
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsSaveModalOpen(true)}
-                icon={<Heart size={13} />}
-                fullWidth
-              >
-                Save
-              </Button>
+              ))}
             </div>
           </div>
         </div>
