@@ -13,6 +13,7 @@ import {
   Unlock,
   X,
   Download,
+  Pencil,
 } from "lucide-react";
 import ExportPaletteModal from "../components/modals/ExportPaletteModal";
 import SaveItemModal from "../components/modals/SaveItemModal";
@@ -38,29 +39,28 @@ const colorNames: Record<string, string> = {
   "#2596be": "Fjord Signal",
   "#f59e0b": "Amber",
   "#8b5cf6": "Violet",
+  "#10b981": "Emerald",
+  "#ef4444": "Crimson",
 };
 
 const getColorName = (hex: string): string => colorNames[hex.toLowerCase()] || "Custom";
 
 const defaultColors = ["#2596be", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444"];
 
-const colorPresets: string[][] = [
-  ["#ff6b6b", "#feca57", "#48dbfb", "#ff9ff3"],
-  ["#00d2d3", "#ff9f43", "#ee5a24", "#0abde3"],
-  ["#10ac84", "#1dd1a1", "#01a3a4", "#0be881"],
-  ["#5f27cd", "#341f97", "#c44dff", "#6c5ce7"],
-  ["#ff6348", "#ffa502", "#eccc68", "#a4b0be"],
-  ["#2ed573", "#7bed9f", "#70a1ff", "#1e90ff"],
+const presetPalettes: { name: string; colors: string[] }[] = [
+  { name: "Candy Pop", colors: ["#ff6b6b", "#feca57", "#48dbfb", "#ff9ff3"] },
+  { name: "Tropical", colors: ["#00d2d3", "#ff9f43", "#ee5a24", "#0abde3"] },
+  { name: "Minty", colors: ["#10ac84", "#1dd1a1", "#01a3a4", "#0be881"] },
+  { name: "Grape", colors: ["#5f27cd", "#341f97", "#c44dff", "#6c5ce7"] },
+  { name: "Sunset", colors: ["#ff6348", "#ffa502", "#eccc68", "#a4b0be"] },
+  { name: "Glacier", colors: ["#2ed573", "#7bed9f", "#70a1ff", "#1e90ff"] },
+  { name: "Warm Sunset", colors: ["#ff6b35", "#f7931a", "#ffd700", "#ff4500"] },
+  { name: "Cool Ocean", colors: ["#0077be", "#00a9ce", "#00d4ff", "#005f73"] },
+  { name: "Forest", colors: ["#228b22", "#32cd32", "#90ee90", "#2e8b57"] },
+  { name: "Royal Purple", colors: ["#8b008b", "#9370db", "#dda0dd", "#4b0082"] },
+  { name: "Hot Pink", colors: ["#ff1493", "#ff69b4", "#ffb6c1", "#c71585"] },
+  { name: "Neon", colors: ["#00ff00", "#ff00ff", "#00ffff", "#ffff00"] },
 ];
-
-const PRESET_PALETTES: Record<string, string[]> = {
-  "Warm Sunset": ["#ff6b35", "#f7931a", "#ffd700", "#ff4500"],
-  "Cool Ocean": ["#0077be", "#00a9ce", "#00d4ff", "#005f73"],
-  Forest: ["#228b22", "#32cd32", "#90ee90", "#2e8b57"],
-  "Royal Purple": ["#8b008b", "#9370db", "#dda0dd", "#4b0082"],
-  "Hot Pink": ["#ff1493", "#ff69b4", "#ffb6c1", "#c71585"],
-  Neon: ["#00ff00", "#ff00ff", "#00ffff", "#ffff00"],
-};
 
 const randomHex = () => {
   const h = Math.floor(Math.random() * 16777215).toString(16);
@@ -93,11 +93,11 @@ const CreatePalette = () => {
   const [colors, setColors] = useState<string[]>(defaultColors);
   const [locks, setLocks] = useState<boolean[]>(defaultColors.map(() => false));
   const [selected, setSelected] = useState(0);
+  const [hovered, setHovered] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [showAllPresets, setShowAllPresets] = useState(false);
   const [previewTab, setPreviewTab] = useState<string>("strip");
 
   const handleCopy = useCallback((id: string, value: string) => {
@@ -115,6 +115,7 @@ const CreatePalette = () => {
         if (result && result.sRGBHex) {
           setColors((prev) => [...prev, result.sRGBHex]);
           setLocks((prev) => [...prev, false]);
+          setSelected(colors.length);
         }
       } catch {
         // user cancelled
@@ -124,9 +125,14 @@ const CreatePalette = () => {
 
   const removeColor = (index: number) => {
     if (colors.length <= 2) return;
+    const total = colors.length;
     setColors((prev) => prev.filter((_, i) => i !== index));
     setLocks((prev) => prev.filter((_, i) => i !== index));
-    setSelected((prev) => Math.min(prev, colors.length - 2));
+    setSelected((prev) => {
+      if (index < prev) return prev - 1;
+      if (index === prev) return Math.min(prev, total - 2);
+      return prev;
+    });
   };
 
   const insertColor = (index: number) => {
@@ -162,14 +168,13 @@ const CreatePalette = () => {
   };
 
   const loadPreset = (preset: string[]) => {
-    const next = [...preset];
-    setColors(next);
-    setLocks(next.map(() => false));
+    setColors(preset);
+    setLocks(preset.map(() => false));
     setSelected(0);
-    setShowAllPresets(false);
   };
 
   const selectedColor = colors[selected] ?? colors[0] ?? "#2596be";
+  const selectedText = onColor(selectedColor);
   const rgb = hexToRgb(selectedColor);
   const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
   const rgbStr = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
@@ -201,496 +206,451 @@ const CreatePalette = () => {
           Palette Generator
         </h1>
         <p className="mt-2 text-muted-foreground text-lg">
-          Build palettes, lock favorites, and export as CSS or JSON.
+          Generate palettes, lock your favorites, and export as CSS or JSON.
         </p>
       </div>
 
-      <div className="relative w-full max-w-[1100px] mx-auto px-4 mb-8">
-        <ToolCard noMaximize className="px-5 pb-5 pt-4">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Palette name"
-                className="flex-1 min-w-[160px] border border-border rounded-xl px-3.5 py-2.5 bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
-              />
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={randomize}
-                icon={<Shuffle size={14} />}
-              >
-                Generate
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={pickFromScreen}
-                icon={<Pipette size={14} />}
-              >
-                Pick
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsSaveModalOpen(true)}
-                icon={<Heart size={14} />}
-              >
-                Save
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsExportOpen(true)}
-                icon={<Download size={14} />}
-              >
-                Export
-              </Button>
-              <span className="hidden sm:inline text-[11px] text-muted-foreground border border-border rounded-full px-2.5 py-1 bg-muted/50">
-                Space to generate
-              </span>
-            </div>
+      <div className="w-full max-w-[1100px] mx-auto px-4 mb-8">
+        <ToolCard noMaximize className="px-4 sm:px-5 pb-5 pt-4">
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Untitled palette"
+              className="flex-1 min-w-[150px] border border-border rounded-full px-4 py-2 bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
+            />
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={randomize}
+              icon={<Shuffle size={14} />}
+            >
+              Generate
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={pickFromScreen}
+              icon={<Pipette size={14} />}
+            >
+              Pick
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsSaveModalOpen(true)}
+              icon={<Heart size={14} />}
+            >
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsExportOpen(true)}
+              icon={<Download size={14} />}
+            >
+              Export
+            </Button>
+            <span className="hidden md:inline text-[11px] text-muted-foreground border border-border rounded-full px-2.5 py-1.5 bg-muted/50">
+              Space to generate
+            </span>
+          </div>
 
-            <div className="relative rounded-2xl overflow-hidden border border-border shadow-sm h-[220px] sm:h-[260px]">
-              <div className="flex h-full w-full">
-                {colors.map((color, index) => {
-                  const tc = onColor(color);
-                  const isSel = selected === index;
-                  return (
-                    <div key={`${color}-${index}`} className="relative flex min-w-0 h-full group/color">
+          <div className="relative w-full h-[300px] sm:h-[360px] lg:h-[400px] rounded-2xl overflow-hidden border border-border shadow-[0_18px_40px_-16px_rgba(0,0,0,0.35)] select-none">
+            <div className="flex h-full w-full">
+              {colors.map((color, index) => {
+                const tc = onColor(color);
+                const isSel = selected === index;
+                const showControls = isSel || hovered === index;
+                return (
+                  <div
+                    key={`${color}-${index}`}
+                    className="relative h-full shrink-0 basis-0 group/color transition-[flex-grow] duration-300 ease-out"
+                    style={{
+                      backgroundColor: color,
+                      flexGrow: isSel ? 1.7 : hovered === index ? 1.4 : 1,
+                    }}
+                    onMouseEnter={() => setHovered(index)}
+                    onMouseLeave={() => setHovered((h) => (h === index ? null : h))}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelected(index)}
+                      onDoubleClick={() => handleCopy(`hex-${index}`, color)}
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 cursor-pointer px-1"
+                      aria-label={`Select color ${color}`}
+                    >
+                      <span
+                        className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest"
+                        style={{ color: tc }}
+                      >
+                        {String(index + 1).padStart(2, "0")}
+                        {locks[index] && <Lock size={10} />}
+                      </span>
+
+                      <span
+                        className={`font-mono font-bold tracking-wider text-center leading-none transition-all ${
+                          copiedId === `hex-${index}` ? "text-sm sm:text-base" : "text-base sm:text-xl lg:text-2xl"
+                        }`}
+                        style={{ color: tc }}
+                      >
+                        {copiedId === `hex-${index}` ? "Copied!" : color.toUpperCase()}
+                      </span>
+
+                      <span
+                        className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.15em] opacity-70 truncate max-w-full px-1"
+                        style={{ color: tc }}
+                      >
+                        {getColorName(color)}
+                      </span>
+                    </button>
+
+                    <div
+                      className={`absolute bottom-9 left-1/2 -translate-x-1/2 z-10 flex items-center gap-0.5 p-1 rounded-full border border-white/25 shadow-lg backdrop-blur-md transition-opacity duration-200 pointer-events-none ${
+                        showControls ? "opacity-100" : "opacity-0"
+                      }`}
+                      style={{ backgroundColor: `${tc}59`, color: tc }}
+                    >
                       <button
                         type="button"
-                        onClick={() => setSelected(index)}
-                        onDoubleClick={() => handleCopy(`hex-${index}`, color)}
-                        className={`flex-1 h-full relative flex flex-col items-center justify-center transition-[flex] duration-200 cursor-pointer min-w-0 ${
-                          isSel ? "flex-[1.35]" : "hover:flex-[1.25]"
-                        }`}
-                        style={{ backgroundColor: color }}
-                        aria-label={`Select ${color}`}
+                        onClick={() => toggleLock(index)}
+                        className="pointer-events-auto w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/25 transition-colors"
+                        title={locks[index] ? "Unlock color" : "Lock color"}
                       >
-                        <span className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 opacity-0 group-hover/color:opacity-100 transition-opacity">
-                          <span
-                            className="p-1.5 rounded-full"
-                            style={{ backgroundColor: `${tc}22`, color: tc }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleLock(index);
-                            }}
-                            role="button"
-                            title={locks[index] ? "Unlock" : "Lock"}
-                          >
-                            {locks[index] ? <Lock size={12} /> : <Unlock size={12} />}
-                          </span>
-                          <span
-                            className="p-1.5 rounded-full"
-                            style={{ backgroundColor: `${tc}22`, color: tc }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeColor(index);
-                            }}
-                            role="button"
-                            title="Remove"
-                          >
-                            <X size={12} />
-                          </span>
-                        </span>
-
-                        {locks[index] && (
-                          <span
-                            className="absolute top-3 left-1/2 -translate-x-1/2 group-hover/color:hidden"
-                            style={{ color: tc }}
-                          >
-                            <Lock size={12} />
-                          </span>
-                        )}
-
-                        <div className="pointer-events-none px-2 text-center max-w-full">
-                          <span
-                            className="block text-[11px] font-medium opacity-70 truncate"
-                            style={{ color: tc }}
-                          >
-                            {getColorName(color)}
-                          </span>
-                          <span
-                            className="block text-sm sm:text-base font-mono font-semibold tracking-wide truncate"
-                            style={{ color: tc }}
-                          >
-                            {copiedId === `hex-${index}` ? "Copied!" : color.toUpperCase()}
-                          </span>
-                        </div>
-
-                        <label
-                          className="absolute inset-0 cursor-pointer"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <input
-                            type="color"
-                            value={color}
-                            onChange={(e) => updateColor(index, e.target.value)}
-                            className="opacity-0 w-full h-full cursor-pointer"
-                            aria-label={`Edit color ${color}`}
-                          />
-                        </label>
-
-                        <span
-                          className="absolute bottom-3 right-2 opacity-0 group-hover/color:opacity-100 transition-opacity p-1.5 rounded-full pointer-events-none"
-                          style={{ backgroundColor: `${tc}22`, color: tc }}
-                          title="Copy hex"
-                        >
-                          {copiedId === `hex-${index}` ? <Check size={12} /> : <Copy size={12} />}
-                        </span>
+                        {locks[index] ? <Lock size={11} /> : <Unlock size={11} />}
                       </button>
-
-                      {index < colors.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(`hex-${index}`, color)}
+                        className="pointer-events-auto w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/25 transition-colors"
+                        title="Copy hex"
+                      >
+                        {copiedId === `hex-${index}` ? <Check size={11} /> : <Copy size={11} />}
+                      </button>
+                      {colors.length > 2 && (
                         <button
                           type="button"
-                          onClick={() => insertColor(index + 1)}
-                          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-card border border-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all opacity-0 group-hover/color:opacity-100"
-                          title="Insert color"
-                          disabled={colors.length >= 10}
+                          onClick={() => removeColor(index)}
+                          className="pointer-events-auto w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/25 transition-colors"
+                          title="Remove color"
                         >
-                          <Plus size={14} />
+                          <X size={11} />
                         </button>
                       )}
                     </div>
+
+                    {index < colors.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => insertColor(index + 1)}
+                        className={`absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-card/95 border border-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-200 ${
+                          showControls ? "opacity-100" : "opacity-0"
+                        }`}
+                        title="Insert color here"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {colors.length < 10 && (
+              <button
+                type="button"
+                onClick={addColor}
+                className="absolute right-3 bottom-3 z-20 w-8 h-8 rounded-full bg-card/90 backdrop-blur border border-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-105 transition-all"
+                title="Add color"
+              >
+                <Plus size={15} />
+              </button>
+            )}
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-4">
+            <div className="rounded-2xl border border-border bg-muted/40 p-3.5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <SectionLabel className="!mb-0">Selected</SectionLabel>
+                <span className="text-[11px] text-muted-foreground">
+                  {selected + 1} / {colors.length}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label
+                  className="relative w-14 h-14 rounded-2xl border border-border shadow-sm shrink-0 overflow-hidden cursor-pointer group/swatch"
+                  style={{ backgroundColor: selectedColor }}
+                  title="Edit selected color"
+                >
+                  <input
+                    type="color"
+                    value={selectedColor}
+                    onChange={(e) => updateColor(selected, e.target.value)}
+                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                    aria-label="Edit selected color"
+                  />
+                  <span
+                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/swatch:opacity-100 transition-opacity"
+                    style={{ backgroundColor: `${selectedText}44`, color: selectedText }}
+                  >
+                    <Pencil size={15} />
+                  </span>
+                </label>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate">
+                    {getColorName(selectedColor)}
+                  </div>
+                  <div className="text-xs font-mono text-muted-foreground">
+                    {selectedColor.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <ColorField
+                  label="HEX"
+                  value={selectedColor.toUpperCase()}
+                  compact
+                  copied={copiedId === "sel-hex"}
+                  onCopy={() => handleCopy("sel-hex", selectedColor)}
+                />
+                <ColorField
+                  label="RGB"
+                  value={rgbStr}
+                  compact
+                  copied={copiedId === "sel-rgb"}
+                  onCopy={() => handleCopy("sel-rgb", rgbStr)}
+                />
+                <ColorField
+                  label="HSL"
+                  value={hslStr}
+                  compact
+                  copied={copiedId === "sel-hsl"}
+                  onCopy={() => handleCopy("sel-hsl", hslStr)}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2.5 mt-auto border-t border-border/70">
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">
+                  Average
+                </span>
+                <span
+                  className="w-4 h-4 rounded border border-border shrink-0"
+                  style={{ backgroundColor: avg }}
+                />
+                <span className="text-xs font-mono font-bold text-foreground">{avg.toUpperCase()}</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-muted/40 p-3.5 flex flex-col min-h-[260px]">
+              <div className="flex gap-1 mb-3">
+                {previewTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => setPreviewTab(tab.value)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        previewTab === tab.value
+                          ? "bg-foreground text-background"
+                          : "bg-card/70 text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon size={13} />
+                      {tab.label}
+                    </button>
                   );
                 })}
               </div>
 
-              {colors.length < 10 && (
-                <button
-                  type="button"
-                  onClick={addColor}
-                  className="absolute right-3 bottom-3 z-10 w-8 h-8 rounded-full bg-card/90 border border-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-105 transition-all"
-                  title="Add color"
-                >
-                  <Plus size={15} />
-                </button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5">
-              <div className="flex flex-col gap-4 min-w-0">
-                <div className="rounded-xl border border-border bg-muted/40 p-3.5">
-                  <div className="flex items-center justify-between mb-2.5">
-                    <SectionLabel className="!mb-0 !text-[11px] uppercase tracking-wide">
-                      Selected
-                    </SectionLabel>
-                    <span className="text-[11px] text-muted-foreground">
-                      {selected + 1} / {colors.length}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 mb-3">
+              <div className="flex-1 min-h-0 overflow-y-auto space-y-3">
+                {previewTab === "strip" && (
+                  <>
                     <div
-                      className="w-10 h-10 rounded-xl border border-border shadow-sm shrink-0"
-                      style={{ backgroundColor: selectedColor }}
+                      className="flex rounded-xl overflow-hidden border border-border shadow-sm h-16"
+                      style={{ background: `linear-gradient(to right, ${colors.join(", ")})` }}
                     />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">
-                        {getColorName(selectedColor)}
-                      </div>
-                      <div className="text-[11px] font-mono text-muted-foreground">
-                        {selectedColor.toUpperCase()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <ColorField
-                      label="HEX"
-                      value={selectedColor.toUpperCase()}
-                      compact
-                      copied={copiedId === "sel-hex"}
-                      onCopy={() => handleCopy("sel-hex", selectedColor)}
-                    />
-                    <ColorField
-                      label="RGB"
-                      value={rgbStr}
-                      compact
-                      copied={copiedId === "sel-rgb"}
-                      onCopy={() => handleCopy("sel-rgb", rgbStr)}
-                    />
-                    <ColorField
-                      label="HSL"
-                      value={hslStr}
-                      compact
-                      copied={copiedId === "sel-hsl"}
-                      onCopy={() => handleCopy("sel-hsl", hslStr)}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/40">
-                  <div
-                    className="w-10 h-10 rounded-xl border border-border shrink-0"
-                    style={{ backgroundColor: avg }}
-                  />
-                  <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">
-                      Average
-                    </div>
-                    <div className="text-sm font-mono font-bold text-foreground">
-                      {avg.toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Presets
-                    </span>
-                    <button
-                      onClick={() => setShowAllPresets(!showAllPresets)}
-                      className="text-[11px] text-muted-foreground hover:text-foreground"
-                    >
-                      {showAllPresets ? "Less" : "All"}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {colorPresets.map((preset, i) => (
-                      <button
-                        key={i}
-                        onClick={() => loadPreset(preset)}
-                        className="flex h-8 rounded-lg overflow-hidden border border-border hover:scale-[1.03] hover:border-foreground/30 transition-all"
-                        title="Load preset"
-                      >
-                        {preset.map((c, j) => (
-                          <div key={j} className="flex-1 h-full" style={{ backgroundColor: c }} />
-                        ))}
-                      </button>
-                    ))}
-                  </div>
-                  {showAllPresets && (
-                    <div className="mt-3">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground block mb-1.5">
-                        Named
-                      </span>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {Object.entries(PRESET_PALETTES).map(([paletteName, preset]) => (
-                          <button
-                            key={paletteName}
-                            onClick={() => loadPreset(preset)}
-                            className="flex h-8 rounded-lg overflow-hidden border border-border hover:scale-[1.03] hover:border-foreground/30 transition-all"
-                            title={paletteName}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {colors.map((color, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelected(index)}
+                          className={`rounded-xl border p-2.5 text-left transition-all shadow-sm ${
+                            selected === index
+                              ? "border-foreground ring-2 ring-foreground/20"
+                              : "border-border hover:border-foreground/30"
+                          }`}
+                          style={{ backgroundColor: color }}
+                        >
+                          <span
+                            className="text-[11px] font-mono font-bold block truncate"
+                            style={{ color: onColor(color) }}
                           >
-                            {preset.map((c, j) => (
-                              <div key={j} className="flex-1 h-full" style={{ backgroundColor: c }} />
-                            ))}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col min-w-0 min-h-0">
-                <div className="flex gap-1 mb-3">
-                  {previewTabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.value}
-                        onClick={() => setPreviewTab(tab.value)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                          previewTab === tab.value
-                            ? "bg-foreground text-background"
-                            : "bg-muted text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        <Icon size={13} />
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="flex-1 min-h-0 overflow-y-auto space-y-3">
-                  {previewTab === "strip" && (
-                    <>
-                      <div
-                        className="flex gap-0 rounded-xl overflow-hidden border border-border shadow-sm h-24"
-                        style={{ background: `linear-gradient(to right, ${colors.join(", ")})` }}
-                      />
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {colors.map((color, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setSelected(index)}
-                            className={`rounded-xl border p-3 text-left transition-all shadow-sm ${
-                              selected === index
-                                ? "border-foreground ring-2 ring-foreground/20"
-                                : "border-border hover:border-foreground/30"
-                            }`}
-                            style={{ backgroundColor: color }}
+                            {color.toUpperCase()}
+                          </span>
+                          <span
+                            className="text-[10px] block mt-0.5 truncate opacity-75"
+                            style={{ color: onColor(color) }}
                           >
-                            <span
-                              className="text-[11px] font-mono font-bold block truncate"
-                              style={{ color: onColor(color) }}
-                            >
-                              {color.toUpperCase()}
-                            </span>
-                            <span
-                              className="text-[10px] block mt-0.5 truncate opacity-75"
-                              style={{ color: onColor(color) }}
-                            >
-                              {getColorName(color)}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                      <div className="rounded-xl border border-border p-4 flex items-center gap-4 shadow-sm bg-card">
-                        <div
-                          className="w-14 h-14 rounded-xl shrink-0 border border-border"
-                          style={{ backgroundColor: avg }}
-                        />
-                        <div>
-                          <span className="text-[10px] text-muted-foreground uppercase block mb-0.5 font-semibold">
-                            Average Color
+                            {getColorName(color)}
                           </span>
-                          <span className="text-sm font-mono font-bold text-foreground">
-                            {avg.toUpperCase()}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
 
-                  {previewTab === "gradient" && (
-                    <>
-                      <div
-                        className="rounded-xl overflow-hidden border border-border shadow-sm h-28"
-                        style={{ background: `linear-gradient(to right, ${colors.join(", ")})` }}
-                      />
-                      <div
-                        className="rounded-xl overflow-hidden border border-border shadow-sm h-28"
-                        style={{ background: `linear-gradient(135deg, ${colors.join(", ")})` }}
-                      />
-                      <div
-                        className="rounded-xl overflow-hidden border border-border shadow-sm h-28"
-                        style={{ background: `radial-gradient(circle, ${colors.join(", ")})` }}
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <div
-                          className="rounded-xl overflow-hidden border border-border shadow-sm h-24"
-                          style={{ background: `linear-gradient(to bottom, ${colors.join(", ")})` }}
-                        />
-                        <div
-                          className="rounded-xl overflow-hidden border border-border shadow-sm h-24"
-                          style={{ background: `conic-gradient(from 0deg, ${colors.join(", ")})` }}
-                        />
-                      </div>
-                    </>
-                  )}
+                {previewTab === "gradient" && (
+                  <>
+                    <div
+                      className="rounded-xl overflow-hidden border border-border shadow-sm h-20"
+                      style={{ background: `linear-gradient(to right, ${colors.join(", ")})` }}
+                    />
+                    <div
+                      className="rounded-xl overflow-hidden border border-border shadow-sm h-20"
+                      style={{ background: `linear-gradient(135deg, ${colors.join(", ")})` }}
+                    />
+                    <div
+                      className="rounded-xl overflow-hidden border border-border shadow-sm h-20"
+                      style={{ background: `radial-gradient(circle, ${colors.join(", ")})` }}
+                    />
+                    <div
+                      className="rounded-xl overflow-hidden border border-border shadow-sm h-20"
+                      style={{ background: `conic-gradient(from 0deg, ${colors.join(", ")})` }}
+                    />
+                  </>
+                )}
 
-                  {previewTab === "card" && (
-                    <>
-                      <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
-                        <div
-                          className="h-24 flex"
-                          style={{
-                            background: `linear-gradient(135deg, ${colors[0]}, ${colors[1] || colors[0]})`,
-                          }}
-                        />
-                        <div className="p-4 bg-card">
-                          <div
-                            className="h-3 rounded-full mb-2"
-                            style={{ backgroundColor: colors[0], width: "60%" }}
-                          />
-                          <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "90%" }} />
-                          <div className="h-2 rounded-full bg-muted" style={{ width: "70%" }} />
-                          <div className="flex gap-2 mt-3">
-                            {colors.slice(0, 4).map((c, i) => (
-                              <div
-                                key={i}
-                                className="w-8 h-8 rounded-lg shadow-sm"
-                                style={{ backgroundColor: c }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
+                {previewTab === "card" && (
+                  <>
+                    <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
                       <div
-                        className="rounded-2xl border border-border overflow-hidden shadow-sm p-5"
+                        className="h-16 flex"
                         style={{
-                          background: `linear-gradient(135deg, ${colors[0]}, ${colors[colors.length - 1]})`,
+                          background: `linear-gradient(135deg, ${colors[0]}, ${colors[1] || colors[0]})`,
                         }}
-                      >
+                      />
+                      <div className="p-3.5 bg-card">
                         <div
-                          className="h-4 rounded-full mb-3"
-                          style={{
-                            backgroundColor: `${onColor(colors[0])}30`,
-                            width: "50%",
-                          }}
+                          className="h-3 rounded-full mb-2"
+                          style={{ backgroundColor: colors[0], width: "60%" }}
                         />
                         <div
-                          className="h-2 rounded-full mb-1.5"
-                          style={{
-                            backgroundColor: `${onColor(colors[0])}20`,
-                            width: "80%",
-                          }}
+                          className="h-2 rounded-full bg-muted mb-1"
+                          style={{ width: "90%" }}
                         />
-                        <div
-                          className="h-2 rounded-full"
-                          style={{
-                            backgroundColor: `${onColor(colors[0])}20`,
-                            width: "60%",
-                          }}
-                        />
-                        <div className="flex gap-2 mt-4">
-                          <div
-                            className="px-4 py-1.5 rounded-full text-[10px] font-medium"
-                            style={{
-                              backgroundColor: colors[1] || colors[0],
-                              color: onColor(colors[1] || colors[0]),
-                            }}
-                          >
-                            Button
-                          </div>
-                          <div
-                            className="px-4 py-1.5 rounded-full text-[10px] font-medium border"
-                            style={{
-                              borderColor: `${onColor(colors[0])}40`,
-                              color: onColor(colors[0]),
-                            }}
-                          >
-                            Outline
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
-                        <div className="flex">
-                          {colors.map((c, i) => (
-                            <div key={i} className="flex-1 h-3" style={{ backgroundColor: c }} />
+                        <div className="h-2 rounded-full bg-muted" style={{ width: "70%" }} />
+                        <div className="flex gap-2 mt-3">
+                          {colors.slice(0, 4).map((c, i) => (
+                            <div
+                              key={i}
+                              className="w-7 h-7 rounded-lg shadow-sm"
+                              style={{ backgroundColor: c }}
+                            />
                           ))}
                         </div>
-                        <div className="p-4 bg-card">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div
-                              className="w-8 h-8 rounded-full"
-                              style={{ backgroundColor: colors[0] }}
-                            />
-                            <div>
-                              <div className="h-2 rounded-full bg-muted" style={{ width: "80px" }} />
-                              <div
-                                className="h-1.5 rounded-full bg-muted/50 mt-1"
-                                style={{ width: "50px" }}
-                              />
-                            </div>
-                          </div>
-                          <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "100%" }} />
-                          <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "95%" }} />
-                          <div className="h-2 rounded-full bg-muted" style={{ width: "40%" }} />
+                      </div>
+                    </div>
+
+                    <div
+                      className="rounded-2xl border border-border overflow-hidden shadow-sm p-4"
+                      style={{
+                        background: `linear-gradient(135deg, ${colors[0]}, ${colors[colors.length - 1]})`,
+                      }}
+                    >
+                      <div
+                        className="h-3.5 rounded-full mb-2.5"
+                        style={{
+                          backgroundColor: `${selectedText}30`,
+                          width: "50%",
+                        }}
+                      />
+                      <div
+                        className="h-2 rounded-full mb-1.5"
+                        style={{ backgroundColor: `${selectedText}20`, width: "80%" }}
+                      />
+                      <div
+                        className="h-2 rounded-full"
+                        style={{ backgroundColor: `${selectedText}20`, width: "60%" }}
+                      />
+                      <div className="flex gap-2 mt-3.5">
+                        <div
+                          className="px-4 py-1.5 rounded-full text-[10px] font-medium"
+                          style={{
+                            backgroundColor: colors[1] || colors[0],
+                            color: onColor(colors[1] || colors[0]),
+                          }}
+                        >
+                          Button
+                        </div>
+                        <div
+                          className="px-4 py-1.5 rounded-full text-[10px] font-medium border"
+                          style={{
+                            borderColor: `${selectedText}40`,
+                            color: selectedText,
+                          }}
+                        >
+                          Outline
                         </div>
                       </div>
-                    </>
-                  )}
-                </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
+                      <div className="flex">
+                        {colors.map((c, i) => (
+                          <div key={i} className="flex-1 h-3" style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                      <div className="p-3.5 bg-card">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div
+                            className="w-8 h-8 rounded-full"
+                            style={{ backgroundColor: colors[0] }}
+                          />
+                          <div>
+                            <div className="h-2 rounded-full bg-muted" style={{ width: "80px" }} />
+                            <div
+                              className="h-1.5 rounded-full bg-muted/50 mt-1"
+                              style={{ width: "50px" }}
+                            />
+                          </div>
+                        </div>
+                        <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "100%" }} />
+                        <div className="h-2 rounded-full bg-muted mb-1" style={{ width: "95%" }} />
+                        <div className="h-2 rounded-full bg-muted" style={{ width: "40%" }} />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <SectionLabel className="!mb-0">Presets</SectionLabel>
+              <span className="text-[11px] text-muted-foreground">Click to load</span>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto pb-0.5">
+              {presetPalettes.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => loadPreset(preset.colors)}
+                  className="shrink-0 group/preset text-left"
+                  title={`Load ${preset.name}`}
+                >
+                  <div className="flex h-9 w-24 rounded-xl overflow-hidden border border-border group-hover/preset:border-foreground/40 group-hover/preset:-translate-y-0.5 transition-all shadow-sm">
+                    {preset.colors.map((c, i) => (
+                      <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }} />
+                    ))}
+                  </div>
+                  <span className="block mt-1 text-[10px] text-muted-foreground group-hover/preset:text-foreground transition-colors truncate w-24">
+                    {preset.name}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
         </ToolCard>
